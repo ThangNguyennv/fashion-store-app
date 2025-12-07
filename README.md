@@ -1,4 +1,4 @@
-# Luxues Store Project (Full-Stack Fashion Website)
+# fashion-store-app
 ---
 This is a complete full-stack fashion e-commerce website project, including a customer-facing site (Client) and an administrative system (Admin). The project is built on the MERN stack (MongoDB, Express, React, Node) but modernized with Vite, TypeScript, and JWT.
 
