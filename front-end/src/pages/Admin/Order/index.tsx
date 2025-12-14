@@ -28,8 +28,8 @@ const OrderAdmin = () => {
     setSelectedIds,
     actionType,
     setActionType,
-    currentStatus,
-    updateSearchParams,
+    status,
+    updateParams,
     handleSubmit,
     handleSort,
     clearSortParams,
@@ -51,7 +51,7 @@ const OrderAdmin = () => {
               <div className='flex items-center justify-center gap-[15px]'>
                 <FilterStatusOrder
                   filterOrder={filterOrder}
-                  currentStatus={currentStatus as OrderStatus}
+                  currentStatus={status as OrderStatus}
                   handleFilterStatus={handleFilterStatus}
                   items={allOrders ?? []}
                 />
@@ -63,7 +63,7 @@ const OrderAdmin = () => {
               <Search
                 keyword={keyword}
                 handleChangeKeyword={(value) => dispatchOrder({ type: 'SET_DATA', payload: { keyword: value } })}
-                handleSearch={(keyword) => updateSearchParams('keyword', keyword)}
+                handleSearch={(keyword) => updateParams({ keyword })}
               />
             </div>
           </div>
@@ -109,8 +109,8 @@ const OrderAdmin = () => {
             </form>
             <div className='flex items-center justify-center gap-[15px]'>
               <a
-                href={`${API_ROOT}/admin/orders/export?status=${currentStatus}`}
-                download={`don-hang-${currentStatus || 'all'}.xlsx`}
+                href={`${API_ROOT}/admin/orders/export?status=${status}`}
+                download={`don-hang-${status || 'all'}.xlsx`}
                 className='p-[5px] border rounded-[5px] border-green-600 text-green-600 hover:bg-green-600 hover:text-white flex items-center justify-center gap-[5px]'
               >
                 <FaFileExcel />
@@ -130,9 +130,9 @@ const OrderAdmin = () => {
           />
           <Pagination
             pagination={pagination}
-            handlePagination={(page: number) => updateSearchParams('page', (page).toString())}
-            handlePaginationPrevious={(page: number) => updateSearchParams('page', (page - 1).toString())}
-            handlePaginationNext={(page: number) => updateSearchParams('page', (page + 1).toString())}
+            handlePagination={(page: number) => updateParams({ page })}
+            handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
+            handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
             items={orders}
           />
         </div>

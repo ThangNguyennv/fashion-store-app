@@ -13,7 +13,7 @@ export interface Props {
 
 export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
   const { stateOrder, dispatchOrder } = useOrderContext()
-  const { orders, accounts, loading } = stateOrder
+  const { orders, accounts, loading, pagination } = stateOrder
   const { myAccount } = useAuth()
   const { dispatchAlert } = useAlertContext()
   const [open, setOpen] = useState(false)
@@ -176,6 +176,7 @@ export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
     accounts,
     handleDelete,
     handleRecover,
-    handlePermanentlyDelete
+    handlePermanentlyDelete,
+    pagination
   }
 }

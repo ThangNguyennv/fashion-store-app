@@ -24,6 +24,8 @@ export interface HelperInterface {
   pagination: PaginationInterface,
 }
 
+
+//
 export interface CurrentParamsInterface {
   keyword: string,
   currentDate: string,
@@ -37,6 +39,14 @@ export interface ParamsInterface {
   sortKey: string,
   sortValue: string
   loading: boolean
+}
+
+export interface AllParams {
+  status?: string
+  page?: number
+  keyword?: string
+  sortKey?: string
+  sortValue?: string
 }
 
 export interface GeneralInfoInterface {

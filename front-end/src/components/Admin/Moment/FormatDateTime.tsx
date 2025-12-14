@@ -7,7 +7,7 @@ interface Props {
 const FormatDateTime = ({ time }: Props) => {
   if (!time) return <p>Chưa có cập nhật thời gian</p>
 
-  return <p>{moment(time).format('DD/MM/YYYY HH:mm:ss')}</p>
+  return <p>{moment(time).format('DD/MM/YYYY | HH:mm:ss')}</p>
 }
 
 export default FormatDateTime

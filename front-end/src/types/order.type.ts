@@ -1,5 +1,5 @@
 import type { AccountInfoInterface } from './account.type'
-import type { CurrentParamsInterface, FilterStatusInterface, PaginationInterface, ParamsInterface, UpdatedBy } from './helper.type'
+import type { FilterStatusInterface, PaginationInterface, UpdatedBy } from './helper.type'
 
 interface PaymentDetails {
   vnp_TxnRef?: string
@@ -57,23 +57,31 @@ export interface OrderDetailInterface {
   message: string
 }
 
-export interface OrderAllResponseInterface extends CurrentParamsInterface {
-    orders: OrderInfoInterface[],
-    accounts?: AccountInfoInterface[],
-    pagination: PaginationInterface,
-    filterOrder: FilterStatusInterface[],
-    allOrders?: OrderInfoInterface[],
+export interface OrderAPIResponse {
+  code: number,
+  message: string,
+  orders: OrderInfoInterface[],
+  accounts?: AccountInfoInterface[],
+  pagination: PaginationInterface,
+  filterOrder: FilterStatusInterface[],
+  allOrders?: OrderInfoInterface[],
+  keyword: string
 }
 
-export interface OrderStates extends ParamsInterface {
+export interface OrderState {
   orders: OrderInfoInterface[],
   accounts?: AccountInfoInterface[],
   filterOrder: FilterStatusInterface[],
   pagination: PaginationInterface,
   allOrders?: OrderInfoInterface[],
+  keyword: string
+  sortKey: string
+  sortValue: string
+  loading: boolean,
+  date: string,
 }
 
-export type OrderActions =
+export type OrderAction =
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_DATA'; payload: Partial<OrderStates> }
+  | { type: 'SET_DATA'; payload: Partial<OrderState> }
   | { type: 'RESET' }

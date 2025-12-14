@@ -1,11 +1,14 @@
 /* eslint-disable indent */
-import type { OrderActions, OrderStates } from '~/types/order.type'
+import type { OrderAction, OrderState } from '~/types/order.type'
 
-export const initialState: OrderStates = {
+export const initialOrderState: OrderState = {
+  orders: [],
+  accounts: [],
+  allOrders: [],
   filterOrder: [],
   pagination: {
     currentPage: 1,
-    limitItems: 3,
+    limitItems: 10,
     skip: 0,
     totalPage: 0
   },
@@ -13,23 +16,20 @@ export const initialState: OrderStates = {
   sortKey: '',
   sortValue: '',
   loading: false,
-  orders: [],
-  accounts: [],
-  allOrders: [],
   date: ''
 }
 
 export function orderReducer(
-  stateOrder: OrderStates,
-  actionOrder: OrderActions
-): OrderStates {
+  stateOrder: OrderState,
+  actionOrder: OrderAction
+): OrderState {
   switch (actionOrder.type) {
     case 'SET_LOADING':
       return { ...stateOrder, loading: actionOrder.payload }
     case 'SET_DATA':
       return { ...stateOrder, ...actionOrder.payload }
     case 'RESET':
-      return initialState
+      return initialOrderState
     default:
       return stateOrder
   }

@@ -38,7 +38,8 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
     accounts,
     handleDelete,
     handleRecover,
-    handlePermanentlyDelete
+    handlePermanentlyDelete,
+    pagination
   } = useTable({ selectedIds, setSelectedIds })
 
   if (loading) {
@@ -139,13 +140,14 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
                     sx={{ padding: 0 }}
                   />
                 </TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '0px' }}>STT</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '0px' }}>Mã đơn</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Khách hàng</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Tổng tiền</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái đơn</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thanh toán</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Phương thức</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Ngày tạo</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian tạo</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
               </TableRow>
@@ -163,6 +165,9 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
                         sx={{ padding: 0 }}
                         value={order._id}
                       />
+                    </TableCell>
+                    <TableCell align='center' sx={{ padding: '0px 2px' }}>
+                      {(pagination.currentPage - 1) * pagination.limitItems + index + 1}
                     </TableCell>
                     <TableCell sx={{ padding: '6px 0px', width: '250px' }}>
                       <div className='flex items-center justify-center font-[600] text-[16px] hover:underline'>
