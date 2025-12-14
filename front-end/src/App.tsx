@@ -81,6 +81,7 @@ import GoogleCallback from './pages/Client/GoogleCallback/GoogleCallback'
 import { Error404Page } from './pages/Error404Page/Error404Page'
 import UnauthorizedRoutesAdmin from './components/Admin/UnauthorizedRoutes/UnauthorizedRoutes'
 import TrashOrder from './pages/Admin/Order/TrashOrder'
+import TrashProductCategory from './pages/Admin/ProductCategory/TrashProductCategory'
 
 function App() {
 
@@ -171,6 +172,7 @@ function App() {
             <Route path='create' element={<CreateProductCategory />}/>
             <Route path='detail/:id' element={ <DetailProductCategory />}/>
             <Route path='edit/:id' element={<EditProductCategory />}/>
+            <Route path='trash' element={<TrashProductCategory />}/>
           </Route>
           <Route path='articles'>
             <Route index element={ <ArticleAdmin />}/>

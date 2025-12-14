@@ -1,23 +1,20 @@
-import FilterStatus from '~/components/Admin/FilterStatus/FilterStatus'
 import Pagination from '~/components/Admin/Pagination/Pagination'
-import ProductTable from '~/components/Admin/ItemTable/ProductTable'
 import Search from '~/components/Admin/Search/Search'
-import { useProduct } from '~/hooks/Admin/Product/useProduct'
-import { Link } from 'react-router-dom'
-import SortProduct from '~/components/Admin/Sort/SortProduct'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import { Link } from 'react-router-dom'
+import { IoArrowBackSharp } from 'react-icons/io5'
+import { useProductCategoryTrash } from '~/hooks/Admin/ProductCategory/useProductCategoryTrash'
+import ProductCategoryTrashTable from '~/components/Admin/ItemTable/ProductCategoryTrashTable'
+import SortRecords from '~/components/Admin/Sort/SortRecords'
 
-const ProductAdmin = () => {
+const TrashProductCategory = () => {
   const {
-    dispatchProduct,
-    products,
-    allProducts,
-    filterStatus,
+    dispatchProductCategory,
     pagination,
     keyword,
     sortKey,
@@ -26,35 +23,39 @@ const ProductAdmin = () => {
     setSelectedIds,
     actionType,
     setActionType,
-    currentStatus,
-    updateSearchParams,
+    updateParams,
     handleSubmit,
     handleSort,
     clearSortParams,
-    handleFilterStatus,
     open,
     handleClose,
     handleConfirmDeleteAll,
-    role
-  } = useProduct()
+    role,
+    productCategories
+  } = useProductCategoryTrash()
 
   return (
     <>
-      {role && role.permissions.includes('products_view') && (
-        <div className='flex flex-col gap-[15px] bg-[#FFFFFF] p-[15px] shadow-md fixed w-[82%]'>
-          <h1 className='text-[24px] font-[700] text-[#000000]'>Danh sách sản phẩm</h1>
+      {role && role.permissions.includes('orders_view') && (
+        <div className='flex flex-col gap-[15px] bg-[#FFFFFF] p-[15px] shadow-md h-[820px] fixed w-[80%]'>
+          <div className='flex items-center justify-between'>
+            <h1 className='text-[24px] font-[700] text-[#000000]'>Thùng rác của danh mục sản phẩm</h1>
+            <button className=''>
+              <Link to={'/admin/products-category'} className='border rounded-[5px] p-[5px] flex items-center justify-between gap-[5px]'>
+                <IoArrowBackSharp />
+                Quay lại
+              </Link>
+            </button>
+          </div>
           <div className='text-[20px] font-[500] text-[#000000] pb-[15px] px-[15px] shadow-md flex flex-col gap-[10px]'>
             <div className='flex items-center justify-between text-[15px]'>
-              <FilterStatus
-                filterStatus={filterStatus}
-                currentStatus={currentStatus}
-                handleFilterStatus={handleFilterStatus}
-                items={allProducts}
-              />
+              <div className='flex items-center justify-center gap-[15px]'>
+                <div className='border rounded-[5px] p-[5px]'>Đã chọn: {selectedIds.length}</div>
+              </div>
               <Search
                 keyword={keyword}
-                handleChangeKeyword={(value) => dispatchProduct({ type: 'SET_DATA', payload: { keyword: value } })}
-                handleSearch={(keyword) => updateSearchParams('keyword', keyword)}
+                handleChangeKeyword={(value) => dispatchProductCategory({ type: 'SET_DATA', payload: { keyword: value } })}
+                handleSearch={(keyword) => updateParams({ keyword })}
               />
             </div>
           </div>
@@ -67,9 +68,8 @@ const ProductAdmin = () => {
                 className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px]'
               >
                 <option disabled value={''}>-- Chọn hành động --</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Dừng hoạt động</option>
-                <option value="delete-all">Xóa tất cả</option>
+                <option value="DELETEALL">Xóa vĩnh viễn</option>
+                <option value="RECOVER">Khôi phục</option>
               </select>
               <button
                 type="submit"
@@ -85,7 +85,7 @@ const ProductAdmin = () => {
                 <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    Bạn có chắc chắn muốn xóa {selectedIds.length} sản phẩm này không?
+                    Bạn có chắc chắn muốn xóa vĩnh viễn {selectedIds.length} danh mục sản phẩm này không? (Một khi đã xóa là không thể khôi phục lại được.)
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -96,31 +96,25 @@ const ProductAdmin = () => {
                 </DialogActions>
               </Dialog>
             </form>
-            <SortProduct
-              handleSort={handleSort}
-              sortKey={sortKey}
-              sortValue={sortValue}
-              clearSortParams={clearSortParams}
-            />
-            <div>
-              <Link
-                to={'/admin/products/create'}
-                className='nav-link border rounded-[5px] px-[15px] py-[5px] border-[#607D00] font-[700] bg-[#607D00] text-white'
-              >
-                + Thêm mới
-              </Link>
+            <div className='flex items-center justify-center gap-[15px]'>
+              <SortRecords
+                handleSort={handleSort}
+                sortKey={sortKey}
+                sortValue={sortValue}
+                clearSortParams={clearSortParams}
+              />
             </div>
           </div>
-          <ProductTable
+          <ProductCategoryTrashTable
             selectedIds={selectedIds}
             setSelectedIds={setSelectedIds}
           />
           <Pagination
             pagination={pagination}
-            handlePagination={(page: number) => updateSearchParams('page', (page).toString())}
-            handlePaginationPrevious={(page: number) => updateSearchParams('page', (page - 1).toString())}
-            handlePaginationNext={(page: number) => updateSearchParams('page', (page + 1).toString())}
-            items={products}
+            handlePagination={(page: number) => updateParams({ page })}
+            handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
+            handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
+            items={productCategories ?? []}
           />
         </div>
       )}
@@ -128,4 +122,4 @@ const ProductAdmin = () => {
   )
 }
 
-export default ProductAdmin
+export default TrashProductCategory

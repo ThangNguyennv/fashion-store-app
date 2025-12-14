@@ -47,12 +47,20 @@ const DetailProductCategory = () => {
                   <b>Mô tả: </b>
                   <span dangerouslySetInnerHTML={{ __html: productCategoryDetail.description }} />
                 </div>
-                <Link
-                  to={`/admin/products-category/edit/${id}`}
-                  className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
-                >
+                <div className='flex items-center justify-start gap-[5px]'>
+                  <Link
+                    to={'/admin/products-category'}
+                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
+                  >
+                  Quay lại
+                  </Link>
+                  <Link
+                    to={`/admin/products-category/edit/${id}`}
+                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
+                  >
                   Chỉnh sửa
-                </Link>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

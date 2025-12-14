@@ -2,6 +2,7 @@ import { Editor } from '@tinymce/tinymce-react'
 import { API_KEY } from '~/utils/constants'
 import { useEdit } from '~/hooks/Admin/ProductCategory/useEdit'
 import SelectTree from '~/components/Admin/TableTree/SelectTreeProduct'
+import { Link } from 'react-router-dom'
 
 const EditProductCategory = () => {
   const {
@@ -142,13 +143,20 @@ const EditProductCategory = () => {
                 <label htmlFor="statusInActive">Dừng hoạt động</label>
               </div>
             </div>
-
-            <button
-              type="submit"
-              className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
-            >
+            <div className='flex items-center justify-start text-center gap-[5px]'>
+              <Link
+                to="/admin/products-category"
+                className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
+              >
+              Quay lại
+              </Link>
+              <button
+                type="submit"
+                className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
+              >
               Cập nhật
-            </button>
+              </button>
+            </div>
           </form>
         )
       )}

@@ -1,21 +1,17 @@
+/* eslint-disable no-console */
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
 import { fetchAllProductCategoriesAPI } from '~/apis/admin/productCategory.api'
 import { initialState, productCategoryReducer } from '~/reducers/admin/productCategoryReducer'
-import type { ProductCategoryActions, ProductCategoryAllResponseInterface, ProductCategoryStates } from '~/types/productCategory.type'
+import type { ProductCategoryActions, ProductCategoryAPIResponse, ProductCategoryStates } from '~/types/productCategory.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
+import type { AllParams } from '~/types/helper.type'
 
 interface ProductCategoryContextType {
   stateProductCategory: ProductCategoryStates
-  fetchProductCategory: (params?: {
-    status?: string
-    page?: number
-    keyword?: string
-    sortKey?: string
-    sortValue?: string
-  }) => Promise<void>
   dispatchProductCategory: React.Dispatch<ProductCategoryActions>
+  fetchProductCategory: (params?: AllParams) => Promise<void>
 }
 
 const ProductCategoryContext = createContext<ProductCategoryContextType | null>(null)
@@ -25,22 +21,10 @@ export const ProductCategoryProvider = ({ children }: { children: React.ReactNod
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 
   const fetchProductCategory = useCallback(
-    async ({
-      status = '',
-      page = 1,
-      keyword = '',
-      sortKey = '',
-      sortValue = ''
-    } = {}) => {
+    async (params: AllParams = {}) => {
       dispatchProductCategory({ type: 'SET_LOADING', payload: true })
       try {
-        const res: ProductCategoryAllResponseInterface = await fetchAllProductCategoriesAPI(
-          status,
-          page,
-          keyword,
-          sortKey,
-          sortValue
-        )
+        const res: ProductCategoryAPIResponse = await fetchAllProductCategoriesAPI(params)
         dispatchProductCategory({
           type: 'SET_DATA',
           payload: {
@@ -50,14 +34,17 @@ export const ProductCategoryProvider = ({ children }: { children: React.ReactNod
             pagination: res.pagination,
             filterStatus: res.filterStatus,
             keyword: res.keyword,
-            sortKey,
-            sortValue
+            sortKey: params.sortKey || '',
+            sortValue: params.sortValue || ''
           }
         })
+      } catch (error) {
+        console.error('Error fetching ProductCategory:', error)
       } finally {
         dispatchProductCategory({ type: 'SET_LOADING', payload: false })
       }
     }, [])
+
   // Gọi APi của product-category để xài bên các trang khác
   useEffect(() => {
     //  Chỉ gọi API khi đã xác thực VÀ AuthContext không còn loading

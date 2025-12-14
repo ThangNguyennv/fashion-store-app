@@ -20,6 +20,8 @@ const SortRecords = ({ handleSort, sortKey, sortValue, clearSortParams }:SortPro
           <option disabled value={''}>-- Sắp xếp --</option>
           <option value="title-asc">Tiêu đề A - Z</option>
           <option value="title-desc">Tiêu đề Z - A</option>
+          <option value="createdAt-asc">Ngày tạo xa nhất</option>
+          <option value="createdAt-desc">Ngày tạo gần nhất</option>
         </select>
         <button
           onClick={clearSortParams}

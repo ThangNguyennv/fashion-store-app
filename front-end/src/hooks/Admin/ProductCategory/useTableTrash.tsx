@@ -1,16 +1,17 @@
-import { fetchPermanentlyDeleteOrderAPI, fetchRecoverOrderAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useState } from 'react'
-import { useOrderTrashContext } from '~/contexts/admin/OrderTrashContext'
+import { useProductCategoryTrashContext } from '~/contexts/admin/ProductCategoryTrashContext'
+import { fetchPermanentlyDeleteProductCategoryAPI, fetchRecoverProductCategoryAPI } from '~/apis/admin/productCategory.api'
 
 export interface Props {
   selectedIds: string[],
-  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>
+  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>,
 }
 
 export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
-  const { stateOrder, dispatchOrder } = useOrderTrashContext()
-  const { orders, accounts, loading, pagination } = stateOrder
+  const { stateProductCategory, dispatchProductCategory } = useProductCategoryTrashContext()
+  const { productCategories, accounts, loading } = stateProductCategory
+
   const { dispatchAlert } = useAlertContext()
   const [openPermanentlyDelete, setOpenPermanentlyDelete] = useState(false)
   const [selectedIdPermanentlyDelete, setSelectedIdPermanentlyDelete] = useState<string | null>(null)
@@ -28,12 +29,12 @@ export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
   const handlePermanentlyDelete = async () => {
     if (!selectedIdPermanentlyDelete) return
 
-    const response = await fetchPermanentlyDeleteOrderAPI(selectedIdPermanentlyDelete)
+    const response = await fetchPermanentlyDeleteProductCategoryAPI(selectedIdPermanentlyDelete)
     if (response.code === 204) {
-      dispatchOrder({
+      dispatchProductCategory({
         type: 'SET_DATA',
         payload: {
-          orders: orders.filter((order) => order._id !== selectedIdPermanentlyDelete)
+          productCategories: productCategories.filter((productCategory) => productCategory._id !== selectedIdPermanentlyDelete)
         }
       })
       dispatchAlert({
@@ -50,12 +51,12 @@ export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
   const handleRecover = async (id: string) => {
     if (!id) return
 
-    const response = await fetchRecoverOrderAPI(id)
+    const response = await fetchRecoverProductCategoryAPI(id)
     if (response.code === 200) {
-      dispatchOrder({
+      dispatchProductCategory({
         type: 'SET_DATA',
         payload: {
-          orders: orders.filter((order) => order._id !== id)
+          productCategories: productCategories.filter((productCategory) => productCategory._id !== id)
         }
       })
       dispatchAlert({
@@ -67,7 +68,6 @@ export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
       return
     }
   }
-
   const handleCheckbox = (id: string, checked: boolean) => {
     if (checked) {
       setSelectedIds((prev) => [...prev, id])
@@ -78,27 +78,31 @@ export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
 
   const handleCheckAll = (checked: boolean) => {
     if (checked) {
-      const allIds = orders.map((order) => order._id)
+      const allIds = productCategories
+        .map((productCategory) => productCategory._id)
+        .filter((id): id is string => id !== undefined)
+
       setSelectedIds(allIds)
     } else {
       setSelectedIds([])
     }
   }
-
-  const isCheckAll = (orders.length > 0) && (selectedIds.length === orders.length)
+  const isCheckAll = (productCategories.length > 0) && (selectedIds.length === productCategories.length)
 
   return {
-    orders,
     loading,
-    openPermanentlyDelete,
-    handleOpenPermanentlyDelete,
-    handleClosePermanentlyDelete,
+    productCategories,
+    accounts,
     handleCheckbox,
     handleCheckAll,
     isCheckAll,
-    accounts,
+    open,
+    handleOpenPermanentlyDelete,
+    handleClosePermanentlyDelete,
     handleRecover,
     handlePermanentlyDelete,
-    pagination
+    openPermanentlyDelete,
+    dispatchProductCategory
   }
 }
+

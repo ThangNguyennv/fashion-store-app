@@ -31,10 +31,10 @@ export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         type: 'SET_DATA',
         payload: {
           orders: res.orders,
+          allOrders: res.allOrders,
           accounts: res.accounts,
           pagination: res.pagination,
           filterOrder: res.filterOrder,
-          allOrders: res.allOrders,
           keyword: res.keyword,
           sortKey: params.sortKey || '',
           sortValue: params.sortValue || ''

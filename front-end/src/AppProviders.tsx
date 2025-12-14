@@ -18,6 +18,7 @@ import { ArticleClientProvider } from './contexts/client/ArticleContext'
 import { CartProvider } from './contexts/client/CartContext'
 import { OrderClientProvider } from './contexts/client/OrderContext'
 import { OrderTrashProvider } from './contexts/admin/OrderTrashContext'
+import { ProductCategoryTrashProvider } from './contexts/admin/ProductCategoryTrashContext'
 
 function ThemeProviderWrapper({ children }: { children: React.ReactNode }) {
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>
@@ -50,6 +51,7 @@ export const AppProviders = composeProviders(
   HomeClientProvider,
   SettingGeneralProvider,
   ProductCategoryProvider,
+  ProductCategoryTrashProvider,
   ProductProvider,
   OrderProvider,
   OrderTrashProvider,

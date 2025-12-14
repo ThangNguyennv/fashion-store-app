@@ -30,8 +30,6 @@ export interface HelperInterface {
   pagination: PaginationInterface,
 }
 
-
-//
 export interface CurrentParamsInterface {
   keyword: string,
   currentDate: string,
@@ -67,5 +65,6 @@ export interface GeneralInfoInterface {
   status: string,
   slug?: string,
   createdAt: Date | null
-  updatedAt: Date | null
+  updatedAt: Date | null,
+  deletedBy: DeletedBy,
 }

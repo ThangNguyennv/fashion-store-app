@@ -11,6 +11,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import { FaTrashAlt } from 'react-icons/fa'
 
 const ProductCategoryAdmin = () => {
   const {
@@ -26,8 +27,8 @@ const ProductCategoryAdmin = () => {
     setSelectedIds,
     actionType,
     setActionType,
-    currentStatus,
-    updateSearchParams,
+    status,
+    updateParams,
     handleSubmit,
     handleSort,
     clearSortParams,
@@ -47,67 +48,78 @@ const ProductCategoryAdmin = () => {
             <div className='flex items-center justify-between text-[15px]'>
               <FilterStatus
                 filterStatus={filterStatus}
-                currentStatus={currentStatus}
+                currentStatus={status}
                 handleFilterStatus={handleFilterStatus}
                 items={allProductCategories}
               />
               <Search
                 keyword={keyword}
                 handleChangeKeyword={(value) => dispatchProductCategory({ type: 'SET_DATA', payload: { keyword: value } })}
-                handleSearch={(keyword) => updateSearchParams('keyword', keyword)}/>
+                handleSearch={(keyword) => updateParams({ keyword })}/>
             </div>
           </div>
           <div className='flex items-center justify-between text-[15px]'>
-            <form onSubmit={(event) => handleSubmit(event)} className='flex gap-[5px]'>
-              <select
-                name="type"
-                id=""
-                value={actionType}
-                onChange={(e) => setActionType(e.target.value)}
-                className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px]'
-              >
-                <option disabled value={''}>-- Chọn hành động --</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Dừng hoạt động</option>
-                <option value="delete-all">Xóa tất cả</option>
-              </select>
-              <button
-                type='submit'
-                className='border rounded-[5px] border-[#9D9995] p-[5px] bg-[#96D5FE]'>
-              Áp dụng
-              </button>
-              <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="delete-dialog-title"
-              >
-                <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
+            <div className='flex items-center justify-center gap-[15px]'>
+              <form onSubmit={(event) => handleSubmit(event)} className='flex gap-[5px]'>
+                <select
+                  name="type"
+                  id=""
+                  value={actionType}
+                  onChange={(e) => setActionType(e.target.value)}
+                  className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px]'
+                >
+                  <option disabled value={''}>-- Chọn hành động --</option>
+                  <option value="active">Hoạt động</option>
+                  <option value="inactive">Dừng hoạt động</option>
+                  <option value="delete-all">Xóa tất cả</option>
+                </select>
+                <button
+                  type='submit'
+                  className='border rounded-[5px] border-[#9D9995] p-[5px] bg-[#96D5FE]'>
+                    Áp dụng
+                </button>
+                <Dialog
+                  open={open}
+                  onClose={handleClose}
+                  aria-labelledby="delete-dialog-title"
+                >
+                  <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
                     Bạn có chắc chắn muốn xóa {selectedIds.length} danh mục sản phẩm này không?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose}>Hủy</Button>
-                  <Button onClick={handleConfirmDeleteAll} color="error" variant="contained">
-                    óa
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </form>
-            <SortRecords
-              handleSort={handleSort}
-              sortKey={sortKey}
-              sortValue={sortValue}
-              clearSortParams={clearSortParams}
-            />
-            <div>
-              <Link
-                to={'/admin/products-category/create'}
-                className='nav-link border rounded-[5px] px-[15px] py-[5px] border-[#607D00] font-[700] bg-[#607D00] text-white'
-              >
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleClose}>Hủy</Button>
+                    <Button onClick={handleConfirmDeleteAll} color="error" variant="contained">
+                      Xóa
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </form>
+              <div className='border rounded-[5px] p-[5px]'>Đã chọn: {selectedIds.length}</div>
+            </div>
+            <div className='flex items-center justify-center gap-[15px]'>
+              <button className=''>
+                <Link to={'/admin/products-category/trash'} className='p-[5px] border rounded-[5px] border-[#525FE1] hover:bg-[#525FE1] flex items-center justify-center gap-[5px]'>
+                  <FaTrashAlt />
+                  <span>Thùng rác</span>
+                </Link>
+              </button>
+              <SortRecords
+                handleSort={handleSort}
+                sortKey={sortKey}
+                sortValue={sortValue}
+                clearSortParams={clearSortParams}
+              />
+              <div>
+                <Link
+                  to={'/admin/products-category/create'}
+                  className='nav-link border rounded-[5px] px-[15px] py-[5px] border-[#607D00] font-[700] bg-[#607D00] text-white'
+                >
               + Thêm mới
-              </Link>
+                </Link>
+              </div>
             </div>
           </div>
           <ProductCategoryTable
@@ -116,9 +128,9 @@ const ProductCategoryAdmin = () => {
           />
           <Pagination
             pagination={pagination}
-            handlePagination={(page: number) => updateSearchParams('page', (page).toString())}
-            handlePaginationPrevious={(page: number) => updateSearchParams('page', (page - 1).toString())}
-            handlePaginationNext={(page: number) => updateSearchParams('page', (page + 1).toString())}
+            handlePagination={(page: number) => updateParams({ page })}
+            handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
+            handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
             items={productCategories}
           />
         </div>

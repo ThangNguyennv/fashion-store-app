@@ -1,4 +1,4 @@
-import type { CurrentParamsInterface, GeneralInfoInterface, HelperInterface, ParamsInterface } from './helper.type'
+import type { GeneralInfoInterface, HelperInterface } from './helper.type'
 
 export interface ProductCategoryInfoInterface extends GeneralInfoInterface {
   children: ProductCategoryInfoInterface[] | [],
@@ -6,14 +6,22 @@ export interface ProductCategoryInfoInterface extends GeneralInfoInterface {
   description: string,
 }
 
-export interface ProductCategoryAllResponseInterface extends HelperInterface, CurrentParamsInterface {
-  productCategories: ProductCategoryInfoInterface[],
-  allProductCategories: ProductCategoryInfoInterface[]
-}
-
-export interface ProductCategoryStates extends HelperInterface, ParamsInterface {
+export interface ProductCategoryAPIResponse extends HelperInterface {
   productCategories: ProductCategoryInfoInterface[],
   allProductCategories: ProductCategoryInfoInterface[],
+  code: number,
+  message: string,
+  keyword: string
+}
+
+export interface ProductCategoryStates extends HelperInterface {
+  productCategories: ProductCategoryInfoInterface[],
+  allProductCategories: ProductCategoryInfoInterface[],
+  keyword: string
+  sortKey: string
+  sortValue: string
+  loading: boolean,
+  date: string,
 }
 
 export type ProductCategoryActions =

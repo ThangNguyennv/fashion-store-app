@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { fetchChangeMultiAPI } from '~/apis/admin/productCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import type { AllParams } from '~/types/helper.type'
+import { useProductCategoryTrashContext } from '~/contexts/admin/ProductCategoryTrashContext'
+import { fetchChangeMultiTrashAPI } from '~/apis/admin/productCategory.api'
 
-export const useProductCategory = () => {
-  const { stateProductCategory, fetchProductCategory, dispatchProductCategory } = useProductCategoryContext()
-  const { productCategories, filterStatus, pagination, keyword, allProductCategories } = stateProductCategory
-  const { dispatchAlert } = useAlertContext()
+export const useProductCategoryTrash = () => {
+  const { stateProductCategory, fetchProductCategoryTrash, dispatchProductCategory } = useProductCategoryTrashContext()
+  const { productCategories, pagination, keyword } = stateProductCategory
   const { role } = useAuth()
+  const { dispatchAlert } = useAlertContext()
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [actionType, setActionType] = useState('')
@@ -19,15 +19,15 @@ export const useProductCategory = () => {
 
   // Parse URL params một lần
   const urlParams = useMemo(() => ({
-    status: searchParams.get('status') || '',
     page: parseInt(searchParams.get('page') || '1', 10),
     keyword: searchParams.get('keyword') || '',
     sortKey: searchParams.get('sortKey') || '',
     sortValue: searchParams.get('sortValue') || ''
   }), [searchParams])
+
   useEffect(() => {
-    fetchProductCategory(urlParams)
-  }, [urlParams.status, urlParams.page, urlParams.keyword, urlParams.sortKey, urlParams.sortValue, fetchProductCategory, urlParams])
+    fetchProductCategoryTrash(urlParams)
+  }, [urlParams.page, urlParams.keyword, urlParams.sortKey, urlParams.sortValue, fetchProductCategoryTrash, urlParams])
 
   const updateParams = useCallback((params: Partial<AllParams>) => {
     const newParams = new URLSearchParams(searchParams)
@@ -42,7 +42,7 @@ export const useProductCategory = () => {
   }, [searchParams, setSearchParams])
 
   const reloadData = (): void => {
-    fetchProductCategory(urlParams)
+    fetchProductCategoryTrash(urlParams)
   }
 
   const handleClose = () => {
@@ -67,8 +67,8 @@ export const useProductCategory = () => {
       })
       return
     }
-    if (typeChange === 'delete-all') {
-      setPendingAction('delete-all')
+    if (typeChange === 'DELETEALL') {
+      setPendingAction('DELETEALL')
       setOpen(true)
       return
     }
@@ -80,7 +80,7 @@ export const useProductCategory = () => {
     const result: string[] = selectedProductsCategory
       .map(productCategory => productCategory._id)
       .filter((id): id is string => typeof id === 'string')
-    const response = await fetchChangeMultiAPI({ ids: result, type: typeChange })
+    const response = await fetchChangeMultiTrashAPI({ ids: result, type: typeChange })
 
     if ([200, 204].includes(response.code)) {
       dispatchAlert({
@@ -102,8 +102,8 @@ export const useProductCategory = () => {
   }
 
   const handleConfirmDeleteAll = async () => {
-    if (pendingAction === 'delete-all') {
-      await executeAction('delete-all')
+    if (pendingAction === 'DELETEALL') {
+      await executeAction('DELETEALL')
     }
     setOpen(false)
   }
@@ -120,15 +120,9 @@ export const useProductCategory = () => {
     setSearchParams(newParams)
   }
 
-  const handleFilterStatus = useCallback((status: string) => {
-    updateParams({ status, page: 1 })
-  }, [updateParams])
-
   return {
-    productCategories,
-    allProductCategories,
     dispatchProductCategory,
-    filterStatus,
+    productCategories,
     pagination,
     keyword,
     sortKey: urlParams.sortKey,
@@ -137,15 +131,13 @@ export const useProductCategory = () => {
     setSelectedIds,
     actionType,
     setActionType,
-    status: urlParams.status,
     updateParams,
     handleSubmit,
     handleSort,
     clearSortParams,
-    handleFilterStatus,
-    role,
-    handleConfirmDeleteAll,
+    open,
     handleClose,
-    open
+    handleConfirmDeleteAll,
+    role
   }
 }

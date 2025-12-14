@@ -44,6 +44,7 @@ const Dashboard = () => {
   } = useDashboard()
 
   if (!chartData) return <p>Đang tải...</p>
+
   return (
     <>
       <div className='flex flex-col gap-[20px] bg-[#FFFFFF] px-[30px] py-[30px] shadow-md'>
@@ -54,7 +55,7 @@ const Dashboard = () => {
             <MdCheckCircleOutline className='text-[30px]'/>
             <div className='flex flex-col gap-[5px]'>
               <b>Doanh thu tháng {currentMonth}</b>
-              <b>{statistic.revenue.total.toLocaleString()}đ</b>
+              <b>{statistic.revenue.total.toLocaleString('vi-VN')}đ</b>
             </div>
           </div>
           <div className='border rounded-[5px] p-[15px] gap-[25px] flex items-center justify-center bg-[#18BA2A]'>

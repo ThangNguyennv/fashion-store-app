@@ -4,10 +4,8 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import Checkbox from '@mui/material/Checkbox'
-import { useTable } from '~/hooks/Admin/ProductCategory/useTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import type { Props } from '~/hooks/Admin/ProductCategory/useTable'
-import ProductTree from '../TableTree/ProductTree'
 import TableContainer from '@mui/material/TableContainer'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'
@@ -16,22 +14,24 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import { useTableTrash } from '~/hooks/Admin/ProductCategory/useTableTrash'
+import ProductCategoryTrashTree from '../TableTree/ProductCategoryTrashTree'
 
 const ProductCategoryTable = ({ selectedIds, setSelectedIds }: Props) => {
   const {
     loading,
-    dispatchProductCategory,
     productCategories,
     accounts,
-    handleToggleStatus,
-    handleDelete,
     handleCheckbox,
     handleCheckAll,
     isCheckAll,
-    open,
-    handleOpen,
-    handleClose
-  } = useTable({ selectedIds, setSelectedIds })
+    handleRecover,
+    openPermanentlyDelete,
+    handleOpenPermanentlyDelete,
+    handleClosePermanentlyDelete,
+    handlePermanentlyDelete,
+    dispatchProductCategory
+  } = useTableTrash({ selectedIds, setSelectedIds })
 
   if (loading) {
     return (
@@ -129,45 +129,45 @@ const ProductCategoryTable = ({ selectedIds, setSelectedIds }: Props) => {
                 </TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hình ảnh</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '0px' }}>Tên danh mục</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái cũ</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian tạo</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian xóa</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {productCategories.map(productCategory => (
-                <ProductTree
+                <ProductCategoryTrashTree
                   key={productCategory._id}
                   productCategory={productCategory}
                   level={1}
                   selectedIds={selectedIds}
                   accounts={accounts}
                   handleCheckbox={handleCheckbox}
-                  handleToggleStatus={handleToggleStatus}
-                  handleDelete={handleDelete}
-                  productCategories={productCategories}
                   dispatchProductCategory={dispatchProductCategory}
-                  open={open}
-                  handleOpen={handleOpen}
-                  handleClose={handleClose}
+                  productCategories={productCategories}
+                  openPermanentlyDelete={openPermanentlyDelete}
+                  handleOpenPermanentlyDelete={handleOpenPermanentlyDelete}
+                  handleClosePermanentlyDelete={handleClosePermanentlyDelete}
+                  handlePermanentlyDelete={handlePermanentlyDelete}
+                  handleRecover={handleRecover}
                 />
               ))}
             </TableBody>
             <Dialog
-              open={open}
-              onClose={handleClose}
+              open={openPermanentlyDelete}
+              onClose={handleClosePermanentlyDelete}
               aria-labelledby="delete-dialog-title"
             >
               <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Bạn có chắc chắn muốn xóa danh mục này không?
+                  Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này không?
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose}>Hủy</Button>
-                <Button onClick={handleDelete} color="error" variant="contained">
+                <Button onClick={handleClosePermanentlyDelete}>Hủy</Button>
+                <Button onClick={handlePermanentlyDelete} color="error" variant="contained">
                   Xóa
                 </Button>
               </DialogActions>
