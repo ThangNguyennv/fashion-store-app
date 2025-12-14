@@ -15,7 +15,6 @@ import ProductCategoryAdmin from '~/pages/Admin/ProductCategory'
 import Role from '~/pages/Admin/Role'
 import General from '~/pages/Admin/Setting/General/General'
 import Advance from '~/pages/Admin/Setting/Advance/Advance'
-import Trash from '~/pages/Admin/Trash/Trash'
 import User from '~/pages/Admin/User'
 import Login from '~/pages/Admin/Auth/Login'
 import Permission from '~/pages/Admin/Role/Permission'
@@ -81,6 +80,7 @@ import AdminChatPage from '~/pages/Admin/AdminChatPage/AdminChatPage'
 import GoogleCallback from './pages/Client/GoogleCallback/GoogleCallback'
 import { Error404Page } from './pages/Error404Page/Error404Page'
 import UnauthorizedRoutesAdmin from './components/Admin/UnauthorizedRoutes/UnauthorizedRoutes'
+import TrashOrder from './pages/Admin/Order/TrashOrder'
 
 function App() {
 
@@ -151,6 +151,7 @@ function App() {
           <Route path='orders'>
             <Route index element={ <OrderAdmin />}/>
             <Route path='detail/:id' element={<DetailOrder />}/>
+            <Route path='trash' element={<TrashOrder />}/>
           </Route>
           <Route path='notification' element={<Notification />}/>
           <Route path='brands'>
@@ -213,7 +214,6 @@ function App() {
             </Route>
             <Route path='advance' element={<Advance />}/>
           </Route>
-          <Route path='trash' element={<Trash />}/>
         </Route>
         <Route path='admin/auth' element={<UnauthorizedRoutesAdmin />}>
           <Route path='login' element={ <Login />}/>

@@ -3,13 +3,11 @@ import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
-import { Link } from 'react-router-dom'
 import Checkbox from '@mui/material/Checkbox'
-import { useTable, type Props } from '~/hooks/Admin/Order/useTable'
+import { useTableTrash, type Props } from '~/hooks/Admin/Order/useTableTrash'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import FormatDateTime from '../Moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
-import type { UpdatedBy } from '~/types/helper.type'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -18,24 +16,23 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import { getTotalBill } from '~/helpers/totalBill'
-import type { OrderStatus } from '~/types/order.type'
 
-const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
+const OrderTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
 
   const {
     orders,
     loading,
-    handleChangeStatus,
-    open,
-    handleOpen,
-    handleClose,
+    openPermanentlyDelete,
+    handleOpenPermanentlyDelete,
+    handleClosePermanentlyDelete,
     handleCheckbox,
     handleCheckAll,
     isCheckAll,
-    accounts,
-    handleDelete,
-    pagination
-  } = useTable({ selectedIds, setSelectedIds })
+    handleRecover,
+    handlePermanentlyDelete,
+    pagination,
+    accounts
+  } = useTableTrash({ selectedIds, setSelectedIds })
 
   if (loading) {
     return (
@@ -60,11 +57,11 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '0px' }}>Mã đơn</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Khách hàng</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Tổng tiền</TableCell>
-              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái đơn</TableCell>
+              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái cũ</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thanh toán</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Phương thức</TableCell>
-              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Ngày tạo</TableCell>
-              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
+              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian tạo</TableCell>
+              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian xóa</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
@@ -139,11 +136,11 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '0px' }}>Mã đơn</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Khách hàng</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Tổng tiền</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái đơn</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái cũ</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thanh toán</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Phương thức</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian tạo</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian xóa</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
               </TableRow>
             </TableHead>
@@ -176,18 +173,7 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
                       {Math.floor(getTotalBill(order)).toLocaleString()}đ
                     </TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }}>
-                      <select
-                        name="status"
-                        value={order.status}
-                        onChange={(event) => handleChangeStatus(order._id, event.target.value as OrderStatus)}
-                        className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px] bg-amber-100 text-black'
-                      >
-                        <option disabled value={''}>-- Chọn hành động --</option>
-                        <option value="PENDING">Đang xử lý</option>
-                        <option value="TRANSPORTING">Đang giao hàng</option>
-                        <option value="CONFIRMED">Hoàn thành</option>
-                        <option value="CANCELED">Hủy</option>
-                      </select>
+                      {order.status}
                     </TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }}>
                       {order.paymentInfo.status === 'FAILED' ? (
@@ -218,66 +204,57 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
                     <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>
                       <FormatDateTime time={order.createdAt}/>
                     </TableCell>
-                    <TableCell align='center' sx={{ padding: '6px 0px' }}>
-                      {(() => {
-                        const updatedBy = order.updatedBy?.[(order.updatedBy as UpdatedBy[]).length - 1]
-                        if (!updatedBy) {
-                          return (
-                            <>
-                              <p className="text-xs italic text-gray-400">Chưa có ai cập nhật</p>
-                            </>
-                          )
-                        }
-                        if (Array.isArray(order.updatedBy) && order.updatedBy.length > 0) {
-                          const updater = (accounts ?? []).find((account) => account._id === updatedBy.account_id)
-                          return updater ? (
-                            <>
-                              <span className="text-sm font-medium text-gray-800">
-                                {updater.fullName}
-                              </span>
-                              <FormatDateTime time={updatedBy.updatedAt}/>
-                            </>
-                          ) : (
-                            <span className="text-sm italic text-gray-400">
-                            Không xác định
-                            </span>
-                          )
-                        }
-                      })()}
+                    <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>{(() => {
+                      const creator = accounts?.find(
+                        (account) => account._id === order.deletedBy?.account_id
+                      )
+                      return creator ? (
+                        <>
+                          <span className="text-sm font-medium text-gray-800">
+                            {creator.fullName}
+                          </span>
+                          <FormatDateTime time={order.deletedBy.deletedAt}/>
+                        </>
+                      ) : (
+                        <span className="text-sm italic text-gray-400">Không xác định</span>
+                      )
+                    })()}
                     </TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }}>
                       <>
-                        <Link
-                          to={`/admin/orders/detail/${order._id}`}
-                          className='nav-link border rounded-[5px] bg-[#0542AB] p-[5px] text-white'
-                        >
-                            Chi tiết
-                        </Link>
                         <button
-                          onClick={() => handleOpen(order._id)}
+                          onClick={() => handleRecover(order._id)}
+                          className='nav-link border rounded-[5px] bg-[#525FE1] p-[5px] text-white'
+                        >
+                            Khôi phục
+                        </button>
+                        <button
+                          onClick={() => handleOpenPermanentlyDelete(order._id)}
                           className='border rounded-[5px] bg-[#BC3433] p-[5px] text-white'
                         >
-                            Xóa
+                            Xóa vĩnh viễn
                         </button>
                       </>
+
                     </TableCell>
                   </TableRow>
                 ))}
             </TableBody>
             <Dialog
-              open={open}
-              onClose={handleClose}
+              open={openPermanentlyDelete}
+              onClose={handleClosePermanentlyDelete}
               aria-labelledby="delete-dialog-title"
             >
               <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Bạn có chắc chắn muốn xóa đơn hàng này không?
+                  Bạn có chắc chắn muốn xóa vĩnh viễn đơn hàng này không?
+                  (Một khi xóa sẽ không thể khôi phục lại được.)
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose}>Hủy</Button>
-                <Button onClick={handleDelete} color="error" variant="contained">
+                <Button onClick={handleClosePermanentlyDelete}>Hủy</Button>
+                <Button onClick={handlePermanentlyDelete} color="error" variant="contained">
                     Xóa
                 </Button>
               </DialogActions>
@@ -291,4 +268,4 @@ const OrderTable = ({ selectedIds, setSelectedIds }: Props) => {
   )
 }
 
-export default OrderTable
+export default OrderTrashTable

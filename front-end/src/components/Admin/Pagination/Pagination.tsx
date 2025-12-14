@@ -5,7 +5,7 @@ import type { PaginationInterface } from '~/types/helper.type'
 
 interface Props {
   pagination: PaginationInterface | null
-  items: unknown[]
+  items: unknown[],
   handlePagination: (page: number) => void
   handlePaginationPrevious: (page: number) => void
   handlePaginationNext: (page: number) => void
@@ -46,10 +46,16 @@ const Pagination = ({ pagination, handlePagination, handlePaginationPrevious, ha
       return []
     }
   }
+  const startIndex = pagination ? (pagination.currentPage - 1) * pagination.limitItems : 0
+  const endIndex = pagination ? Math.min(pagination.currentPage * pagination.limitItems, pagination.totalItems) : 0
+
   return (
     <>
       {items && items.length > 0 && pagination && (
-        <nav className='flex items-center justify-center p-[10px]'>
+        <nav className='flex items-center justify-between p-[10px]'>
+          <div>
+            Hiển thị {startIndex + 1} - {endIndex} trong tổng số {pagination.totalItems}
+          </div>
           <ul className='flex items-center justify-center gap-[10px]'>
             <li>
               <button

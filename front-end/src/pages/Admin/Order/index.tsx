@@ -14,11 +14,11 @@ import type { OrderStatus } from '~/types/order.type'
 import { FaTrashAlt } from 'react-icons/fa'
 import { FaFileExcel } from 'react-icons/fa'
 import { API_ROOT } from '~/utils/constants'
+import { Link } from 'react-router-dom'
 
 const OrderAdmin = () => {
   const {
     dispatchOrder,
-    orders,
     filterOrder,
     pagination,
     keyword,
@@ -38,7 +38,8 @@ const OrderAdmin = () => {
     handleClose,
     handleConfirmDeleteAll,
     role,
-    allOrders
+    allOrders,
+    orders
   } = useOrder()
 
   return (
@@ -55,10 +56,6 @@ const OrderAdmin = () => {
                   handleFilterStatus={handleFilterStatus}
                   items={allOrders ?? []}
                 />
-                <button className='p-[5px] border rounded-[5px] border-[#525FE1] hover:bg-[#525FE1] flex items-center justify-center gap-[5px]'>
-                  <FaTrashAlt />
-                  <span>Thùng rác</span>
-                </button>
               </div>
               <Search
                 keyword={keyword}
@@ -68,46 +65,55 @@ const OrderAdmin = () => {
             </div>
           </div>
           <div className='flex items-center justify-between text-[15px]'>
-            <form onSubmit={(event) => handleSubmit(event)} className='flex gap-[5px]'>
-              <select
-                name="type"
-                value={actionType}
-                onChange={(e) => setActionType(e.target.value)}
-                className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px]'
-              >
-                <option disabled value={''}>-- Chọn hành động --</option>
-                <option value="PENDING">Đang xử lý</option>
-                <option value="TRANSPORTING">Đang giao hàng</option>
-                <option value="CONFIRMED">Hoàn thành</option>
-                <option value="CANCELED">Hủy tất cả</option>
-                <option value="DELETEALL">Xóa tất cả</option>
-              </select>
-              <button
-                type="submit"
-                className='border rounded-[5px] border-[#9D9995] p-[5px] bg-[#96D5FE]'
-              >
-                Áp dụng
-              </button>
-              <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="delete-dialog-title"
-              >
-                <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Bạn có chắc chắn muốn hủy {selectedIds.length} đơn hàng này không?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose}>Hủy</Button>
-                  <Button onClick={handleConfirmDeleteAll} color="error" variant="contained">
-                    Xóa
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </form>
             <div className='flex items-center justify-center gap-[15px]'>
+              <form onSubmit={(event) => handleSubmit(event)} className='flex gap-[5px]'>
+                <select
+                  name="type"
+                  value={actionType}
+                  onChange={(e) => setActionType(e.target.value)}
+                  className='cursor-pointer outline-none border rounded-[5px] border-[#9D9995] p-[5px]'
+                >
+                  <option disabled value={''}>-- Chọn hành động --</option>
+                  <option value="PENDING">Đang xử lý</option>
+                  <option value="TRANSPORTING">Đang giao hàng</option>
+                  <option value="CONFIRMED">Hoàn thành</option>
+                  <option value="CANCELED">Hủy</option>
+                  <option value="DELETEALL">Xóa</option>
+                </select>
+                <button
+                  type="submit"
+                  className='border rounded-[5px] border-[#9D9995] p-[5px] bg-[#96D5FE]'
+                >
+                Áp dụng
+                </button>
+                <Dialog
+                  open={open}
+                  onClose={handleClose}
+                  aria-labelledby="delete-dialog-title"
+                >
+                  <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                    Bạn có chắc chắn muốn xóa {selectedIds.length} đơn hàng này không?
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleClose}>Hủy</Button>
+                    <Button onClick={handleConfirmDeleteAll} color="error" variant="contained">
+                    Xóa
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </form>
+              <div className='border rounded-[5px] p-[5px]'>Đã chọn: {selectedIds.length}</div>
+            </div>
+            <div className='flex items-center justify-center gap-[15px]'>
+              <button className=''>
+                <Link to={'/admin/orders/trash'} className='p-[5px] border rounded-[5px] border-[#525FE1] hover:bg-[#525FE1] flex items-center justify-center gap-[5px]'>
+                  <FaTrashAlt />
+                  <span>Thùng rác</span>
+                </Link>
+              </button>
               <a
                 href={`${API_ROOT}/admin/orders/export?status=${status}`}
                 download={`don-hang-${status || 'all'}.xlsx`}
@@ -133,7 +139,7 @@ const OrderAdmin = () => {
             handlePagination={(page: number) => updateParams({ page })}
             handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
             handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
-            items={orders}
+            items={orders ?? []}
           />
         </div>
       )}

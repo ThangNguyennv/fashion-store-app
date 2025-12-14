@@ -1,6 +1,8 @@
 import Skeleton from '@mui/material/Skeleton'
 import { useDetail } from '~/hooks/Admin/Order/useDetail'
 import { formatDateForInput } from '~/helpers/formatDateForInput'
+import { Link } from 'react-router-dom'
+import { IoArrowBack } from 'react-icons/io5'
 
 const DetailOrder = () => {
   const {
@@ -120,6 +122,12 @@ const DetailOrder = () => {
                 </div>
               </div>
             </div>
+            <button className='flex items-center justify-start'>
+              <Link to={'/admin/orders/'} className='flex items-center justify-between gap-[5px] text-black border rounded-[5px] p-[5px]'>
+                <IoArrowBack />
+                Quay lại
+              </Link>
+            </button>
           </div>
         ) : (
           <>

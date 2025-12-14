@@ -10,7 +10,8 @@ export const initialOrderState: OrderState = {
     currentPage: 1,
     limitItems: 10,
     skip: 0,
-    totalPage: 0
+    totalPage: 0,
+    totalItems: 0
   },
   keyword: '',
   sortKey: '',

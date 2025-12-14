@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { fetchChangeMultiAPI } from '~/apis/admin/order.api'
+import { fetchChangeMultiTrashAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { useOrderContext } from '~/contexts/admin/OrderContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { OrderStatus } from '~/types/order.type'
 import type { AllParams } from '~/types/helper.type'
+import { useOrderTrashContext } from '~/contexts/admin/OrderTrashContext'
 
-export const useOrder = () => {
-  const { stateOrder, fetchOrders, dispatchOrder } = useOrderContext()
-  const { orders, pagination, filterOrder, keyword, allOrders } = stateOrder
+export const useOrderTrash = () => {
+  const { stateOrder, fetchOrdersTrash, dispatchOrder } = useOrderTrashContext()
+  const { orders, pagination, keyword } = stateOrder
   const { role } = useAuth()
   const { dispatchAlert } = useAlertContext()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -20,7 +19,6 @@ export const useOrder = () => {
 
   // Parse URL params một lần
   const urlParams = useMemo(() => ({
-    status: searchParams.get('status') || '',
     page: parseInt(searchParams.get('page') || '1', 10),
     keyword: searchParams.get('keyword') || '',
     sortKey: searchParams.get('sortKey') || '',
@@ -28,8 +26,8 @@ export const useOrder = () => {
   }), [searchParams])
 
   useEffect(() => {
-    fetchOrders(urlParams)
-  }, [urlParams.status, urlParams.page, urlParams.keyword, urlParams.sortKey, urlParams.sortValue, fetchOrders, urlParams])
+    fetchOrdersTrash(urlParams)
+  }, [urlParams.page, urlParams.keyword, urlParams.sortKey, urlParams.sortValue, fetchOrdersTrash, urlParams])
 
   const updateParams = useCallback((params: Partial<AllParams>) => {
     const newParams = new URLSearchParams(searchParams)
@@ -44,7 +42,7 @@ export const useOrder = () => {
   }, [searchParams, setSearchParams])
 
   const reloadData = (): void => {
-    fetchOrders(urlParams)
+    fetchOrdersTrash(urlParams)
   }
 
   const handleClose = () => {
@@ -86,7 +84,7 @@ export const useOrder = () => {
     let result: string[] = []
     result = selectedOrders.map(order => order._id)
 
-    const response = await fetchChangeMultiAPI({ ids: result, type: typeChange })
+    const response = await fetchChangeMultiTrashAPI({ ids: result, type: typeChange })
 
     if ([200, 204].includes(response.code)) {
       dispatchAlert({
@@ -125,14 +123,9 @@ export const useOrder = () => {
     setSearchParams(newParams)
   }
 
-  const handleFilterStatus = useCallback((status: OrderStatus) => {
-    updateParams({ status, page: 1 })
-  }, [updateParams])
-
   return {
     dispatchOrder,
     orders,
-    filterOrder,
     pagination,
     keyword,
     sortKey: urlParams.sortKey,
@@ -141,16 +134,13 @@ export const useOrder = () => {
     setSelectedIds,
     actionType,
     setActionType,
-    status: urlParams.status,
     updateParams,
     handleSubmit,
     handleSort,
     clearSortParams,
-    handleFilterStatus,
     open,
     handleClose,
     handleConfirmDeleteAll,
-    role,
-    allOrders
+    role
   }
 }

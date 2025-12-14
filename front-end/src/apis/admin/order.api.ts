@@ -46,26 +46,9 @@ export const fetchDeleteOrderAPI = async (id: string) => {
   return response.data
 }
 
-export const fetchPermanentlyDeleteOrderAPI = async (id: string) => {
-  const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/orders/permanentlyDelete/${id}`,
-    { withCredentials: true }
-  )
-  return response.data
-}
-
 export const fetchDetailOrderAPI = async (id: string): Promise<OrderDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
     `${API_ROOT}/admin/orders/detail/${id}`,
-    { withCredentials: true }
-  )
-  return response.data
-}
-
-export const fetchRecoverOrderAPI = async (id: string) => {
-  const response = await authorizedAxiosInstance.patch(
-    `${API_ROOT}/admin/orders/recover/${id}`,
-    {},
     { withCredentials: true }
   )
   return response.data
@@ -84,6 +67,48 @@ export const fetchEditEstimatedConfirmedDay = async (data: { estimatedConfirmedD
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/edit-estimatedConfirmedDay`,
     data,
+    { withCredentials: true }
+  )
+  return response.data
+}
+
+export const fetchOrderTrashAPI = async (
+  params: AllParams
+): Promise<OrderAPIResponse> => {
+  const queryParams = new URLSearchParams()
+  if (params.page) queryParams.set('page', params.page.toString())
+  if (params.keyword) queryParams.set('keyword', params.keyword)
+  if (params.sortKey) queryParams.set('sortKey', params.sortKey)
+  if (params.sortValue) queryParams.set('sortValue', params.sortValue)
+
+  const response = await authorizedAxiosInstance.get(
+    `${API_ROOT}/admin/orders/trash?${queryParams.toString()}`,
+    { withCredentials: true }
+  )
+  return response.data
+}
+
+export const fetchChangeMultiTrashAPI = async (data: { ids: string[], type: string }) => {
+  const response = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/admin/orders/trash/form-change-multi-trash`,
+    data,
+    { withCredentials: true }
+  )
+  return response.data
+}
+
+export const fetchPermanentlyDeleteOrderAPI = async (id: string) => {
+  const response = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/admin/orders/trash/permanentlyDelete/${id}`,
+    { withCredentials: true }
+  )
+  return response.data
+}
+
+export const fetchRecoverOrderAPI = async (id: string) => {
+  const response = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/admin/orders/trash/recover/${id}`,
+    {},
     { withCredentials: true }
   )
   return response.data

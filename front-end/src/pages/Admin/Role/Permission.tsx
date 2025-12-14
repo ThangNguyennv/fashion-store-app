@@ -102,14 +102,6 @@ const permissionSections = [
     permissions: [
       { key: 'settings-advance_view', label: 'Xem' }
     ]
-  },
-  {
-    title: 'Thùng rác',
-    permissions: [
-      { key: 'trashs_view', label: 'Xem' },
-      { key: 'trashs_recover', label: 'Khôi phục' },
-      { key: 'trashs_delete', label: 'Xóa' }
-    ]
   }
 ]
 

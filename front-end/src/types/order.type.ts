@@ -1,5 +1,5 @@
 import type { AccountInfoInterface } from './account.type'
-import type { FilterStatusInterface, PaginationInterface, UpdatedBy } from './helper.type'
+import type { DeletedBy, FilterStatusInterface, PaginationInterface, UpdatedBy } from './helper.type'
 
 interface PaymentDetails {
   vnp_TxnRef?: string
@@ -39,6 +39,7 @@ export interface OrderInfoInterface {
       account_id: string,
     },
     updatedBy: UpdatedBy[],
+    deletedBy: DeletedBy,
     createdAt: Date | null
     updatedAt: Date | null,
     paymentInfo: {

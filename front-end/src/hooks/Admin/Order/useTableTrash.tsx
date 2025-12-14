@@ -1,43 +1,40 @@
-import { fetchChangeStatusAPI, fetchDeleteOrderAPI } from '~/apis/admin/order.api'
+import { fetchPermanentlyDeleteOrderAPI, fetchRecoverOrderAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { useAuth } from '~/contexts/admin/AuthContext'
-import type { UpdatedBy } from '~/types/helper.type'
 import { useState } from 'react'
-import { useOrderContext } from '~/contexts/admin/OrderContext'
-import type { OrderStatus } from '~/types/order.type'
+import { useOrderTrashContext } from '~/contexts/admin/OrderTrashContext'
 
 export interface Props {
   selectedIds: string[],
   setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
-  const { stateOrder, dispatchOrder } = useOrderContext()
+export const useTableTrash = ({ selectedIds, setSelectedIds }: Props) => {
+  const { stateOrder, dispatchOrder } = useOrderTrashContext()
   const { orders, accounts, loading, pagination } = stateOrder
-  const { myAccount } = useAuth()
   const { dispatchAlert } = useAlertContext()
   const [open, setOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [openPermanentlyDelete, setOpenPermanentlyDelete] = useState(false)
+  const [selectedIdPermanentlyDelete, setSelectedIdPermanentlyDelete] = useState<string | null>(null)
 
-  const handleOpen = (id: string) => {
-    setSelectedId(id)
-    setOpen(true)
+  const handleOpenPermanentlyDelete = (id: string) => {
+    setSelectedIdPermanentlyDelete(id)
+    setOpenPermanentlyDelete(true)
   }
 
-  const handleClose = () => {
-    setSelectedId(null)
-    setOpen(false)
+  const handleClosePermanentlyDelete = () => {
+    setSelectedIdPermanentlyDelete(null)
+    setOpenPermanentlyDelete(false)
   }
 
-  const handleDelete = async () => {
-    if (!selectedId) return
+  const handlePermanentlyDelete = async () => {
+    if (!selectedIdPermanentlyDelete) return
 
-    const response = await fetchDeleteOrderAPI(selectedId)
+    const response = await fetchPermanentlyDeleteOrderAPI(selectedIdPermanentlyDelete)
     if (response.code === 204) {
       dispatchOrder({
         type: 'SET_DATA',
         payload: {
-          orders: orders.filter((order) => order._id !== selectedId)
+          orders: orders.filter((order) => order._id !== selectedIdPermanentlyDelete)
         }
       })
       dispatchAlert({
@@ -51,35 +48,22 @@ export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
     }
   }
 
-  const handleChangeStatus = async (id: string, newStatus: OrderStatus): Promise<void> => {
-    const currentUser: UpdatedBy = {
-      account_id: myAccount ? myAccount._id : '',
-      updatedAt: new Date()
-    }
+  const handleRecover = async (id: string) => {
+    if (!id) return
 
-    const response = await fetchChangeStatusAPI(newStatus, id)
+    const response = await fetchRecoverOrderAPI(id)
     if (response.code === 200) {
-      const updatedAllOrders = (stateOrder.allOrders ?? []).map(order =>
-        order._id === id
-          ? { ...order, status: newStatus, updatedBy: [...(order.updatedBy || []), currentUser] }
-          : order
-      )
-      const updatedOrders = (stateOrder.orders ?? []).map(order =>
-        order._id === id
-          ? { ...order, status: newStatus, updatedBy: [...(order.updatedBy || []), currentUser] }
-          : order
-      )
       dispatchOrder({
         type: 'SET_DATA',
         payload: {
-          orders: updatedOrders,
-          allOrders: updatedAllOrders
+          orders: orders.filter((order) => order._id !== id)
         }
       })
       dispatchAlert({
         type: 'SHOW_ALERT',
         payload: { message: response.message, severity: 'success' }
       })
+      setOpen(false)
     } else if (response.code === 400) {
       alert('error: ' + response.error)
       return
@@ -108,15 +92,16 @@ export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
   return {
     orders,
     loading,
-    handleChangeStatus,
     open,
-    handleOpen,
-    handleClose,
+    openPermanentlyDelete,
+    handleOpenPermanentlyDelete,
+    handleClosePermanentlyDelete,
     handleCheckbox,
     handleCheckAll,
     isCheckAll,
     accounts,
-    handleDelete,
+    handleRecover,
+    handlePermanentlyDelete,
     pagination
   }
 }

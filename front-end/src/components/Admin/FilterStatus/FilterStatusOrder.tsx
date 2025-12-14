@@ -47,6 +47,8 @@ const FilterStatusOrder = ({ filterOrder, currentStatus, handleFilterStatus, ite
           <Skeleton variant="rectangular" width={74} height={35} sx={{ bgcolor: 'grey.400', borderRadius: 2 }}/>
           <Skeleton variant="rectangular" width={122} height={35} sx={{ bgcolor: 'grey.400', borderRadius: 2 }}/>
           <Skeleton variant="rectangular" width={55} height={35} sx={{ bgcolor: 'grey.400', borderRadius: 2 }}/>
+          <Skeleton variant="rectangular" width={74} height={35} sx={{ bgcolor: 'grey.400', borderRadius: 2 }}/>
+          <Skeleton variant="rectangular" width={74} height={35} sx={{ bgcolor: 'grey.400', borderRadius: 2 }}/>
         </div>
       )}
     </>

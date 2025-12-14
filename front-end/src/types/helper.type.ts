@@ -5,6 +5,11 @@ export interface UpdatedBy {
   updatedAt: Date | null
 }
 
+export interface DeletedBy {
+  account_id: string,
+  deletedAt: Date | null
+}
+
 export interface FilterStatusInterface {
   name: string,
   status: string,
@@ -15,7 +20,8 @@ export interface PaginationInterface {
   currentPage: number,
   limitItems: number,
   skip: number,
-  totalPage: number
+  totalPage: number,
+  totalItems: number
 }
 
 export interface HelperInterface {
