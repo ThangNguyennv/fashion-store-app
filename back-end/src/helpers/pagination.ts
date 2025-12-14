@@ -3,6 +3,7 @@ interface ObjectPagination {
   limitItems: number;
   skip?: number;
   totalPage?: number;
+  totalItems?: number
 }
 
 const paginationHelpers = (
@@ -20,7 +21,7 @@ const paginationHelpers = (
   const totalPage = Math.ceil(countProducts / objectPagination.limitItems)
 
   objectPagination.totalPage = totalPage
-
+  objectPagination.totalItems = countProducts
   return objectPagination
 }
 

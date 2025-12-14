@@ -9,9 +9,10 @@ router.patch('/edit-estimatedConfirmedDay', controller.estimatedConfirmedDay)
 router.get('/export', controller.exportOrder)
 router.patch('/change-status/:status/:id', controller.changeStatus)
 router.delete('/delete/:id', controller.deleteItem)
-router.delete('/permanentlyDelete/:id', controller.permanentlyDeleteItem)
 router.get('/detail/:id', controller.detail)
-
-router.patch('/recover/:id', controller.recoverPatch)
+router.get('/trash', controller.orderTrash)
+router.patch('/trash/form-change-multi-trash', controller.changeMultiTrash)
+router.delete('/trash/permanentlyDelete/:id', controller.permanentlyDeleteOrder)
+router.patch('/trash/recover/:id', controller.recoverOrder)
 
 export const orderRoutes: Router = router

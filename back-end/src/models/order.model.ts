@@ -67,7 +67,8 @@ const orderSchema = new mongoose.Schema(
     deletedBy: {
       account_id: String,
       deletedAt: Date
-    }
+    },
+    recoveredAt: Date
   },
   {
     timestamps: true

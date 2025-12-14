@@ -5,32 +5,25 @@ import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'
 import Account from '~/models/account.model'
 import Product from '~/models/product.model'
-import * as productsHelper from '~/helpers/product'
-import { OneProduct } from '~/helpers/product'
-import mongoose from 'mongoose'
 import ExcelJS from 'exceljs'
+import filterStatusHelpers from '~/helpers/filterStatus'
 
 // [GET] /admin/orders
 export const index = async (req: Request, res: Response) => {
   try {
     const find: any = { deleted: false }
 
-    // if (req.query.status === 'CANCELED') {
-    //   find.deleted = true
-    // } else {
-    //   find.deleted = false
-    //   if (req.query.status) {
-    //     find.status = req.query.status.toString()
-    //   }
-    // }
-
     if (req.query.status) {
       find.status = req.query.status.toString()
     }
-    if (req.query.phone) {
-      find['userInfo.phone'] = req.query.phone
-    }
     
+    // Search
+    const objectSearch = searchHelpers(req.query)
+    if (objectSearch.regex) {
+      find["userInfo.phone"] = objectSearch.regex
+    }
+    // End search
+
     // Pagination
     const countOrders = await Order.countDocuments(find)
     const objectPagination = paginationHelpers(
@@ -42,13 +35,6 @@ export const index = async (req: Request, res: Response) => {
       countOrders
     )
     // End Pagination
-
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex) {
-      find["userInfo.phone"] = objectSearch.regex
-    }
-    // End search
 
     // Sort
     let sort: Record<string, 1 | -1> = { }
@@ -191,7 +177,7 @@ export const changeMulti = async (req: Request, res: Response) => {
         )
         res.json({
           code: 204,
-          message: `Đã hủy thành công ${ids.length} đơn hàng!`
+          message: `Đã xóa thành công ${ids.length} đơn hàng!`
         })
         break
       default:
@@ -237,25 +223,7 @@ export const deleteItem = async (req: Request, res: Response) => {
   }
 }
 
-// [DELETE] /admin/orders/permanentlyDelete/:id
-export const permanentlyDeleteItem = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id
-    await Order.deleteOne(
-      { _id: id }
-    )
-    res.json({
-      code: 204,
-      message: 'Đã xóa vĩnh viễn thành công đơn hàng!'
-    })
-  } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
-    })
-  }
-}
+
 
 // [GET] /admin/orders/detail/:id
 export const detail = async (req: Request, res: Response) => {
@@ -285,27 +253,6 @@ export const detail = async (req: Request, res: Response) => {
         orderDeleted: orderDeleted
       })
     }
-  } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
-    })
-  }
-}
-
-// [PATCH] /admin/orders/recover/:id
-export const recoverPatch = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id
-    await Order.updateOne(
-      { _id: id },
-      { deleted: false, recoveredAt: new Date() }
-    )
-    res.json({
-      code: 200,
-      message: 'Đã khôi phục thành công đơn hàng!'
-    })
   } catch (error) {
     res.json({
       code: 400,
@@ -453,4 +400,157 @@ export const exportOrder = async (req: Request, res: Response) => {
       error: error.message 
     })
   }
+}
+
+// [GET] /admin/orders/trash
+export const orderTrash = async (req: Request, res: Response) => {
+  try {
+    const find: any = {
+      deleted: true
+    }
+
+    // Search
+    const objectSearch = searchHelpers(req.query)
+    if (objectSearch.regex) {
+      find["userInfo.phone"] = objectSearch.regex
+    }
+    // End search
+
+    // Pagination
+    const countOrders = await Order.countDocuments(find)
+
+    const objectPagination = paginationHelpers(
+      {
+        currentPage: 1,
+        limitItems: 10
+      },
+      req.query,
+      countOrders
+    )
+    // End Pagination
+
+    // Sort
+    let sort: Record<string, 1 | -1> = { }
+    if (req.query.sortKey) {
+      const key = req.query.sortKey.toString()
+      const dir = req.query.sortValue === 'asc' ? 1 : -1
+      sort[key] = dir
+    }
+    // luôn sort phụ theo createdAt
+    if (!sort.createdAt) {
+      sort.createdAt = -1
+    }
+    // End Sort
+
+    const orders = await Order
+      .find(find)
+      .sort(sort)
+      .limit(objectPagination.limitItems)
+      .skip(objectPagination.skip)
+      .lean()
+
+    const accounts = await Account.find({
+      deleted: false
+    })
+    res.json({
+      code: 200,
+      message: 'Thành công!',
+      orders: orders,
+      accounts: accounts,
+      keyword: objectSearch.keyword,
+      pagination: objectPagination,
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [DELETE] /admin/orders/trash/form-change-multi-trash
+export const changeMultiTrash = async (req: Request, res: Response) => {
+  try {
+    const body = req.body as { type: string; ids: string[] }
+    const type = body.type
+    const ids = body.ids
+    enum Key {
+      DELETEALL = 'DELETEALL',
+      RECOVER = 'RECOVER',
+    }
+    switch (type) {
+      case Key.DELETEALL:
+        await Order.deleteMany({ _id: { $in: ids } })
+        res.json({
+          code: 204,
+          message: `Đã xóa vĩnh viễn thành công ${ids.length} đơn hàng!`
+        })
+        break
+      case Key.RECOVER:
+        await Order.updateMany(
+          { _id: { $in: ids } },
+          { deleted: false, recoveredAt: new Date() }
+        )
+        res.json({
+          code: 200,
+          message: `Đã khôi phục thành công ${ids.length} đơn hàng!`
+        })
+        break
+      default:
+        res.json({
+          code: 404,
+          message: 'Không tồn tại!'
+        })
+        break
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [DELETE] /admin/orders/trash/permanentlyDelete/:id
+export const permanentlyDeleteOrder = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+    await Order.deleteOne(
+      { _id: id }
+    )
+    res.json({
+      code: 204,
+      message: 'Đã xóa vĩnh viễn thành công đơn hàng!'
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [PATCH] /admin/orders/trash/recover/:id
+export const recoverOrder = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+    console.log("🚀 ~ order.controller.ts ~ recoverOrder ~ id:", id);
+    await Order.updateOne(
+      { _id: id },
+      { deleted: false, recoveredAt: new Date() }
+    )
+    res.json({
+      code: 200,
+      message: 'Đã khôi phục thành công đơn hàng!'
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
 }
