@@ -1,11 +1,11 @@
 import { Document } from 'mongoose'
 
 export interface TreeItem extends Document {
-  id: string;
-  parent_id: string;
-  [key: string]: unknown;
-  index?: number;
-  children?: TreeItem[];
+  id: string
+  parent_id: string
+  [key: string]: unknown
+  index?: number
+  children?: TreeItem[]
 }
 
 let count = 0

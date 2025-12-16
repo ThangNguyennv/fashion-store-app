@@ -17,8 +17,8 @@ const productCategorySchema = new mongoose.Schema(
     thumbnail: String,
     status: {
       type: String,
-      enum: ['active', 'inactive'],
-      default: 'active'
+      enum: ['ACTIVE', 'INACTIVE'],
+      default: 'ACTIVE'
     },
     slug: {
       type: String,
@@ -49,8 +49,7 @@ const productCategorySchema = new mongoose.Schema(
   }
 )
 
-// ===== INDEXES =====
-productCategorySchema.index({ slug: 1 }, { unique: true })
+// INDEXES
 productCategorySchema.index({ title: 1, deleted: 1 })
 productCategorySchema.index({ deleted: 1, status: 1, createdAt: -1 })
 

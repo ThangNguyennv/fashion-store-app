@@ -1,15 +1,14 @@
-import Account from '../models/account.model'
 import { TreeItem } from './createTree'
 
 interface UserRef {
-  account_id: string;
-  accountFullName?: string;
+  account_id: string
+  accountFullName?: string
 }
 
 export interface LogNode extends TreeItem {
-  createdBy: UserRef[];
-  updatedBy: UserRef[];
-  accountFullName?: string;
+  createdBy: UserRef[]
+  updatedBy: UserRef[]
+  accountFullName?: string
 }
 
 //  Add thông tin cho mỗi node

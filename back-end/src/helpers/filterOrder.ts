@@ -8,17 +8,17 @@ const filterOrderHelpers = (query: Record<string, unknown>): StatusItem[] => {
       class: ''
     },
     {
-      name: 'Đang xử lý',
+      name: 'Chờ xử lý',
       status: 'PENDING',
       class: ''
     },
     {
-      name: 'Đang giao hàng',
+      name: 'Đang vận chuyển',
       status: 'TRANSPORTING',
       class: ''
     },
     {
-      name: 'Hoàn thành',
+      name: 'Đã xác nhận',
       status: 'CONFIRMED',
       class: ''
     },

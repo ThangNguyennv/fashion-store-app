@@ -4,20 +4,20 @@ import slug from 'mongoose-slug-updater'
 mongoose.plugin(slug)
 
 const commentSchema = new mongoose.Schema({
-  user_id: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User'
-  },
-  rating: { type: Number, required: true, min: 1, max: 5 },
-  content: { type: String, required: true },
-  status: { 
-    type: String, 
-    enum: ['pending', 'approved', 'rejected'], 
-    default: 'pending' 
-  },
-  images: [String],
-  color:  String , // Tên màu, ví dụ: "Xanh Navy"
-  size:  String   // Kích cỡ, ví dụ: "XL"
+    user_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User'
+    },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    content: { type: String, required: true },
+    status: { 
+      type: String, 
+      enum: ['pending', 'approved', 'rejected'], 
+      default: 'pending' 
+    },
+    images: [String],
+    color:  String , // Tên màu, ví dụ: "Xanh Navy"
+    size:  String   // Kích cỡ, ví dụ: "XL"
   }, 
   {
     timestamps: true
@@ -99,6 +99,10 @@ const productSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+// ===== INDEXES =====
+productSchema.index({ title: 1, deleted: 1 })
+productSchema.index({ deleted: 1, status: 1, createdAt: -1 })
 
 const Product = mongoose.model('Product', productSchema, 'products')
 

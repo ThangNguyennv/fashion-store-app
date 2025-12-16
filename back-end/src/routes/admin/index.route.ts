@@ -16,7 +16,7 @@ import { orderRoutes } from './order.route'
 import { settingRoutes } from './setting.route'
 import { brandRoutes } from './brand.route'
 import { chatAdminRoutes } from './chat.admin.route'
-import { noCache } from '~/middlewares/admin/noCache'
+import { noCache } from '~/middlewares/admin/noCache.middleware'
 import { Request, Response, NextFunction } from 'express'
 
 const routeAdmin = (app: Express): void => {

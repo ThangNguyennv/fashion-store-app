@@ -7,7 +7,7 @@ import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
 import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
 import Account from '~/models/account.model'
 import paginationHelpers from '~/helpers/pagination'
-import { updateStatusRecursiveForProduct } from '~/helpers/updateStatusRecursiveForProduct'
+import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursiveForProduct'
 
 // [GET] /admin/products-category
 export const index = async (req: Request, res: Response) => {
@@ -128,15 +128,16 @@ export interface UpdatedBy {
   updatedAt: Date
 }
 
+// [PATCH] /admin/change-status-with-children/:status/:id
 export const changeStatusWithChildren = async (req: Request, res: Response) => {
    try {
-    const { status, id } = req.params;
+    const { status, id } = req.params
     const updatedBy: UpdatedBy = {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
     }
 
-    await updateStatusRecursiveForProduct(status, id, updatedBy);
+    await updateStatusRecursiveForOneItem(status, id, updatedBy)
 
     return res.json({ 
       code: 200, 
@@ -162,36 +163,28 @@ export const changeMulti = async (req: Request, res: Response) => {
       updatedAt: new Date()
     }
     enum Key {
-      ACTIVE = 'active',
-      INACTIVE = 'inactive',
-      DELETEALL = 'delete-all',
+      ACTIVE = 'ACTIVE',
+      INACTIVE = 'INACTIVE',
+      DELETEALL = 'DELETEALL',
     }
     switch (type) {
       case Key.ACTIVE:
-        await ProductCategory.updateMany(
-          { _id: { $in: ids } },
-          { status: Key.ACTIVE, $push: { updatedBy: updatedBy } }
-        )
+        await updateManyStatusFast(Key.ACTIVE, ids, updatedBy)
+
         res.json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục sản phẩm!`
         })
         break
       case Key.INACTIVE:
-        await ProductCategory.updateMany(
-          { _id: { $in: ids } },
-          { status: Key.INACTIVE, $push: { updatedBy: updatedBy } }
-        )
+        await updateManyStatusFast(Key.INACTIVE, ids, updatedBy)
         res.json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục sản phẩm!`
         })
         break
       case Key.DELETEALL:
-        await ProductCategory.updateMany(
-          { _id: { $in: ids } },
-          { deleted: 'true', deletedAt: new Date() }
-        )
+        await deleteManyStatusFast(ids)
         res.json({
           code: 204,
           message: `Xóa thành công ${ids.length} danh mục sản phẩm!`
@@ -243,12 +236,6 @@ export const deleteItem = async (req: Request, res: Response) => {
 // [POST] /admin/products-category/create
 export const createPost = async (req: Request, res: Response) => {
   try {
-    if (req.body.position == '') {
-      const count = await ProductCategory.countDocuments()
-      req.body.position = count + 1
-    } else {
-      req.body.position = parseInt(req.body.position)
-    }
     req.body.createdBy = {
       account_id: req['accountAdmin'].id
     }
@@ -271,7 +258,6 @@ export const createPost = async (req: Request, res: Response) => {
 // [PATCH] /admin/products-category/edit/:id
 export const editPatch = async (req: Request, res: Response) => {
   try {
-    req.body.position = parseInt(req.body.position)
     const updatedBy = {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
@@ -349,8 +335,9 @@ export const ProductCategoryTrash = async (req: Request, res: Response) => {
     // End Sort
 
     // Pagination
-    const parentFind = { ...find, parent_id: '' }
-    const countParents = await ProductCategory.countDocuments(parentFind)
+    // const parentFind = { ...find, parent_id: '' }
+
+    const countParents = await ProductCategory.countDocuments(find)
     const objectPagination = paginationHelpers(
       { 
         currentPage: 1, 
@@ -362,33 +349,30 @@ export const ProductCategoryTrash = async (req: Request, res: Response) => {
     // End Pagination
 
     //  Query song song bằng Promise.all (giảm round-trip)
-    const [parentCategories, accounts, allCategories] = await Promise.all([
+    const [parentCategories, accounts] = await Promise.all([
       ProductCategory
-        .find(parentFind)
+        .find(find)
         .sort(sort)
         .limit(objectPagination.limitItems)
         .skip(objectPagination.skip), // chỉ parent
       Account.find({ deleted: false }), // account info
-      ProductCategory
-        .find({ deleted: false })
-        .sort(sort) 
     ])
     
-    // Add children vào cha (Đã phân trang giới hạn 2 item)
-    const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
+    // // Add children vào cha (Đã phân trang giới hạn 2 item)
+    // const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
   
-    // Add children vào cha (Không có phân trang, lấy tất cả item)
-    const newAllProductCategories = buildTree(allCategories as unknown as TreeItem[])
+    // // Add children vào cha (Không có phân trang, lấy tất cả item)
+    // const newAllProductCategories = buildTree(allCategories as unknown as TreeItem[])
 
-    // Gắn account info cho tree
-    const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-    addLogInfoToTree(newProductCategories as LogNode[], accountMap)
-    addLogInfoToTree(newAllProductCategories as LogNode[], accountMap)
+    // // Gắn account info cho tree
+    // const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
+    // addLogInfoToTree(newProductCategories as LogNode[], accountMap)
+    // addLogInfoToTree(newAllProductCategories as LogNode[], accountMap)
 
     res.json({
       code: 200,
       message: 'Thành công!',
-      productCategories: newProductCategories,
+      productCategories: parentCategories,
       accounts: accounts,
       keyword: objectSearch.keyword,
       pagination: objectPagination,
@@ -408,6 +392,7 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
     const body = req.body as { type: string; ids: string[] }
     const type = body.type
     const ids = body.ids
+    console.log("🚀 ~ product-category.controller.ts ~ changeMultiTrash ~ ids:", ids);
     enum Key {
       DELETEALL = 'DELETEALL',
       RECOVER = 'RECOVER',
@@ -463,6 +448,15 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
         res.json({
           code: 204,
           message: `Đã xóa vĩnh viễn thành công ${allIdsToDelete.length} danh mục (bao gồm ${ids.length} danh mục đã chọn và các danh mục con)!`
+        })
+        break
+      case Key.RECOVER:
+        await ProductCategory.updateMany(
+          { _id: { $in: ids } },
+          { deleted: false, recoveredAt: new Date() })
+        res.json({
+          code: 200,
+          message: `Khôi phục thành công ${ids.length} danh mục sản phẩm!`
         })
         break
       default:
@@ -549,6 +543,7 @@ export const permanentlyDeleteProductCategory = async (req: Request, res: Respon
 export const recoverProductCategory = async (req: Request, res: Response) => {
   try {
     const id = req.params.id
+    
     await ProductCategory.updateOne(
       { _id: id },
       { deleted: false, recoveredAt: new Date() }

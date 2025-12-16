@@ -4,9 +4,7 @@ import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'
 import Account from '~/models/account.model'
-import Product from '~/models/product.model'
 import ExcelJS from 'exceljs'
-import filterStatusHelpers from '~/helpers/filterStatus'
 
 // [GET] /admin/orders
 export const index = async (req: Request, res: Response) => {
@@ -62,7 +60,7 @@ export const index = async (req: Request, res: Response) => {
 
     res.json({
       code: 200,
-      message: 'Thành công!',
+      message: 'Trả về orders thành công!',
       orders: orders,
       filterOrder: filterOrderHelpers(req.query),
       keyword: objectSearch.keyword,
@@ -98,7 +96,7 @@ export const changeStatus = async (req: Request, res: Response) => {
     )
     res.json({
       code: 200,
-      message: 'Cập nhật trạng thái thành công!'
+      message: 'Cập nhật trạng thái thành công đơn hàng!'
     })
   } catch (error) {
     res.json({
@@ -180,7 +178,7 @@ export const changeMulti = async (req: Request, res: Response) => {
       default:
         res.json({
           code: 404,
-          message: 'Không tồn tại!'
+          message: 'Không tồn tại đơn hàng!'
         })
         break
     }
@@ -229,12 +227,8 @@ export const detail = async (req: Request, res: Response) => {
       deleted: false,
       _id: req.params.id
     }
-    const findDeleted = {
-      deleted: true,
-      _id: req.params.id
-    }
+
     const order = await Order.findOne(find)
-    const orderDeleted = await Order.findOne(findDeleted)
 
     if (order) {
       res.json({
@@ -243,13 +237,7 @@ export const detail = async (req: Request, res: Response) => {
         order: order
       })
     }
-    if (orderDeleted) {
-      res.json({
-        code: 200,
-        message: 'Chi tiết đơn hàng bị xóa!',
-        orderDeleted: orderDeleted
-      })
-    }
+
   } catch (error) {
     res.json({
       code: 400,
@@ -451,7 +439,7 @@ export const orderTrash = async (req: Request, res: Response) => {
     })
     res.json({
       code: 200,
-      message: 'Thành công!',
+      message: 'Trả orderTrash thành công!',
       orders: orders,
       accounts: accounts,
       keyword: objectSearch.keyword,
