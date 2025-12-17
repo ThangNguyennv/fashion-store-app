@@ -34,13 +34,6 @@ export interface HelperInterface {
   pagination: PaginationInterface,
 }
 
-export interface CurrentParamsInterface {
-  keyword: string,
-  currentDate: string,
-  currentSortKey: string,
-  currentSortValue: string
-}
-
 export interface ParamsInterface {
   keyword: string,
   date: string,
