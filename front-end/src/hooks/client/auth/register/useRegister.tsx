@@ -22,7 +22,7 @@ const useRegister = () => {
       const confirmPassword = form.confirmPassword.value
       const response = await fetchRegisterAPI(fullName, email, password, confirmPassword)
 
-      if (response.code === 200) {
+      if (response.code === 201) {
         dispatchAlert({
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'success' }
