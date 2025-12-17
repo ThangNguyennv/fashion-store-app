@@ -5,7 +5,10 @@ mongoose.plugin(slug)
 
 const articleCategorySchema = new mongoose.Schema(
   {
-    title: String, // San pham 1
+    title: {
+      type: String,
+      required: true
+    },
     parent_id: {
       type: String,
       default: ''
@@ -13,7 +16,11 @@ const articleCategorySchema = new mongoose.Schema(
     descriptionShort: String,
     descriptionDetail: String,
     thumbnail: String,
-    status: String,
+    status: {
+      type: String,
+      enum: ['ACTIVE', 'INACTIVE'],
+      default: 'ACTIVE'
+    },
     slug: {
       type: String,
       slug: 'title', // <-> San-pham-1
@@ -25,10 +32,6 @@ const articleCategorySchema = new mongoose.Schema(
     },
     createdBy: {
       account_id: String,
-      createdAt: {
-        type: Date,
-        default: Date.now
-      }
     },
     deletedBy: {
       account_id: String,
@@ -46,6 +49,9 @@ const articleCategorySchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+articleCategorySchema.index({ title: 1, deleted: 1 })
+articleCategorySchema.index({ deleted: 1, status: 1, createdAt: -1 })
 
 const ArticleCategory = mongoose.model(
   'ArticleCategory',

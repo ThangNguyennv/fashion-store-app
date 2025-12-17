@@ -9,11 +9,10 @@ export const createTree = (parentItems: TreeItem[], allItems: TreeItem[]): TreeI
   parentItems.forEach((item) => {
     count++
     // convert Mongoose Document thành object JS thuần (bỏ các method, getter đặc biệt, metadata của Mongoose)
-    let plainItem = item.toObject ? item.toObject() : item
-    const newItem = { ...plainItem, index: count } as TreeItem
-
+    const newItem = { ...item, index: count } as TreeItem
+    const itemId = item._id?.toString() || ''
     // Tìm con trong toàn bộ danh sách
-    const children = allItems.filter(child => child.parent_id === item.id)
+    const children = allItems.filter(child => child.parent_id === itemId)
 
     if (children.length > 0) {
       newItem.children = createTree(children, allItems)

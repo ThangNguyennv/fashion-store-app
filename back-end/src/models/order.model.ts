@@ -56,16 +56,25 @@ const orderSchema = new mongoose.Schema(
       default: false
     },
     createdBy: {
-      account_id: String
+      account_id: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Account'
+      }
     },
     updatedBy: [
       {
-        account_id: String,
+        account_id: {
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: 'Account'
+        },
         updatedAt: Date
       }
     ],
     deletedBy: {
-      account_id: String,
+      account_id: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Account'
+      },
       deletedAt: Date
     },
     recoveredAt: Date

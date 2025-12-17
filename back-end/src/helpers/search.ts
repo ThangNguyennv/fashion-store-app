@@ -1,4 +1,4 @@
-import { convertToFullName, convertToSlug } from "./convertToSlug"
+import { convertToSlug } from "./convertToSlug"
 
 interface ObjectSearch {
   slug?: RegExp,

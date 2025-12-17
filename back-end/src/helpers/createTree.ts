@@ -1,9 +1,7 @@
-import { Document } from 'mongoose'
-
-export interface TreeItem extends Document {
-  id: string
+export interface TreeItem {
+  _id: any
   parent_id: string
-  [key: string]: unknown
+  [key: string]: any
   index?: number
   children?: TreeItem[]
 }
@@ -14,10 +12,12 @@ export const createTree = (parentItems: TreeItem[], parentId: string = ''): Tree
   const tree: TreeItem[] = []
 
   parentItems.forEach((item) => {
+    const itemId = item._id?.toString() || ''
     if (item.parent_id === parentId) {
       count++
-      const newItem = { ...item.toObject(), index: count } as TreeItem
-      const children = createTree(parentItems, item.id)
+      const newItem = { ...item, index: count } as TreeItem
+      
+      const children = createTree(parentItems, itemId)
       if (children.length > 0) {
         newItem.children = children
       }

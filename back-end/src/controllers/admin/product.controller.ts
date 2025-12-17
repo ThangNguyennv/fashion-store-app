@@ -14,16 +14,6 @@ export const index = async (req: Request, res: Response) => {
       find.status = req.query.status.toString()
     }
 
-    // Sort
-    const sort = {}
-    if (req.query.sortKey && req.query.sortValue) {
-      const sortKey = req.query.sortKey.toLocaleString()
-      sort[sortKey] = req.query.sortValue
-    } else {
-      sort['position'] = 'desc'
-    }
-    // End Sort
-
     // Search
     const objectSearch = searchHelpers(req.query)
     if (objectSearch.regex || objectSearch.slug) {
@@ -33,6 +23,19 @@ export const index = async (req: Request, res: Response) => {
       ]
     }
     // End search
+
+    // Sort
+    let sort: Record<string, 1 | -1> = { }
+    if (req.query.sortKey) {
+      const key = req.query.sortKey.toString()
+      const dir = req.query.sortValue === 'asc' ? 1 : -1
+      sort[key] = dir
+    }
+    // luôn sort phụ theo createdAt
+    if (!sort.createdAt) {
+      sort.createdAt = -1
+    }
+    // End Sort
 
     // Pagination
     const countProducts = await Product.countDocuments(find)
@@ -46,38 +49,20 @@ export const index = async (req: Request, res: Response) => {
     )
     // End Pagination
     
-    const products = await Product
-      .find(find)
-      .sort(sort)
-      .limit(objectPagination.limitItems)
-      .skip(objectPagination.skip)
-
-    // products trả về 1 mảng các object => Duyệt for of bình thường
-    for (const product of products) {
-      // Lấy ra thông tin người tạo
-      const user = await Account.findOne({
-        _id: product.createdBy.account_id
-      })
-      if (user) {
-        product['accountFullName'] = user.fullName
-      }
-      // Lấy ra thông tin người cập nhật gần nhất
-      const updatedBy = product.updatedBy[product.updatedBy.length - 1]
-      if (updatedBy) {
-        const userUpdated = await Account.findOne({
-          _id: updatedBy.account_id
-        })
-        updatedBy['accountFullName'] = userUpdated.fullName
-      }
-    }
-    const accounts = await Account.find({
-      deleted: false
-    })
-
-    const allProducts = await Product.find({
-      deleted: false
-    })
-
+    const [products, allProducts] = await Promise.all([
+      Product
+        .find(find)
+        .sort(sort)
+        .limit(objectPagination.limitItems)
+        .skip(objectPagination.skip)
+        .populate('createdBy.account_id', 'fullName email')
+        .populate('updatedBy.account_id', 'fullName email')
+        .lean(),
+      Product
+        .find({ deleted: false })
+        .lean()
+    ])
+   
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -85,7 +70,6 @@ export const index = async (req: Request, res: Response) => {
       filterStatus: filterStatusHelpers(req.query),
       keyword: objectSearch.keyword,
       pagination: objectPagination,
-      accounts: accounts,
       allProducts: allProducts
     })
   } catch (error) {
@@ -102,20 +86,28 @@ export const changeStatus = async (req: Request, res: Response) => {
   try {
     const status: string = req.params.status
     const id: string = req.params.id
+
     const updatedBy = {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
     }
-    await Product.updateOne(
-      { _id: id },
-      {
-        status: status,
-        $push: { updatedBy: updatedBy }
-      }
-    )
+
+    const updater = await Product
+      .findByIdAndUpdate(
+        { _id: id },
+        {
+          status: status,
+          $push: { updatedBy: updatedBy }
+        },
+        { new: true } // Trả về document sau update
+      )
+      .populate('updatedBy.account_id', 'fullName email')
+      .lean() 
+
     res.json({
       code: 200,
-      message: 'Cập nhật thành công trạng thái sản phẩm!'
+      message: 'Cập nhật thành công trạng thái sản phẩm!',
+      updater: updater
     })
   } catch (error) {
     res.json({
@@ -137,9 +129,9 @@ export const changeMulti = async (req: Request, res: Response) => {
       updatedAt: new Date()
     }
     enum Key {
-      ACTIVE = 'active',
-      INACTIVE = 'inactive',
-      DELETEALL = 'delete-all',
+      ACTIVE = 'ACTIVE',
+      INACTIVE = 'INACTIVE',
+      DELETEALL = 'DELETEALL',
     }
     switch (type) {
       case Key.ACTIVE:
@@ -348,6 +340,161 @@ export const detail = async (req: Request, res: Response) => {
       code: 200,
       message: 'Lấy thành công chi tiết sản phẩm!',
       product: product
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [GET] /admin/products/trash
+export const productTrash = async (req: Request, res: Response) => {
+  try {
+    const find: any = {
+      deleted: true
+    }
+
+    // Search
+    const objectSearch = searchHelpers(req.query)
+    if (objectSearch.regex || objectSearch.slug) {
+      find.$or = [
+        { title: objectSearch.regex },
+        { slug: objectSearch.slug }
+      ]
+    }
+    // End search
+
+    // Sort
+    let sort: Record<string, 1 | -1> = { }
+    if (req.query.sortKey) {
+      const key = req.query.sortKey.toString()
+      const dir = req.query.sortValue === 'asc' ? 1 : -1
+      sort[key] = dir
+    }
+    // luôn sort phụ theo createdAt
+    if (!sort.createdAt) {
+      sort.createdAt = -1
+    }
+    // End Sort
+
+
+    // Pagination
+    const countOrders = await Product.countDocuments(find)
+
+    const objectPagination = paginationHelpers(
+      {
+        currentPage: 1,
+        limitItems: 10
+      },
+      req.query,
+      countOrders
+    )
+    // End Pagination
+
+    const products = await Product
+      .find(find)
+      .sort(sort)
+      .limit(objectPagination.limitItems)
+      .skip(objectPagination.skip)
+      .lean()
+      .populate('createdBy.account_id', 'fullName email')
+      .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
+      .lean()
+
+    res.json({
+      code: 200,
+      message: 'Trả productTrash thành công!',
+      products: products,
+      keyword: objectSearch.keyword,
+      pagination: objectPagination,
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [PATCH] /admin/products/trash/form-change-multi-trash
+export const changeMultiTrash = async (req: Request, res: Response) => {
+  try {
+    const body = req.body as { type: string; ids: string[] }
+    const type = body.type
+    const ids = body.ids
+    enum Key {
+      DELETEALL = 'DELETEALL',
+      RECOVER = 'RECOVER',
+    }
+    switch (type) {
+      case Key.DELETEALL:
+        await Product.deleteMany({ _id: { $in: ids } })
+        res.json({
+          code: 204,
+          message: `Đã xóa vĩnh viễn thành công ${ids.length} sản phẩm!`
+        })
+        break
+      case Key.RECOVER:
+        await Product.updateMany(
+          { _id: { $in: ids } },
+          { deleted: false, recoveredAt: new Date() }
+        )
+        res.json({
+          code: 200,
+          message: `Đã khôi phục thành công ${ids.length} sản phẩm!`
+        })
+        break
+      default:
+        res.json({
+          code: 404,
+          message: 'Không tồn tại!'
+        })
+        break
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [DELETE] /admin/products/trash/permanentlyDelete/:id
+export const permanentlyDeleteProduct = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+    await Product.deleteOne(
+      { _id: id }
+    )
+    res.json({
+      code: 204,
+      message: 'Đã xóa vĩnh viễn thành công sản phẩm!'
+    })
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: 'Lỗi!',
+      error: error
+    })
+  }
+}
+
+// [PATCH] /admin/products/trash/recover/:id
+export const recoverProduct = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+    await Product.updateOne(
+      { _id: id },
+      { deleted: false, recoveredAt: new Date() }
+    )
+    res.json({
+      code: 200,
+      message: 'Đã khôi phục thành công sản phẩm!'
     })
   } catch (error) {
     res.json({

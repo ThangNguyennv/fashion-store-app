@@ -12,8 +12,8 @@ const commentSchema = new mongoose.Schema({
     content: { type: String, required: true },
     status: { 
       type: String, 
-      enum: ['pending', 'approved', 'rejected'], 
-      default: 'pending' 
+      enum: ['PENDING', 'APPROVED', 'REJECTED'], 
+      default: 'PENDING' 
     },
     images: [String],
     color:  String , // Tên màu, ví dụ: "Xanh Navy"
@@ -64,8 +64,8 @@ const productSchema = new mongoose.Schema(
     thumbnail: String,
     status: {
       type: String,
-      enum: ['active', 'inactive'],
-      default: 'active'
+      enum: ['ACTIVE', 'INACTIVE'],
+      default: 'ACTIVE'
     },
     featured: {
       type: String,
@@ -81,15 +81,24 @@ const productSchema = new mongoose.Schema(
       default: false
     },
     createdBy: {
-      account_id: String,
+      account_id: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Account'
+      }
     },
     deletedBy: {
-      account_id: String,
+      account_id: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Account'
+      },
       deletedAt: Date
     },
     updatedBy: [
       {
-        account_id: String,
+        account_id: {
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: 'Account'
+      },
         updatedAt: Date
       }
     ],
@@ -100,7 +109,7 @@ const productSchema = new mongoose.Schema(
   }
 )
 
-// ===== INDEXES =====
+// INDEXES 
 productSchema.index({ title: 1, deleted: 1 })
 productSchema.index({ deleted: 1, status: 1, createdAt: -1 })
 

@@ -33,4 +33,9 @@ router.patch(
 )
 router.get('/detail/:id', requirePermission("products_view"), controller.detail)
 
+router.get('/trash', controller.productTrash)
+router.patch('/trash/form-change-multi-trash', controller.changeMultiTrash)
+router.delete('/trash/permanentlyDelete/:id', controller.permanentlyDeleteProduct)
+router.patch('/trash/recover/:id', controller.recoverProduct)
+
 export const productRoutes: Router = router

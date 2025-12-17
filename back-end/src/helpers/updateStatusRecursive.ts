@@ -1,12 +1,11 @@
-import ProductCategory from "~/models/product-category.model"
 import { UpdatedBy } from "~/controllers/admin/product-category.controller"
 
-export const updateStatusRecursiveForOneItem = async (status: string, id: string, currentUser: UpdatedBy): Promise<void> => {
+export const updateStatusRecursiveForOneItem = async (model: any, status: string, id: string, currentUser: UpdatedBy): Promise<void> => {
   const stack = [id]
   while (stack.length > 0) {
     const currentId = stack.pop()!
 
-    await ProductCategory.updateOne(
+    await model.updateOne(
       { _id: currentId },
       { 
         status: status, 
@@ -18,7 +17,7 @@ export const updateStatusRecursiveForOneItem = async (status: string, id: string
         }
       }
     ) 
-    const children = await ProductCategory.find(
+    const children = await model.find(
       { parent_id: currentId },
       { _id: 1 } // Chỉ lần id
     )
@@ -30,12 +29,12 @@ export const updateStatusRecursiveForOneItem = async (status: string, id: string
 }
 
 
-export const updateManyStatusFast = async (status: string, ids: string[], currentUser: UpdatedBy): Promise<void> => {
+export const updateManyStatusFast = async (model: any, status: string, ids: string[], currentUser: UpdatedBy): Promise<void> => {
   // Dùng Set để lọc trùng ID (đề phòng Frontend gửi trùng)
   const uniqueIds = [...new Set(ids)]
 
   // Thực hiện Update 1 lần cho tất cả
-  await ProductCategory.updateMany(
+  await model.updateMany(
     { 
       _id: { $in: uniqueIds } // Tìm tất cả thằng nào có ID nằm trong danh sách này
     },
@@ -51,12 +50,12 @@ export const updateManyStatusFast = async (status: string, ids: string[], curren
   )
 }
 
-export const deleteManyStatusFast = async (ids: string[]): Promise<void> => {
+export const deleteManyStatusFast = async (model: any, ids: string[]): Promise<void> => {
   // Dùng Set để lọc trùng ID (đề phòng Frontend gửi trùng)
   const uniqueIds = [...new Set(ids)]
 
   // Thực hiện Update 1 lần cho tất cả
-  await ProductCategory.updateMany(
+  await model.updateMany(
     { _id: { $in: uniqueIds } },
     { deleted: 'true', deletedAt: new Date() }
   )

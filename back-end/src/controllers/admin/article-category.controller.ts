@@ -7,7 +7,7 @@ import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
 import paginationHelpers from '~/helpers/pagination'
 import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
 import Account from '~/models/account.model'
-import { updateStatusRecursiveForArticle } from '~/helpers/updateStatusRecursiveForArticle'
+import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
 
 // [GET] /admin/articles-category
 export const index = async (req: Request, res: Response) => {
@@ -27,6 +27,19 @@ export const index = async (req: Request, res: Response) => {
     }
     // End search
 
+    // Sort
+    let sort: Record<string, 1 | -1> = { }
+    if (req.query.sortKey) {
+      const key = req.query.sortKey.toString()
+      const dir = req.query.sortValue === 'asc' ? 1 : -1
+      sort[key] = dir
+    }
+    // luôn sort phụ theo createdAt
+    if (!sort.createdAt) {
+      sort.createdAt = -1
+    }
+    // End Sort
+
     // Pagination
     const parentFind = { ...find, parent_id: '' }
     const countParents = await ArticleCategory.countDocuments(parentFind)
@@ -40,25 +53,20 @@ export const index = async (req: Request, res: Response) => {
     )
     // End Pagination
     
-    // Sort
-    const sort = {}
-    if (req.query.sortKey && req.query.sortValue) {
-      const sortKey = req.query.sortKey.toLocaleString()
-      sort[sortKey] = req.query.sortValue
-    } else {
-      sort['position'] = 'desc'
-    }
-    // // End Sort
-
-  const allCategories = await ArticleCategory.find({ deleted: false }).sort(sort)
-
     //  Query song song bằng Promise.all (giảm round-trip)
-    const [parentCategories, accounts] = await Promise.all([
+    const [parentCategories, accounts, allCategories] = await Promise.all([
       ArticleCategory.find(parentFind)
         .sort(sort)
         .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip), // chỉ parent
-      Account.find({ deleted: false }) // account info
+        .skip(objectPagination.skip) // chỉ parent
+        .lean(),
+      Account
+        .find({ deleted: false }) // account info
+        .lean(),
+      ArticleCategory
+        .find({ deleted: false })
+        .sort(sort)
+        .lean()
     ])
 
     // Tạo cây phân cấp
@@ -129,11 +137,11 @@ export const changeStatusWithChildren = async (req: Request, res: Response) => {
       updatedAt: new Date()
     }
 
-    await updateStatusRecursiveForArticle(status, id, updatedBy);
+    await updateStatusRecursiveForOneItem(ArticleCategory, status, id, updatedBy)
 
     return res.json({ 
       code: 200, 
-      message: "Cập nhật thành công trạng thái danh mục sản phẩm!" 
+      message: "Cập nhật thành công trạng thái danh mục bài viết!" 
     });
   } catch (error) {
     res.json({
@@ -155,36 +163,27 @@ export const changeMulti = async (req: Request, res: Response) => {
       updatedAt: new Date()
     }
     enum Key {
-      ACTIVE = 'active',
-      INACTIVE = 'inactive',
-      DELETEALL = 'delete-all',
+      ACTIVE = 'ACTIVE',
+      INACTIVE = 'INACTIVE',
+      DELETEALL = 'DELETEALL',
     }
     switch (type) {
       case Key.ACTIVE:
-        await ArticleCategory.updateMany(
-          { _id: { $in: ids } },
-          { status: Key.ACTIVE, $push: { updatedBy: updatedBy } }
-        )
+        await updateManyStatusFast(ArticleCategory, Key.ACTIVE, ids, updatedBy)
         res.json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục bài viết!`
         })
         break
       case Key.INACTIVE:
-        await ArticleCategory.updateMany(
-          { _id: { $in: ids } },
-          { status: Key.INACTIVE, $push: { updatedBy: updatedBy } }
-        )
+        await updateManyStatusFast(ArticleCategory, Key.INACTIVE, ids, updatedBy)
         res.json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục bài viết!`
         })
         break
       case Key.DELETEALL:
-        await ArticleCategory.updateMany(
-          { _id: { $in: ids } },
-          { deleted: 'true', deletedAt: new Date() }
-        )
+        await deleteManyStatusFast(ArticleCategory, ids)
         res.json({
           code: 204,
           message: `Xóa thành công ${ids.length} danh mục bài viết!`
@@ -237,12 +236,6 @@ export const deleteItem = async (req: Request, res: Response) => {
 // [POST] /admin/articles-category/create
 export const createPost = async (req: Request, res: Response) => {
   try {
-    if (req.body.position == '') {
-      const count = await ArticleCategory.countDocuments()
-      req.body.position = count + 1
-    } else {
-      req.body.position = parseInt(req.body.position)
-    }
     req.body.createdBy = {
       account_id: req['accountAdmin'].id
     }
@@ -267,7 +260,6 @@ export const createPost = async (req: Request, res: Response) => {
 // [PATCH] /admin/articles-category/edit/:id
 export const editPatch = async (req: Request, res: Response) => {
   try {
-    req.body.position = parseInt(req.body.position)
     const updatedBy = {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
@@ -305,7 +297,7 @@ export const detail = async (req: Request, res: Response) => {
     const articleCategory = await ArticleCategory.findOne(find)
     res.json({
       code: 200,
-      message: 'Thành công!',
+      message: 'Lấy Thành công chi tiết danh mục bài viết!',
       articleCategory: articleCategory
     })
   } catch (error) {

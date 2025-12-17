@@ -392,7 +392,7 @@ export const createReview = async (req: Request, res: Response) => {
       images: images,
       color: color,
       size: size,
-      status: 'approved' // Hoặc 'pending' nếu bạn muốn duyệt
+      status: 'APPROVED' // Hoặc 'pending' nếu bạn muốn duyệt
     }
 
     // Thêm đánh giá mới vào sản phẩm
@@ -400,7 +400,7 @@ export const createReview = async (req: Request, res: Response) => {
 
     // Tính toán lại điểm sao trung bình
     let totalRating = 0
-    const approvedComments = product.comments.filter(c => c.status === 'approved')
+    const approvedComments = product.comments.filter(c => c.status === 'APPROVED')
     
     approvedComments.forEach(comment => {
       totalRating += comment.rating

@@ -47,15 +47,19 @@ export const index = async (req: Request, res: Response) => {
     }
     // End Sort
 
-    const [orders, accounts, allOrders] = await Promise.all([
+    const [orders, allOrders] = await Promise.all([
       Order
         .find(find)
         .sort(sort)
         .limit(objectPagination.limitItems)
         .skip(objectPagination.skip)
-        .lean(),  
-      Account.find({deleted: false}),
-      Order.find({deleted: false})
+        .lean()  
+        .populate('createdBy.account_id', 'fullName email') // Lấy thông tin người tạo
+        .populate('updatedBy.account_id', 'fullName email')
+        .lean(),
+      Order
+       .find({deleted: false})
+       .lean()
     ])
 
     res.json({
@@ -65,7 +69,6 @@ export const index = async (req: Request, res: Response) => {
       filterOrder: filterOrderHelpers(req.query),
       keyword: objectSearch.keyword,
       pagination: objectPagination,
-      accounts: accounts,
       allOrders: allOrders, // Tất cả những order ban đầu chưa có phân trang
     })
   } catch (error) {
@@ -87,16 +90,22 @@ export const changeStatus = async (req: Request, res: Response) => {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
     }
-    await Order.updateOne(
-      { _id: id },
-      {
-        status: status,
-        $push: { updatedBy: updatedBy }
-      }
-    )
+    const updater = await Order
+      .findByIdAndUpdate(
+        { _id: id },
+        {
+          status: status,
+          $push: { updatedBy: updatedBy }
+        },
+        { new: true } // Trả về document sau update
+      )
+      .populate('updatedBy.account_id', 'fullName email')
+      .lean() 
+
     res.json({
       code: 200,
-      message: 'Cập nhật trạng thái thành công đơn hàng!'
+      message: 'Cập nhật trạng thái thành công đơn hàng!',
+      updater: updater
     })
   } catch (error) {
     res.json({
@@ -432,16 +441,13 @@ export const orderTrash = async (req: Request, res: Response) => {
       .sort(sort)
       .limit(objectPagination.limitItems)
       .skip(objectPagination.skip)
+      .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
       .lean()
 
-    const accounts = await Account.find({
-      deleted: false
-    })
     res.json({
       code: 200,
       message: 'Trả orderTrash thành công!',
       orders: orders,
-      accounts: accounts,
       keyword: objectSearch.keyword,
       pagination: objectPagination,
     })

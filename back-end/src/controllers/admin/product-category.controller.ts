@@ -7,7 +7,7 @@ import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
 import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
 import Account from '~/models/account.model'
 import paginationHelpers from '~/helpers/pagination'
-import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursiveForProduct'
+import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
 
 // [GET] /admin/products-category
 export const index = async (req: Request, res: Response) => {
@@ -60,11 +60,15 @@ export const index = async (req: Request, res: Response) => {
         .find(parentFind)
         .sort(sort)
         .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip), // chỉ parent
-      Account.find({ deleted: false }), // account info
+        .skip(objectPagination.skip) // chỉ parent
+        .lean(),
+      Account
+        .find({ deleted: false }) // account info
+        .lean(),
       ProductCategory
         .find({ deleted: false })
         .sort(sort) 
+        .lean()
     ])
     
     // Add children vào cha (Đã phân trang giới hạn 2 item)
@@ -92,7 +96,6 @@ export const index = async (req: Request, res: Response) => {
     res.json({
       code: 400,
       message: 'Lỗi!',
-      error: error
     })
   }
 }
@@ -137,7 +140,7 @@ export const changeStatusWithChildren = async (req: Request, res: Response) => {
       updatedAt: new Date()
     }
 
-    await updateStatusRecursiveForOneItem(status, id, updatedBy)
+    await updateStatusRecursiveForOneItem(ProductCategory, status, id, updatedBy)
 
     return res.json({ 
       code: 200, 
@@ -169,7 +172,7 @@ export const changeMulti = async (req: Request, res: Response) => {
     }
     switch (type) {
       case Key.ACTIVE:
-        await updateManyStatusFast(Key.ACTIVE, ids, updatedBy)
+        await updateManyStatusFast(ProductCategory, Key.ACTIVE, ids, updatedBy)
 
         res.json({
           code: 200,
@@ -177,14 +180,14 @@ export const changeMulti = async (req: Request, res: Response) => {
         })
         break
       case Key.INACTIVE:
-        await updateManyStatusFast(Key.INACTIVE, ids, updatedBy)
+        await updateManyStatusFast(ProductCategory, Key.INACTIVE, ids, updatedBy)
         res.json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục sản phẩm!`
         })
         break
       case Key.DELETEALL:
-        await deleteManyStatusFast(ids)
+        await deleteManyStatusFast(ProductCategory, ids)
         res.json({
           code: 204,
           message: `Xóa thành công ${ids.length} danh mục sản phẩm!`
@@ -354,8 +357,11 @@ export const ProductCategoryTrash = async (req: Request, res: Response) => {
         .find(find)
         .sort(sort)
         .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip), // chỉ parent
-      Account.find({ deleted: false }), // account info
+        .skip(objectPagination.skip) // chỉ parent
+        .lean(),
+      Account
+        .find({ deleted: false }) // account info
+        .lean()
     ])
     
     // // Add children vào cha (Đã phân trang giới hạn 2 item)
@@ -392,7 +398,6 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
     const body = req.body as { type: string; ids: string[] }
     const type = body.type
     const ids = body.ids
-    console.log("🚀 ~ product-category.controller.ts ~ changeMultiTrash ~ ids:", ids);
     enum Key {
       DELETEALL = 'DELETEALL',
       RECOVER = 'RECOVER',
