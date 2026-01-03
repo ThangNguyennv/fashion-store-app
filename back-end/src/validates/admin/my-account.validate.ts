@@ -65,7 +65,7 @@ export const editPatch = (
       .uri()
       .messages({
         "string.uri": "URL avatar không hợp lệ!"
-      })
+      }),
   })
 
   const { error, value } = schema.validate(req.body, {

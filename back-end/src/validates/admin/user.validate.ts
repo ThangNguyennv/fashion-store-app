@@ -122,7 +122,6 @@ export const editPatch = (
       return
     }
   }
-  console.log(value)
   req.body = value
   next()
 }

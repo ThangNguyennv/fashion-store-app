@@ -16,24 +16,29 @@ import { brandClientRoutes } from './brand.route'
 import { chatRoutes } from "./chat.route"
 import passport from 'passport'
 import '~/config/passport'
+import { noCache } from '~/middlewares/admin/noCache.middleware'
 
 const routeClient = (app: Express): void => {
   // Middleware để lấy danh mục sản phẩm và bài viết
   app.use(categoryMiddleware.categoryProduct)
   app.use(categoryMiddleware.categoryArticle)
   app.use(settingMiddleware.settingsGeneral)
-
   app.use(passport.initialize())
+
+  // --- NHÓM 1: CHO PHÉP CACHE (Public) ---
+  // Không thêm noCache vào đây để tăng tốc độ tải trang
   app.use('/', homeRoutes)
   app.use('/products', productRoutes)
   app.use('/articles', articleRoutes)
   app.use('/brands', brandClientRoutes)
   app.use('/search', searchRoutes)
-  app.use('/cart', cartMiddleware.cartId, cartRoutes)
-  app.use('/checkout', cartMiddleware.cartId, checkoutRoutes)
-  app.use('/user', userRoutes)
-  app.use('/settings', settingRoutes)
-  app.use("/chats", chatRoutes)
+
+  // --- NHÓM 2: KHÔNG CACHE (Private/Dynamic) ---
+  app.use('/cart', noCache, cartMiddleware.cartId, cartRoutes)
+  app.use('/checkout', noCache, cartMiddleware.cartId, checkoutRoutes)
+  app.use('/user', noCache, userRoutes)
+  app.use('/settings', noCache, settingRoutes)
+  app.use("/chats", noCache, chatRoutes)
 }
 
 // app.use() -> Đi vào router con thì có thể là các phương thức khác

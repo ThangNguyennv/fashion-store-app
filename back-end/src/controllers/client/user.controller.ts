@@ -424,7 +424,7 @@ export const changePasswordPatch = async (req: Request, res: Response) => {
     const user = await User.findOne({
       _id: req['accountUser'].id,
       deleted: false
-    })
+    }).select('+password')
 
     if (!user) {
       return res.json({ code: 404, message: 'Không tìm thấy người dùng.' })
