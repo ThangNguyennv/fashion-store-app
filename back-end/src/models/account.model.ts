@@ -16,10 +16,6 @@ const accountSchema = new mongoose.Schema(
       required: true,
       select: false // Quan trọng: Ẩn mật khẩu khỏi các truy vấn find()
     },
-//     refreshToken: {
-//       type: String,
-//       select: false
-//     },
     phone: String,
     avatar: String,
     role_id: {
@@ -28,8 +24,8 @@ const accountSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive'], // Chỉ cho phép 2 giá trị này
-      default: 'active'
+      enum: ['ACTIVE', 'INACTIVE'], // Chỉ cho phép 2 giá trị này
+      default: 'ACTIVE'
     },
     deleted: {
       type: Boolean,

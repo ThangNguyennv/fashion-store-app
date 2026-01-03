@@ -14,6 +14,8 @@ import { setAuthCookies } from '~/controllers/client/user.controller'
 router.post('/register', validate.registerPost, controller.registerPost)
 router.post('/login', validate.loginPost, controller.loginPost)
 router.get('/logout', controller.logout)
+router.post('/refresh-token', controller.refreshToken)
+
 router.post(
   '/password/forgot',
   validate.forgotPasswordPost,
@@ -37,7 +39,7 @@ router.get('/auth/google',
 
 router.get('/auth/google/callback', 
   passport.authenticate('google', { 
-    failureRedirect: '/user/login', // Nếu thất bại, đá về trang đăng nhập
+    failureRedirect: `${process.env.CLIENT_URL}/user/login?error=auth_failed`, // Nếu thất bại, đá về trang đăng nhập
     session: false // Không dùng session, dùng JWT
   }),
   controller.googleCallback // Nếu thành công, gọi hàm controller này để cấp JWT

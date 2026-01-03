@@ -1,43 +1,44 @@
 import { Request, Response, NextFunction } from 'express'
 import User from '~/models/user.model'
-import jwt from 'jsonwebtoken'
+import { StatusCodes } from 'http-status-codes'
+import { JWTProvider } from '~/providers/jwt.provider'
 
 export const requireAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+  req: Request, 
+      res: Response,
+      next: NextFunction
 ): Promise<void> => {
-  const tokenUser = req.cookies.tokenUser 
-  if (!tokenUser) {
-    res.json({
-      code: 401,
-      message: 'Vui lòng gửi kèm token!'
-    })
-    return
-  }
-
-  try {
-    // Xác thực chữ ký của token
-    const decoded = jwt.verify(tokenUser, process.env.JWT_SECRET as string) as { userId: string }
-
+  try {
+    const accessTokenUser = req.cookies.accessTokenUser 
+    if (!accessTokenUser) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Vui lòng gửi kèm token!' })
+      return
+    }
+    const accessTokenUserDecoded = await JWTProvider.verifyToken(
+      accessTokenUser, 
+      process.env.JWT_ACCESS_TOKEN_SECRET_CLIENT
+    ) as { userId: string }
+    if (!accessTokenUserDecoded) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Token không hợp lệ!!' })
+      return
+    }
     const user = await User.findOne({
-      _id: decoded.userId,
-      deleted: false
-    }).select('-password')
-  
-    if (!user) {
-      res.json({ code: 401, message: 'Token không hợp lệ!' })
+      _id: accessTokenUserDecoded.userId,
+      deleted: false,
+      status: 'ACTIVE'
+    })
+    if (!user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Người dùng không tồn tại!' })
       return
     }
-
-    req['accountUser'] = user
-    next()
-
-  } catch (error) {
-    res.json({
-      code: 401,
-      message: 'Token không hợp lệ hoặc đã hết hạn!'
-    })
-    return
-  }
+    req['accountUser'] = user 
+    next() 
+  } catch (error) {
+    if (error.message?.includes('jwt expired')) {
+      res.status(StatusCodes.GONE).json({ message: 'Cần refresh token mới!' })
+      return
+    }
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Token không hợp lệ, vui lòng đăng nhập lại!' })
+    return
+  }
 }

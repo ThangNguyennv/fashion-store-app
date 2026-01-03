@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import Cart from '~/models/cart.model'
-import { COOKIE_OPTIONS } from '~/utils/constants'
+import { getCookieOptions } from '~/utils/constants'
 
 export const cartId = async (
   req: Request,
@@ -13,7 +13,7 @@ export const cartId = async (
     // Tạo giỏ hàng
     const cart = new Cart()
     await cart.save()
-    res.cookie('cartId', cart.id, COOKIE_OPTIONS)
+    res.cookie('cartId', cart.id, getCookieOptions('30 days'))
     req["cartId"] = cart.id,
     req['miniCart'] = cart
   } else {
@@ -24,7 +24,7 @@ export const cartId = async (
       // => Tạo giỏ hàng mới
       const newCart = new Cart()
       await newCart.save()
-      res.cookie('cartId', newCart.id, COOKIE_OPTIONS)
+      res.cookie('cartId', newCart.id, getCookieOptions('30 days'))
       req["cartId"] = newCart.id,
       req['miniCart'] = newCart
     } else {

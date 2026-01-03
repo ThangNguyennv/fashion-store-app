@@ -1,4 +1,4 @@
-import passport from 'passport'
+import passport, { use } from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import User from '~/models/user.model'
 
@@ -28,39 +28,30 @@ async (accessToken, refreshToken, profile, done) => {
     }
 
     // 2. Tìm người dùng bằng Google ID
-    let user = await User.findOne({ googleId: googleId })
-
-    // Kịch bản 1: Người dùng đã tồn tại (đã đăng nhập bằng Google trước đó)
-    if (user) {
-      return done(null, user)
-    }
-
-    // Kịch bản 2: Không tìm thấy bằng Google ID, thử tìm bằng email
-    // (Trường hợp người dùng đã đăng ký bằng email/password trước đó)
-    user = await User.findOne({ email: email })
-
-    if (user) {
-      // Nếu tìm thấy, cập nhật `googleId` để "liên kết" tài khoản
-      user.googleId = googleId
-      // Cập nhật avatar nếu họ chưa có
-      user.avatar = user.avatar || avatar
-      await user.save()
-      return done(null, user)
-    }
-
-    // Kịch bản 3: Người dùng hoàn toàn mới
-    const newUser = new User({
-      googleId: googleId,
-      email: email,
-      fullName: fullName,
-      avatar: avatar
-      // Mật khẩu là 'required: false' trong model, nên chúng ta không cần đặt
-      // 'status' sẽ là 'active' (default)
+    let user = await User.findOne({ 
+      $or: [{ googleId: googleId}, { email: email }],
+      deleted: false 
     })
 
-    await newUser.save()
-    return done(null, newUser)
-
+    // Nếu không có user thì tạo mới
+    if (!user) {
+      user = new User({
+        googleId,
+        email,
+        fullName,
+        avatar
+      })
+      await user.save()
+    } else {
+      // Nếu có rồi thì cập nhật googleId
+      if (!user.googleId) {
+        user.googleId = googleId
+        user.avatar = user.avatar || avatar
+        await user.save()
+      }
+    }
+    // LUÔN TRẢ VỀ USER Ở ĐÂY để Passport cho phép đi tiếp vào Controller
+    return done(null, user)
   } catch (error) {
     return done(error as Error, false)
   }

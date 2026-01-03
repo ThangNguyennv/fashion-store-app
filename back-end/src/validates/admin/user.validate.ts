@@ -7,68 +7,83 @@ export const editPatch = (
   next: NextFunction
 ): void => {
   const schema = Joi.object({
-    websiteName: Joi.string()
+    fullName: Joi.string()
       .trim()
       .required()
-      .min(1)
       .max(50)
+      .trim()
       .messages({
-        "any.required": "Tên website là bắt buộc!",
-        "string.empty": "Vui lòng nhập tên website!",
-        "string.max": "Tên website không được vượt quá 50 ký tự!"
+        "string.empty": "Vui lòng nhập họ tên!",
+        "string.max": "Họ tên không được vượt quá 50 ký tự!",
+        "any.required": "Họ tên là bắt buộc!"
       }),
     
     email: Joi.string()
       .trim()
       .required()
-      .min(1)
       .email()
       .lowercase()
+      .trim()
       .messages({
-        "any.required": "Email là bắt buộc!",
-        "string.empty": "Vui lòng nhập email!",
+        "string.empty": "Email không được để trống!",
         "string.email": "Email không đúng định dạng!",
+        "any.required": "Email là bắt buộc!"
       }),
     
+    // Cho phép rỗng, nhưng nếu nhập thì phải >= 8 ký tự và 1 số điều kiện nữa
+    password: Joi.string()
+      .trim()
+      .optional() // Cho phép không gửi trường password lên
+      .allow('', null) // Cho phép gửi trường password lên là: '' hoặc null
+      .when(Joi.string().trim().min(1), { // Nhảy vào đây chỉ khi nhập mật khẩu
+        then: Joi.string()
+          .min(8)
+          .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+          .messages({
+            "string.min": "Mật khẩu phải chứa ít nhất 8 ký tự!",
+            "string.pattern.base":
+              "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt (@$!%*?&)!"
+          }),
+      }),
+    
+    // Số điện thoại VN chuẩn:
+    // - 0xxxxxxxxx (10 số)
     phone: Joi.string()
       .trim()
       .required()
       .min(1)
       .pattern(/^(0[35789]\d{8}|\+84[35789]\d{8})$/)
       .messages({
-        "any.required": "Số điện thoại là bắt buộc!",
+        "any.required": "Số điện thoại là bắt buộc",
         "string.empty": "Vui lòng nhập số điện thoại!",
         "string.pattern.base": "Số điện thoại phải có 10 số và bắt đầu bằng 03/05/07/08/09 hoặc +84!"
       }),
     
+    status: Joi.string()
+      .valid('ACTIVE', 'INACTIVE')
+      .required()
+      .messages({
+        "any.only": "Trạng thái phải là ACTIVE hoặc INACTIVE!",
+        "any.required": "Trạng thái là bắt buộc!"
+      }),
     address: Joi.string()
       .trim()
-      .required()
-      .min(1)
+      .allow('') // Cho phép chuỗi rỗng
+      .optional() 
       .messages({
-        "any.required": "Địa chỉ là bắt buộc!",
-        "string.empty": "Vui lòng nhập địa chỉ!"
+        'string.base': 'Địa chỉ phải là chuỗi ký tự'
       }),
-
-    copyright: Joi.string()
-      .trim()
-      .required()
-      .min(1)
-      .messages({
-        "any.required": "Thông tin bản quyền là bắt buộc!",
-        "string.empty": "Vui lòng nhập thông tin bản quyền!",
-      }),
-
-    logo: Joi.string()
-      .trim()
+    avatar: Joi.string()
       .optional()
       .allow('')
       .uri()
       .messages({
-        "string.uri": "URL logo không hợp lệ!"
+        "string.uri": "URL avatar không hợp lệ!"
       })
+    
   })
-   const { error, value } = schema.validate(req.body, {
+
+  const { error, value } = schema.validate(req.body, {
     abortEarly: false,      // Hiển thị tất cả lỗi
     stripUnknown: true,     // Loại bỏ trường không có trong schema
     convert: true           // Chuyển đổi kiểu dữ liệu
@@ -107,7 +122,7 @@ export const editPatch = (
       return
     }
   }
-
+  console.log(value)
   req.body = value
   next()
 }

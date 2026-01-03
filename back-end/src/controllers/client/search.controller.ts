@@ -5,8 +5,8 @@ import { OneProduct } from '~/helpers/product'
 import { convertToSlug } from '~/helpers/convertToSlug';
 
 interface ObjectSearch {
-  keyword: string;
-  regex?: RegExp;
+  keyword: string
+  regex?: RegExp
 }
 // [GET] /search
 export const index = async (req: Request, res: Response) => {
@@ -26,7 +26,7 @@ export const index = async (req: Request, res: Response) => {
           { slug: stringSlugRegex }
         ],
         deleted: false,
-        status: 'active'
+        status: 'ACTIVE'
       })
       newProducts = productsHelper.priceNewProducts(products as OneProduct[])
     }

@@ -6,6 +6,8 @@ import ms from 'ms'
 import { StatusCodes } from 'http-status-codes'
 import Session from '~/models/session.model'
 import crypto from 'crypto'
+import { getCookieOptions } from '~/utils/constants'
+import Role from '~/models/role.model'
 
 // [POST] /admin/auth/login
 export const loginPost = async (req: Request, res: Response) => {
@@ -17,18 +19,27 @@ export const loginPost = async (req: Request, res: Response) => {
       deleted: false
     }).select('+password')
     if (!accountAdmin) {
-      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Tài khoản hoặc mật khẩu không chính xác!' })
+      res.json({
+        code: 401,
+        message: 'Tài khoản hoặc mật khẩu không chính xác!'
+      })
       return
     }
 
     const isMatch = await bcrypt.compare(password, accountAdmin.password)
     if (!isMatch) {
-      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Tài khoản hoặc mật khẩu không chính xác!' })
+      res.json({
+        code: 401,
+        message: 'Tài khoản hoặc mật khẩu không chính xác!'
+      })
       return
     }
 
-    if (accountAdmin.status === 'inactive') {
-      res.status(StatusCodes.FORBIDDEN).json({ message: 'Tài khoản đã bị khóa!' })
+    if (accountAdmin.status === 'INACTIVE') {
+      res.json({
+        code: 403,
+        message: 'Tài khoản đã bị khóa!'
+      })
       return
     }
 
@@ -47,7 +58,7 @@ export const loginPost = async (req: Request, res: Response) => {
     const refreshToken = await JWTProvider.generateToken(
       payload,
       process.env.JWT_REFRESH_TOKEN_SECRET_ADMIN,
-      '14 days'
+      '14d'
     )
     // const parser = new UAParser(req.get("User-Agent"))
     // const device = parser.getDevice()
@@ -64,24 +75,21 @@ export const loginPost = async (req: Request, res: Response) => {
     // })
     // await session.save()
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: ms('14 days'),
-    })
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: ms('14 days'),
-    })
-    res.json({ code: 200, message: 'Đăng nhập thành công!', accountAdmin: accountAdmin });
-    return
+    res.cookie('accessToken', accessToken, getCookieOptions('14 days'))
+    res.cookie('refreshToken', refreshToken, getCookieOptions('14 days'))
+    const role = await Role.findOne({ _id: accountAdmin.role_id, deleted: false })
+    res.json({ 
+      code: 200, 
+      message: 'Đăng nhập thành công!', 
+      accountAdmin: accountAdmin,
+      role: role
+    })
 
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error)
+    res.json({
+      code: 400,
+      error: error
+    })
   }
 }
 
@@ -105,7 +113,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     const account = await Account.findOne({
       _id: refreshTokenDecoded.accountId,
       deleted: false,
-      status: "active"
+      status: "ACTIVE"
     })
     if (!account) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Account không tồn tại!' })
@@ -143,12 +151,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     // )
     // console.log("🚀 ~ auth.controller.ts ~ refreshToken ~ newRefreshToken:", newRefreshToken);
 
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: ms('14 days')
-    })
+    res.cookie('accessToken', newAccessToken, getCookieOptions('14 days'))
 
     // res.cookie('refreshToken', newRefreshToken, {
     //   httpOnly: true,
@@ -166,20 +169,15 @@ export const refreshToken = async (req: Request, res: Response) => {
 // [DELETE] /admin/auth/logout
 export const logout = async (req: Request, res: Response) => {
   try {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    })
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    })
+    res.clearCookie('accessToken', getCookieOptions('14 days'))
+    res.clearCookie('refreshToken', getCookieOptions('14 days'))
 
     res.json({ code: 200, message: "Đăng xuất thành công 1 thiết bị!" })
   } catch (error) {
-    res.status(StatusCodes.UNAUTHORIZED).json(error)
+    res.json({
+      code: 400,
+      error: error
+    })
   }
 }
 

@@ -9,7 +9,7 @@ import searchHelpers from '~/helpers/search'
 const getSubCategory = async (parentId: string) => {
   const subs = await ProductCategory.find({
     deleted: false,
-    status: 'active',
+    status: 'ACTIVE',
     parent_id: parentId
   })
   let allSub = [...subs]
@@ -40,9 +40,10 @@ export const index = async (req: Request, res: Response) => {
       const categorySlug = req.query.category.toString()
       const category = await ProductCategory.findOne({
         slug: categorySlug,
-        status: 'active',
+        status: 'ACTIVE',
         deleted: false
       })
+      console.log("🚀 ~ product.controller.ts ~ index ~ category:", category);
 
       if (category) {
       // SỬ DỤNG HÀM ĐỆ QUY `getSubCategory`
@@ -52,7 +53,12 @@ export const index = async (req: Request, res: Response) => {
         // Tìm sản phẩm có ID nằm trong danh mục cha (Cấp 1) HOẶC bất kỳ danh mục con nào
         find.product_category_id = { $in: [category.id, ...listSubCategoryId] }
       } else {
-        return res.json({ code: 200, message: 'Danh mục không tồn tại.', products: [], pagination: {} })
+        return res.json({ 
+          code: 400, 
+          message: 'Danh mục không tồn tại.', 
+          products: [], 
+          pagination: {} 
+        })
       }
     }
 
@@ -72,7 +78,7 @@ export const index = async (req: Request, res: Response) => {
     const limitItems = 16 // Số sản phẩm mỗi trang
     const skip = (currentPage - 1) * limitItems
     const sort = {}
-    const sortKey = req.query.sortKey as string || 'position' // Mặc định sort theo 'position'
+    const sortKey = req.query.sortKey as string
     const sortValue = req.query.sortValue === 'asc' ? 1 : -1 // Chuyển 'asc'/'desc' thành 1/-1
 
     sort[sortKey] = sortValue
@@ -154,7 +160,7 @@ export const getFilters = async (req: Request, res: Response) => {
       // Tác vụ 1: Lấy danh mục Cấp 1
       ProductCategory
         .find({
-          deleted: false, status: 'active',
+          deleted: false, status: 'ACTIVE',
           $or: [{ parent_id: null }, { parent_id: '' }] // Chỉ lấy danh mục gốc
         })
         .select('title slug _id')
@@ -163,7 +169,7 @@ export const getFilters = async (req: Request, res: Response) => {
 
       // Tác vụ 2: Chạy aggregation trên sản phẩm
       Product.aggregate([
-        { $match: { deleted: false, status: 'active' } },
+        { $match: { deleted: false, status: 'ACTIVE' } },
         // Dùng $facet để chạy 3 pipeline con song song mà không làm bùng nổ dữ liệu
         {
           $facet: {
@@ -230,7 +236,7 @@ export const category = async (req: Request, res: Response) => {
   try {
     const category = await ProductCategory.findOne({
       slug: req.params.slugCategory,
-      status: 'active',
+      status: 'ACTIVE',
       deleted: false
     })
 
@@ -270,7 +276,7 @@ export const detail = async (req: Request, res: Response) => {
     const find = {
       deleted: false,
       slug: req.params.slugProduct,
-      status: 'active'
+      status: 'ACTIVE'
     }
     const product = await Product
       .findOne(find)
@@ -280,7 +286,7 @@ export const detail = async (req: Request, res: Response) => {
       const category = await ProductCategory.findOne({
         _id: product.product_category_id,
         deleted: false,
-        status: 'active'
+        status: 'ACTIVE'
       })
       product['category'] = category
     }
@@ -303,7 +309,7 @@ export const detail = async (req: Request, res: Response) => {
 export const getSearchSuggestions = async (req: Request, res: Response) => {
   try {
     const keyword = req.query.keyword as string
-    const find: any = { deleted: false, status: 'active' }
+    const find: any = { deleted: false, status: 'ACTIVE' }
     if (!keyword || !keyword.trim()) {
       return res.json({ code: 200, products: [] })
     }

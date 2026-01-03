@@ -3,8 +3,8 @@ import Product from '~/models/product.model'
 import User from '~/models/user.model'
 import Order from '~/models/order.model'
 
-// [GET] /admin/dashboard
-export const dashboard = async (req: Request, res: Response) => {
+// [GET] /admin/statistics
+export const statistic = async (req: Request, res: Response) => {
   try {
     const statistic = {
       user: {

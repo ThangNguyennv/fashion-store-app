@@ -8,40 +8,46 @@ export const registerPost = (
 ): void => {
   const schema = Joi.object({
     fullName: Joi.string()
-      .required()
-      .min(5)
-      .max(50)
       .trim()
+      .required()
+      .min(1)
+      .max(50)
       .messages({
-        "string.empty": "Vui lòng nhập họ tên!",
-        "string.min": "Họ tên phải có ít nhất 5 ký tự!",
+        "any.required": "Họ và tên là bắt buộc!",
+        "string.empty": "Họ và tên không được để trống!",
         "string.max": "Họ tên không được vượt quá 50 ký tự!"
       }),
-      email: Joi.string()
-        .required()
-        .email()
-        .lowercase()
-        .trim()
-        .messages({
-          "string.empty": "Vui lòng nhập email của bạn!",
-          "string.email": "Email không đúng định dạng!"
-        }),
-      password: Joi.string()
-        .required()
-        .min(8)
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-        .messages({
-          "string.empty": "Vui lòng nhập mật khẩu!",
-          "string.min": "Mật khẩu phải chứa ít nhất 8 ký tự!",
-          "string.pattern.base": "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt (@$!%*?&)!"
-        }),
-      confirmPassword: Joi.string()
-        .required()
-        .valid(Joi.ref('password'))
-        .messages({
-          "string.empty": "Vui lòng xác nhận mật khẩu!",
-          "any.only": "Mật khẩu xác nhận không khớp!"
-        }),
+    email: Joi.string()
+      .trim()
+      .required()
+      .email()
+      .lowercase()
+      .messages({
+        "any.required": "Email là bắt buộc!",
+        "string.empty": "Email không được để trống!",
+        "string.email": "Email không đúng định dạng!"
+      }),
+    password: Joi.string()
+      .trim()
+      .required()
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+      .messages({
+        "any.required": "Mật khẩu là bắt buộc!",
+        "string.empty": "Mật khẩu không được để trống!",
+        "string.min": "Mật khẩu phải chứa ít nhất 8 ký tự!",
+        "string.pattern.base": "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt (@$!%*?&)!"
+      }),
+    confirmPassword: Joi.string()
+      .trim()
+      .required()
+      .min(8)
+      .valid(Joi.ref('password'))
+      .messages({
+        "any.required": "Xác nhận mật khẩu là bắt buộc!",
+        "string.empty": "Xác nhận mật khẩu không được để trống!",
+        "any.only": "Mật khẩu xác nhận không khớp!"
+      }),
   })
   const { error, value  } = schema.validate(req.body, {
     abortEarly: false,      // Hiển thị tất cả lỗi
@@ -49,7 +55,7 @@ export const registerPost = (
     convert: true           // Chuyển đổi kiểu dữ liệu (Form HTML thường gửi data dạng STRING)
   })
   if (error) {
-    const errors = error.details.map(detail => detail.message);
+    const errors = error.details.map(detail => detail.message)
     res.json({
       code: 400,
       message: errors[0],
@@ -57,26 +63,50 @@ export const registerPost = (
     })
     return
   }
-  req.body = value;
+  req.body = value
   next()
 }
 
 export const loginPost = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body.email) {
+  const schema = Joi.object({
+    email: Joi.string()
+      .trim()
+      .required()
+      .min(1)
+      .email()
+      .lowercase()
+      .messages({
+        "any.required": "Email là bắt buộc!",
+        "string.empty": "Email không được để trống!",
+        "string.email": "Email không đúng định dạng!"
+      }),
+    
+    password: Joi.string()
+      .required()
+      .min(8)
+      .messages({
+        "any.required": "Mật khẩu là bắt buộc!",
+        "string.empty": "Mật khẩu không được để trống!"
+      })
+  })
+
+  const { error, value } = schema.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true,
+    convert: true
+  })
+
+  if (error) {
+    const errors = error.details.map(detail => detail.message)
     res.json({
       code: 400,
-      message: 'Vui lòng nhập email!'
+      message: errors[0],
+      errors
     })
     return
   }
 
-  if (!req.body.password) {
-    res.json({
-      code: 400,
-      message: 'Vui lòng nhập mật khẩu!'
-    })
-    return
-  }
+  req.body = value
   next()
 }
 
@@ -85,13 +115,36 @@ export const forgotPasswordPost = (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.body.email) {
+  const schema = Joi.object({
+    email: Joi.string()
+      .trim()
+      .required()
+      .min(1)
+      .email()
+      .lowercase()
+      .messages({
+        "any.required": "Email là bắt buộc!",
+        "string.empty": "Email không được để trống!",
+        "string.email": "Email không đúng định dạng!"
+      })
+  })
+  const { error, value } = schema.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true,
+    convert: true
+  })
+
+  if (error) {
+    const errors = error.details.map(detail => detail.message)
     res.json({
       code: 400,
-      message: 'Vui lòng nhập email!'
+      message: errors[0],
+      errors
     })
     return
   }
+
+  req.body = value
   next()
 }
 
@@ -115,27 +168,50 @@ export const resetPasswordPost = (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.body.password) {
+  const schema = Joi.object({
+    password: Joi.string()
+      .trim()
+      .required()
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+      .messages({
+        "any.required": "Mật khẩu là bắt buộc!",
+        "string.min": "Mật khẩu phải chứa ít nhất 8 ký tự!",
+        "string.pattern.base": "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt (@$!%*?&)!"
+      }),
+    confirmPassword: Joi.string()
+      .trim()
+      .required()
+      .min(8)
+      .valid(Joi.ref('password'))
+      .messages({
+        "any.required": "Xác nhận mật khẩu là bắt buộc!",
+        "string.empty": "Xác nhận mật khẩu không được để trống!",
+        "any.only": "Mật khẩu xác nhận không khớp!"
+      }),
+    resetToken: Joi.string()
+      .trim()
+      .required()
+      .messages({
+        "any.required": "resetToken là bắt buộc!",
+        "string.empty": "resetToken không được để trống!",
+      })
+  })
+  const { error, value  } = schema.validate(req.body, {
+    abortEarly: false,      // Hiển thị tất cả lỗi
+    stripUnknown: true,     // Loại bỏ trường không có trong schema (Chống hacker gửi linh tinh lên)
+    convert: true           // Chuyển đổi kiểu dữ liệu (Form HTML thường gửi data dạng STRING)
+  })
+  if (error) {
+    const errors = error.details.map(detail => detail.message)
     res.json({
       code: 400,
-      message: 'Vui lòng nhập mật khẩu!'
+      message: errors[0],
+      errors
     })
     return
   }
-  if (!req.body.confirmPassword) {
-    res.json({
-      code: 400,
-      message: 'Vui lòng nhập xác nhận mật khẩu!'
-    })
-    return
-  }
-  if (req.body.password != req.body.confirmPassword) {
-    res.json({
-      code: 400,
-      message: 'Mật khẩu không khớp, vui lòng nhập lại!'
-    })
-    return
-  }
+  req.body = value
   next()
 }
 

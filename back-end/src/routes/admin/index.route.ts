@@ -1,9 +1,8 @@
 import { Express } from 'express'
 import systemConfig from '~/config/system'
 import * as authMiddleware from '~/middlewares/admin/auth.middleware'
-import { dashboardRoutes } from './dashboard.route'
+import { statisticRoutes } from './statistic.route'
 import { productRoutes } from './product.route'
-import { trashRoutes } from './trash.route'
 import { productCategoryRoutes } from './product-category.route'
 import { roleRoutes } from './role.route'
 import { accountRoutes } from './account.route'
@@ -17,26 +16,28 @@ import { settingRoutes } from './setting.route'
 import { brandRoutes } from './brand.route'
 import { chatAdminRoutes } from './chat.admin.route'
 import { noCache } from '~/middlewares/admin/noCache.middleware'
+import { requirePermission } from '~/middlewares/admin/role.middleware'
 
 const routeAdmin = (app: Express): void => {
   const PATH_ADMIN = systemConfig.prefixAdmin
   app.use(PATH_ADMIN, noCache)
   app.use(PATH_ADMIN + '/auth', authRoutes)
   app.use(PATH_ADMIN + '/my-account', authMiddleware.requireAuth, myAccountRoutes)
-  app.use(PATH_ADMIN + '/dashboard', authMiddleware.requireAuth, dashboardRoutes)
-  app.use(PATH_ADMIN + '/orders', authMiddleware.requireAuth, orderRoutes)
-  app.use(PATH_ADMIN + '/chats', authMiddleware.requireAuth, chatAdminRoutes)
-  app.use(PATH_ADMIN + '/settings', authMiddleware.requireAuth, settingRoutes)
+  app.use(PATH_ADMIN + '/statistics', authMiddleware.requireAuth,requirePermission(['Admin']), statisticRoutes)
+  app.use(PATH_ADMIN + '/settings', authMiddleware.requireAuth,requirePermission(['Admin']), settingRoutes)
+  app.use(PATH_ADMIN + '/roles', authMiddleware.requireAuth,requirePermission(['Admin']), roleRoutes)
+  app.use(PATH_ADMIN + '/accounts', authMiddleware.requireAuth,requirePermission(['Admin']), accountRoutes)
+  app.use(PATH_ADMIN + '/users', authMiddleware.requireAuth,requirePermission(['Admin']), userRoutes)
 
-  app.use(PATH_ADMIN + '/products', authMiddleware.requireAuth, productRoutes)
-  app.use(PATH_ADMIN + '/products-category', authMiddleware.requireAuth, productCategoryRoutes)
-  app.use(PATH_ADMIN + '/brands', authMiddleware.requireAuth, brandRoutes)
-  app.use(PATH_ADMIN + '/articles', authMiddleware.requireAuth, articleRoutes)
-  app.use(PATH_ADMIN + '/articles-category', authMiddleware.requireAuth, articleCategoryRoutes)
-  app.use(PATH_ADMIN + '/roles', authMiddleware.requireAuth, roleRoutes)
-  app.use(PATH_ADMIN + '/accounts', authMiddleware.requireAuth, accountRoutes)
-  app.use(PATH_ADMIN + '/users', authMiddleware.requireAuth, userRoutes)
-  app.use(PATH_ADMIN + '/trash', authMiddleware.requireAuth, trashRoutes)
+  app.use(PATH_ADMIN + '/chats', authMiddleware.requireAuth,requirePermission(['Admin', 'Product']), chatAdminRoutes)
+  app.use(PATH_ADMIN + '/products-category', authMiddleware.requireAuth,requirePermission(['Admin', 'Product']), productCategoryRoutes)
+  app.use(PATH_ADMIN + '/products', authMiddleware.requireAuth, requirePermission(['Admin', 'Product']), productRoutes)
+
+  app.use(PATH_ADMIN + '/brands', authMiddleware.requireAuth,requirePermission(['Admin', 'Content']), brandRoutes)
+  app.use(PATH_ADMIN + '/articles', authMiddleware.requireAuth,requirePermission(['Admin', 'Content']), articleRoutes)
+  app.use(PATH_ADMIN + '/articles-category', authMiddleware.requireAuth,requirePermission(['Admin', 'Content']), articleCategoryRoutes)
+
+  app.use(PATH_ADMIN + '/orders', authMiddleware.requireAuth,requirePermission(['Admin', 'Order']), orderRoutes)
 }
 
 export default routeAdmin

@@ -14,7 +14,7 @@ export const uploadWithOneImageToCloud = (
   next: NextFunction
 ): void => {
   if (req.file) {
-    const streamUpload = (req) => {
+    const streamUpload = (req: Request) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream((error, result) => {
           if (result) {
@@ -26,7 +26,7 @@ export const uploadWithOneImageToCloud = (
         streamifier.createReadStream(req.file.buffer).pipe(stream)
       })
     }
-    async function upload(req) {
+    async function upload(req: Request) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = await streamUpload(req)
       req.body[req.file.fieldname] = result.secure_url
@@ -71,4 +71,3 @@ export const uploadCloud = async (req: Request, res: Response, next: NextFunctio
     next(error)
   }
 }
-export default uploadCloud

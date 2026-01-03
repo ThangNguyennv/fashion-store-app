@@ -7,9 +7,9 @@ import paginationHelpers from '~/helpers/pagination'
 export const index = async (req: Request, res: Response) => {
   try {
     interface Find {
-      deleted: boolean;
-      status?: string;
-      title?: RegExp;
+      deleted: boolean
+      status?: string
+      title?: RegExp
     }
     const find: Find = { deleted: false }
 
@@ -22,14 +22,18 @@ export const index = async (req: Request, res: Response) => {
       )
     // End Pagination
 
-    const allArticles = await Article
-      .find(find)
-      .sort({ position: 'desc' })
-    const articles = await Article
-      .find(find)
-      .sort({ position: 'desc' })
-      .limit(objectPagination.limitItems)
-      .skip(objectPagination.skip)
+    const [articles, allArticles] = await Promise.all([
+      Article
+        .find(find)
+        .sort({ createdAt: -1 })
+        .limit(objectPagination.limitItems)
+        .skip(objectPagination.skip)
+        .lean(),
+      Article
+        .find(find)
+        .sort({ createdAt: -1 })
+        .lean()
+    ])
 
     res.json({
       code: 200,
@@ -52,13 +56,13 @@ export const category = async (req: Request, res: Response) => {
   try {
     const category = await ArticleCategory.findOne({
       slug: req.params.slugCategory,
-      status: 'active',
+      status: 'ACTIVE',
       deleted: false
     })
     const getSubArticle = async (parentId) => {
       const subs = await ArticleCategory.find({
         deleted: false,
-        status: 'active',
+        status: 'ACTIVE',
         parent_id: parentId
       })
       let allSub = [...subs] // Cú pháp trải ra (spread syntax)
@@ -77,7 +81,8 @@ export const category = async (req: Request, res: Response) => {
         deleted: false,
         article_category_id: { $in: [category.id, ...listSubCategoryId] }
       })
-      .sort({ position: 'desc' })
+      .sort({ createdAt: -1 })
+      .lean()
   
     res.json({
       code: 200,
@@ -100,14 +105,14 @@ export const detail = async (req: Request, res: Response) => {
     const find = {
       deleted: false,
       slug: req.params.slugArticle,
-      status: 'active'
+      status: 'ACTIVE'
     }
     const article = await Article.findOne(find)
     if (article.article_category_id) {
       const category = await ArticleCategory.findOne({
         _id: article.article_category_id,
         deleted: false,
-        status: 'active'
+        status: 'ACTIVE'
       })
       article['category'] = category
     }

@@ -1,10 +1,8 @@
 import { Request, Response } from 'express'
 import Cart from '~/models/cart.model'
-import Product from '~/models/product.model'
 import * as productsHelper from '~/helpers/product'
 import { OneProduct } from '~/helpers/product'
-import mongoose, { version } from 'mongoose'
-import { type } from 'node:os'
+import mongoose from 'mongoose'
 
 // [GET] /cart
 export const index = async (req: Request, res: Response) => {
@@ -36,7 +34,7 @@ export const index = async (req: Request, res: Response) => {
         }
       }
     }
-    cart['totalsPrice'] = totalsPrice
+    cart.totalsPrice = totalsPrice
 
     res.json({
       code: 200,
@@ -124,7 +122,6 @@ export const updateQuantity = async (req: Request, res: Response) => {
   }
 }
 
-// === SỬA LẠI HÀM XÓA ĐỂ XÓA ĐÚNG PHÂN LOẠI ===
 // [DELETE] /cart/delete-item
 export const deleteItem = async (req: Request, res: Response) => {
   try {

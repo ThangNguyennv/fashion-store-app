@@ -1,7 +1,6 @@
 import { Express } from 'express'
 import { homeRoutes } from './home.route'
 import { productRoutes } from './product.route'
-import * as userMiddleware from '~/middlewares/client/user.middleware'
 import * as categoryMiddleware from '~/middlewares/client/category.middleware'
 import * as settingMiddleware from '~/middlewares/client/setting.middleware'
 // import * as authMiddleware from '~/middlewares/client/auth.middleware'
@@ -22,7 +21,6 @@ const routeClient = (app: Express): void => {
   // Middleware để lấy danh mục sản phẩm và bài viết
   app.use(categoryMiddleware.categoryProduct)
   app.use(categoryMiddleware.categoryArticle)
-  app.use(userMiddleware.infoUser)
   app.use(settingMiddleware.settingsGeneral)
 
   app.use(passport.initialize())

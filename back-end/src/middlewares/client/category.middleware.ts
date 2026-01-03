@@ -10,7 +10,7 @@ export const categoryProduct = async (
 ) => {
   const productsCategory = await ProductCategory.find({
     deleted: false
-  })
+  }).lean()
   const newProductsCategory = buildTree(productsCategory as unknown as TreeItem[])
   req['layoutProductsCategory'] = newProductsCategory 
   next()
@@ -23,7 +23,7 @@ export const categoryArticle = async (
 ) => {
   const articlesCategory = await ArticleCategory.find({
     deleted: false
-  })
+  }).lean()
   const newArticlesCategory = buildTree(articlesCategory as unknown as TreeItem[])
   req['layoutArticlesCategory'] = newArticlesCategory
   next()

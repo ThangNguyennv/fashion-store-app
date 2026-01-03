@@ -1,7 +1,10 @@
-export const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none' as const,
-  expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 năm
-  path: '/'
-}
+import ms, { StringValue } from 'ms'
+
+const isProduction = process.env.NODE_ENV === 'production'
+
+export const getCookieOptions = (duration: StringValue = '14 days') => ({
+  httpOnly: true, // Chống XSS
+  secure: isProduction, // Chỉ bật True khi là HTTPS (Production)
+  sameSite: isProduction ? ('none' as const) : ('lax' as const), // 'none' cho HTTPS, 'lax' cho localhost
+  maxAge: ms(duration)
+})

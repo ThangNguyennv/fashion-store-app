@@ -5,7 +5,6 @@ import crypto from 'crypto'
 import { Request } from 'express'
 import Cart from '~/models/cart.model'
 import Order from '~/models/order.model'
-import qs from "qs"
 
 export const zalopayCreateOrder = async (
   totalBill: number, 
@@ -36,6 +35,7 @@ export const zalopayCreateOrder = async (
     description: `Thanh toán đơn hàng ${transID}`,
     bank_code: "", 
     mac: '',
+    // Thay CLIENT_URL = link ngrok
     callback_url: `${process.env.CLIENT_URL}/checkout/zalopay-callback`
   }
 

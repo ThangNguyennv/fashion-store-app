@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const roleSchema = new mongoose.Schema(
   {
     title: String,
+    titleId: String,
     description: String,
     permissions: {
       type: Array,

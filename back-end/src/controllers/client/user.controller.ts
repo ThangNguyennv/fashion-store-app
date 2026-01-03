@@ -7,8 +7,9 @@ import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken' 
-import { COOKIE_OPTIONS } from '~/utils/constants'
+import { JWTProvider } from '~/providers/jwt.provider'
+import { StatusCodes } from 'http-status-codes'
+import { getCookieOptions } from '~/utils/constants'
 
 // [POST] /user/register
 export const registerPost = async (req: Request, res: Response) => {
@@ -68,18 +69,28 @@ export const loginPost = async (req: Request, res: Response) => {
       })
       return
     }
-    if (user.status === 'inactive') {
-      return res.json({
+    if (user.status === 'INACTIVE') {
+      res.json({
         code: 403,
         message: 'Tài khoản đang bị khóa!'
       })
+      return
     }
 
-
-    const payload = { userId: user._id, email: user.email }
-    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: '1d' // Token hết hạn sau 1 ngày
-    })
+    const payload = { 
+      userId: user._id,
+      email: user.email 
+    }
+    const accessTokenUser = await JWTProvider.generateToken(
+      payload, 
+      process.env.JWT_ACCESS_TOKEN_SECRET_CLIENT,
+      '1h' 
+    )
+    const refreshTokenUser = await JWTProvider.generateToken(
+      payload, 
+      process.env.JWT_REFRESH_TOKEN_SECRET_CLIENT,
+      '14d' 
+    )
 
     const guestCartId = req.cookies.cartId
     const userCart = await Cart.findOne({ user_id: user._id })
@@ -98,57 +109,118 @@ export const loginPost = async (req: Request, res: Response) => {
       }
       // Case 1b: User có giỏ cũ, không có giỏ khách
       // => Chỉ cần set cookie về giỏ cũ
-      res.cookie('cartId', userCart._id.toString(), COOKIE_OPTIONS)
-
+      res.cookie('cartId', userCart._id.toString(), getCookieOptions('30 days'))
     } else { // Case 2: User chưa có giỏ hàng (user mới)
       if (guestCartId) {
         // Case 2a: User chưa có giỏ, nhưng có giỏ khách
         // => Gán giỏ khách cho user
         await Cart.updateOne({ _id: guestCartId }, { user_id: user._id })
-        res.cookie('cartId', guestCartId, COOKIE_OPTIONS)
+        res.cookie('cartId', guestCartId, getCookieOptions('30 days'))
       } else {
         // Case 2b: User mới, không có giỏ nào
         // => Tạo giỏ mới cho user
         const newCart = new Cart({ user_id: user._id, products: [] })
         await newCart.save()
-        res.cookie('cartId', newCart._id.toString(), COOKIE_OPTIONS)
+        res.cookie('cartId', newCart._id.toString(), getCookieOptions('30 days'))
       }
     }
 
     const userInfo = user.toObject()
     delete userInfo.password
 
-    // Gửi JWT về client qua cookie
-    res.cookie('tokenUser', token, {
-      httpOnly: true, // Chỉ server có thể truy cập
-      secure: true, // Chỉ gửi qua HTTPS ở môi trường production
-      sameSite: 'none', 
-      maxAge: 24 * 60 * 60 * 1000 // 1 ngày
-    })
+    res.cookie('accessTokenUser', accessTokenUser, getCookieOptions('14 days'))
+    res.cookie('refreshTokenUser', refreshTokenUser, getCookieOptions('14 days'))
+
     res.json({
       code: 200,
       message: 'Đăng nhập thành công!',
-      tokenUser: token,
       accountUser: userInfo
     })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error: error })
+    res.json({ 
+      code: 400, 
+      message: 'Lỗi!'
+    })
+  }
+}
+
+// [POST] /user/refresh-token
+export const refreshToken = async (req: Request, res: Response) => {
+  const refreshTokenUser = req.cookies?.refreshTokenUser
+
+  if (!refreshTokenUser) {
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Không tồn tại refreshTokenUser!' })
+    return
+  }
+  try {
+    const refreshTokenUserDecoded = await JWTProvider.verifyToken(
+      refreshTokenUser, 
+      process.env.JWT_REFRESH_TOKEN_SECRET_CLIENT
+    ) as {
+      userId: string
+    }
+    const user = await User.findOne({
+      _id: refreshTokenUserDecoded.userId,
+      deleted: false,
+      status: "ACTIVE"
+    })
+    if (!user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'User không tồn tại!' })
+      return
+    }
+    // const session = await Session.findOne({
+    //   accountId: new mongoose.Types.ObjectId(refreshTokenDecoded.accountId),
+    //   refreshTokenHash: hashToken(refreshToken)
+    // })
+
+    // if (!session) {
+    //   res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Refresh Token không hợp lệ' })
+    //   return
+    // }
+    
+    // // Xóa phiên cũ, tạo phiên mới + accessToken mới
+    // await session.deleteOne()
+
+    const payload = { 
+      userId: refreshTokenUserDecoded.userId
+    }
+
+    const newAccessTokenUser = await JWTProvider.generateToken(
+      payload,
+      process.env.JWT_ACCESS_TOKEN_SECRET_CLIENT,
+      '1h'
+    )
+
+    // const newRefreshToken = await JWTProvider.generateToken(
+    //   payload,
+    //   process.env.JWT_REFRESH_TOKEN_SECRET_ADMIN,
+    //   '14 days'
+    // )
+    // console.log("🚀 ~ auth.controller.ts ~ refreshToken ~ newRefreshToken:", newRefreshToken);
+
+    res.cookie('accessTokenUser', newAccessTokenUser, getCookieOptions('14 days'))
+
+    res.status(StatusCodes.OK).json({ message: 'Làm mới accessTokenUser thành công!' })
+  } catch (error) {
+    res.status(StatusCodes.UNAUTHORIZED).json( {message: 'RefreshToken invalid!'} )
   }
 }
 
 // [GET] /user/logout
 export const logout = async (req: Request, res: Response) => {
   try {
-    const { expires, ...clearOptions } = COOKIE_OPTIONS
-    res.clearCookie('tokenUser', clearOptions)
-    res.clearCookie('cartId',clearOptions)
+    res.clearCookie('accessTokenUser', getCookieOptions('14 days'))
+    res.clearCookie('refreshTokenUser', getCookieOptions('14 days'))
 
     res.json({
       code: 200,
       message: 'Đăng xuất thành công!'
     })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error: error })
+    res.json({ 
+      code: 400, 
+      message: 'Lỗi!'
+    })
   }
 }
 
@@ -158,15 +230,16 @@ export const forgotPasswordPost = async (req: Request, res: Response) => {
     const email = req.body.email
     const user = await User.findOne({ email: email, deleted: false })
     if (!user) {
-      return res.json({ code: 401, message: 'Email không tồn tại!' })
+      res.json({ code: 401, message: 'Email không tồn tại!' })
+      return
     }
 
-    // TẠO RESET TOKEN BẰNG JWT
-    // Tạo token tạm thời chỉ có hiệu lực 15 phút
     const payload = { userId: user._id }
-    const resetToken = jwt.sign(payload, process.env.JWT_SECRET_RESET as string, {
-      expiresIn: '15m'
-    })
+    const resetToken = await JWTProvider.generateToken(
+      payload,
+      process.env.JWT_SECRET_RESET_PASSWORD,
+      '15m'
+    )
 
     // // Lưu thông tin vào db
     // const otp = generateHelper.generateRandomNumber(6)
@@ -195,7 +268,7 @@ export const forgotPasswordPost = async (req: Request, res: Response) => {
     // `
 
     const clientUrl = process.env.CLIENT_URL
-    const resetLink = `${clientUrl}/user/password/reset?token=${resetToken}`
+    const resetLink = `${clientUrl}/user/password/reset?resetToken=${resetToken}`
 
     const subject = 'Yêu cầu lấy lại mật khẩu'
     const html = `
@@ -249,30 +322,54 @@ export const forgotPasswordPost = async (req: Request, res: Response) => {
 // [POST] /user/password/reset
 export const resetPasswordPost = async (req: Request, res: Response) => {
   try {
-    const { password, token } = req.body
+    const { password, resetToken } = req.body
 
-    if (!token) {
-      return res.json({ code: 401, message: 'Token không hợp lệ hoặc đã hết hạn.' })
+    if (!resetToken) {
+      res.json({ code: 401, message: 'resetToken không hợp lệ hoặc đã hết hạn.' })
+      return
     }
 
     // Xác thực reset token
-    let payload: any
+    // let payload: any
+    // try {
+    //   payload = jwt.verify(resetToken, process.env.JWT_SECRET_RESET_PASSWORD)
+    // } catch (verifyError) {
+    //   return res.json({ code: 401, message: 'Token không hợp lệ hoặc đã hết hạn.' })
+    // }
+    let resetTokenDecoded: any
     try {
-      payload = jwt.verify(token, process.env.JWT_SECRET_RESET as string)
-    } catch (verifyError) {
-      return res.json({ code: 401, message: 'Token không hợp lệ hoặc đã hết hạn.' })
+      resetTokenDecoded = await JWTProvider.verifyToken(
+        resetToken,
+        process.env.JWT_SECRET_RESET_PASSWORD
+      ) as {
+        userId: string
+      }
+      const user = await User.findOne({
+        _id: resetTokenDecoded.userId,
+        deleted: false,
+        status: "ACTIVE"
+      })
+      if (!user) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: 'User không tồn tại!' })
+        return
+      }
+      // Băm mật khẩu mới
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+      await User.updateOne(
+        { _id: user._id },
+        { password: hashedPassword }
+      )
+      res.json({
+        code: 200,
+        message: 'Đổi mật khẩu thành công! Bạn có thể đăng nhập.'
+      })
+    } catch (error: any) {
+      if (error.name === 'TokenExpiredError') {
+        return res.json({ code: 401, message: 'Link đã hết hạn (quá 15 phút). Vui lòng yêu cầu lại!' })
+      }
+      return res.json({ code: 401, message: 'Token không hợp lệ!' })
     }
-    // Băm mật khẩu mới
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-    await User.updateOne(
-      { _id: payload.userId },
-      { password: hashedPassword }
-    )
-    res.json({
-      code: 200,
-      message: 'Đổi mật khẩu thành công! Bạn có thể đăng nhập.'
-    })
   } catch (error) {
     res.json({ code: 400, message: 'Lỗi!', error: error })
   }
@@ -405,11 +502,16 @@ export const getOrders = async (req: Request, res: Response) => {
     // End Pagination
 
     // Sort
-    let sort: Record<string, any> = {}
-    if (req.query.sortKey && req.query.sortValue) {
-      const sortKey = req.query.sortKey.toLocaleString()
-      sort[sortKey] = req.query.sortValue
-    } 
+    let sort: Record<string, 1 | -1> = { }
+    if (req.query.sortKey) {
+      const key = req.query.sortKey.toString()
+      const dir = req.query.sortValue === 'asc' ? 1 : -1
+      sort[key] = dir
+    }
+    // luôn sort phụ theo createdAt
+    if (!sort.createdAt) {
+      sort.createdAt = -1
+    }
     // End Sort
 
     const orders = await Order
@@ -417,6 +519,7 @@ export const getOrders = async (req: Request, res: Response) => {
       .sort(sort)
       .limit(objectPagination.limitItems)
       .skip(objectPagination.skip)
+      .lean()
 
     // Sort chay do không sài hàm sort() kia cho các thuộc tính không có trong db.
     if (req.query.sortKey === 'price' && req.query.sortValue) {
@@ -469,6 +572,10 @@ export const googleCallback = async (req: Request, res: Response) => {
 
     if (!user) {
       return res.redirect(`${process.env.CLIENT_URL}/user/login?error=auth_failed`)
+    }
+    // Nếu không có user hoặc user bị khóa
+    if (user.status === 'INACTIVE') {
+      return res.redirect(`${process.env.CLIENT_URL}/user/login?error=account_locked`)
     }
 
     // 2. Logic giỏ hàng 
@@ -534,7 +641,7 @@ export const googleCallback = async (req: Request, res: Response) => {
       
       // TH1b: User có giỏ cũ, không có giỏ khách
       // => Chỉ cần set cookie về giỏ cũ
-      res.cookie('cartId', finalCartId, COOKIE_OPTIONS)
+      //res.cookie('cartId', finalCartId, COOKIE_OPTIONS)
     } else {
       // TH2: User chưa có giỏ hàng (user mới)
       if (guestCartId) {
@@ -549,25 +656,26 @@ export const googleCallback = async (req: Request, res: Response) => {
         await newCart.save()
         finalCartId = newCart._id.toString()
       }
-      res.cookie('cartId', finalCartId, COOKIE_OPTIONS)
+      //res.cookie('cartId', finalCartId, COOKIE_OPTIONS)
     }
 
     // 3. Tạo JWT (token đăng nhập chính)
     const payload = { userId: user._id, email: user.email }
-    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: '1d' // Token hết hạn sau 1 ngày
-    })
+    const accessTokenUser = await JWTProvider.generateToken(
+      payload,
+      process.env.JWT_ACCESS_TOKEN_SECRET_CLIENT,
+      '1h'
+    )
+    const refreshTokenUser = await JWTProvider.generateToken(
+      payload,
+      process.env.JWT_REFRESH_TOKEN_SECRET_CLIENT,
+      '14d'
+    )
 
     // 4. Gửi JWT về client qua cookie
-    res.cookie('tokenUser', token, {
-      httpOnly: true, // Chỉ server có thể truy cập
-      secure: true, // Chỉ gửi qua HTTPS ở môi trường production
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000 
-    })
-
     const redirectUrl = new URL(`${process.env.CLIENT_URL}/auth/google/callback`)
-    redirectUrl.searchParams.set('tokenUser', token)
+    redirectUrl.searchParams.set('accessTokenUser', accessTokenUser)
+    redirectUrl.searchParams.set('refreshTokenUser', refreshTokenUser)
     redirectUrl.searchParams.set('cartId', finalCartId)
 
     // 5. Chuyển hướng người dùng về trang chủ React
@@ -579,36 +687,16 @@ export const googleCallback = async (req: Request, res: Response) => {
   }
 }
 
-// controllers/user.controller.ts
+// [POST] /user/set-auth-cookies
 export const setAuthCookies = async (req: Request, res: Response) => {
   try {
-    const { tokenUser, cartId } = req.body
+    const { accessTokenUser, refreshTokenUser, cartId } = req.body
 
-    if (!tokenUser) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Thiếu token" 
-      })
-    }
-
-    // Verify token
-    jwt.verify(tokenUser, process.env.JWT_SECRET as string)
-
-    // Set cookies
-    res.cookie('tokenUser', tokenUser, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000
-    })
+    res.cookie('accessTokenUser', accessTokenUser, getCookieOptions('14 days'))
+    res.cookie('refreshTokenUser', refreshTokenUser, getCookieOptions('14 days'))
 
     if (cartId) {
-      res.cookie('cartId', cartId, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 30 * 24 * 60 * 60 * 1000
-      })
+      res.cookie('cartId', cartId, getCookieOptions('30 days'))
     }
 
     res.json({ 

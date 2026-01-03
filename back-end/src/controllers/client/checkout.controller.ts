@@ -39,7 +39,7 @@ export const index = async (req: Request, res: Response) => {
         }
       }
     }
-    cart['totalsPrice'] = totalsPrice
+    cart.totalsPrice = totalsPrice
 
     res.json({
       code: 200,
@@ -70,9 +70,8 @@ export const order = async (req: Request, res: Response) => {
       path: 'products.product_id',
       model: 'Product'
     })
-    console.log("🚀 ~ checkout.controller.ts ~ order ~ cart:", cart);
     if (!cart || cart.products.length === 0) {
-      return res.json({ code: 400, message: 'Giỏ hàng trống!' });
+      return res.json({ code: 400, message: 'Giỏ hàng trống!' })
     }
     const products = cart.products.map(item => {
       const productInfo = item.product_id as any // Sau khi populate, đây là object
@@ -87,7 +86,6 @@ export const order = async (req: Request, res: Response) => {
         size: item.size
       }
     })
-    console.log("🚀 ~ checkout.controller.ts ~ order ~ products:", products);
 
     const totalBill = products.reduce((acc, product) => {
       const priceNew = (product.price * (100 - product.discountPercentage)) / 100
@@ -110,7 +108,7 @@ export const order = async (req: Request, res: Response) => {
       await Cart.updateOne({ _id: cartId }, { products: [] })
       return res.json({ 
         code: 201,  
-        message: 'Thành công!', 
+        message: 'Đặt hàng thành công!', 
         order: newOrder
       })
     } else if (paymentMethod === 'VNPAY') {
@@ -137,7 +135,7 @@ export const order = async (req: Request, res: Response) => {
       )
     }
   } catch (error) {
-    return res.json({ 
+    res.json({ 
       code: 400,  
       message: 'Lỗi!', 
       error: error

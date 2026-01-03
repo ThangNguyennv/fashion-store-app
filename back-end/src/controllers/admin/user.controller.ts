@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import User from '~/models/user.model'
-import md5 from 'md5'
+import bcrypt from 'bcrypt'
 
 // [GET] /admin/users
 export const index = async (req: Request, res: Response) => {
@@ -8,7 +8,7 @@ export const index = async (req: Request, res: Response) => {
     const find = {
       deleted: false
     }
-    const users = await User.find(find).select('-password -token')
+    const users = await User.find(find)
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -45,28 +45,31 @@ export const changeStatus = async (req: Request, res: Response) => {
 // [PATCH] /admin/users/edit/:id
 export const editPatch = async (req: Request, res: Response) => {
   try {
+    const { email, password } = req.body
     const isEmailExist = await User.findOne({
       _id: { $ne: req.params.id }, // $ne ($notequal) -> Tránh trường hợp khi tìm bị lặp và không cập nhật lại lên đc.
-      email: req.body.email,
+      email: email,
       deleted: false
     })
     if (isEmailExist) {
       res.json({
         code: 409,
-        message: `Email ${req.body.email} đã tồn tại, vui lòng chọn email khác!`
+        message: `Email ${email} đã tồn tại, vui lòng chọn email khác!`
       })
+      return
+    } 
+    if (password) {
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+      req.body.password = hashedPassword
     } else {
-      if (req.body.password) {
-        req.body.password = md5(req.body.password) // Mã hóa password mới để lưu lại vào db
-      } else {
-        delete req.body.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
-      }
-      await User.updateOne({ _id: req.params.id }, req.body)
-      res.json({
-        code: 200,
-        message: 'Cập nhật thành công người dùng!'
-      })
+      delete req.body.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
     }
+    await User.updateOne({ _id: req.params.id }, req.body)
+    res.json({
+      code: 200,
+      message: 'Cập nhật thành công người dùng!'
+    })
   } catch (error) {
     res.json({
       code: 400,
@@ -83,7 +86,7 @@ export const detail = async (req: Request, res: Response) => {
       deleted: false,
       _id: req.params.id
     }
-    const accountUser = await User.findOne(find).select('-password -tokenUser')
+    const accountUser = await User.findOne(find)
     res.json({
       code: 200,
       message: 'Chi tiết người dùng!',

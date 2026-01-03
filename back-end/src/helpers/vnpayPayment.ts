@@ -28,6 +28,7 @@ export const vnpayCreateOrder = (totalBill: number, orderId: string,  res: Respo
     vnp_TxnRef: txnRef,
     vnp_OrderInfo: `Thanh toán đơn hàng: ${txnRef}`,
     vnp_OrderType: ProductCode.Other,
+    // Thay API_ROOT = link ngrok
     vnp_ReturnUrl: `${process.env.API_ROOT}/checkout/vnpay-return`,
     vnp_Locale: VnpLocale.VN,
     vnp_CreateDate: dateFormat(new Date()),

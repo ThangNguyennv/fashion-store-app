@@ -1,15 +1,20 @@
-import Role from "~/models/role.model"
+import { Request, Response, NextFunction } from 'express'
 
-export const requirePermission = (permission: string) => {
-  return async (req, res, next) => {
-    const account = req["accountAdmin"] 
+export const requirePermission = (roleName: string[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const accountRole = req["accountAdmin.roleName"] 
 
-    // Lấy role từ DB
-    const role = await Role.findOne({ _id: account.role_id })
-
-    if (!role || !role.permissions.includes(permission)) {
-      return res.status(403).json({ message: "Không có quyền truy cập" })
+    if (!accountRole) {
+      res.json({ code: 401, message: "Vui lòng đăng nhập!" })
+      return
     }
-    next()
+    if (accountRole === 'Admin') {
+      return next()
+    }
+    if (!roleName.includes(accountRole)) {
+      res.json({ code: 403,  message: "Bạn không có quyền truy cập vào trang này!" })
+      return
+    }
+    next()  
   }
 }

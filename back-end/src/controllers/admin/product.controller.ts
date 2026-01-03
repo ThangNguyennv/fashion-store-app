@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
 import Product from '~/models/product.model'
-import Account from '~/models/account.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
 import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
@@ -209,7 +208,6 @@ export const deleteItem = async (req: Request, res: Response) => {
 
 // [POST] /admin/products/create
 export const createPost = async (req: Request, res: Response) => {
-  console.log(req.body)
   try {
     // 1. Parse dữ liệu sản phẩm từ chuỗi JSON
     const productData = req.body
@@ -239,14 +237,14 @@ export const createPost = async (req: Request, res: Response) => {
     productData.discountPercentage = parseInt(productData.discountPercentage) || 0
     productData.stock = parseInt(productData.stock) || 0
     
-    let position: number
-    if (!productData.position) {
-      const count = await Product.countDocuments({ deleted: false })
-      position = count + 1
-    } else {
-      position = parseInt(productData.position)
-    }
-    productData.position = position
+    // let position: number
+    // if (!productData.position) {
+    //   const count = await Product.countDocuments({ deleted: false })
+    //   position = count + 1
+    // } else {
+    //   position = parseInt(productData.position)
+    // }
+    // productData.position = position
     productData.createdBy = {
       account_id: req['accountAdmin'].id
     }
@@ -303,7 +301,7 @@ export const editPatch = async (req: Request, res: Response) => {
     productData.price = parseInt(productData.price) || 0
     productData.discountPercentage = parseInt(productData.discountPercentage) || 0
     productData.stock = parseInt(productData.stock) || 0
-    productData.position = parseInt(productData.position) || 0
+    // productData.position = parseInt(productData.position) || 0
 
     const updatedBy = {
       account_id: req['accountAdmin'].id,

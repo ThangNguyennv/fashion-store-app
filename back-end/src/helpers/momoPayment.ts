@@ -12,6 +12,7 @@ export const momoCreateOrder = async (id: string, totalBill: number, res: Respon
   const orderInfoText = `Thanh toán đơn hàng ${id}`
   const partnerCode = 'MOMO'
   const redirectUrl = `${process.env.CLIENT_URL}/checkout/success/${id}`
+  // Thay CLIENT_URL = link ngrok
   const ipnUrl = `${process.env.CLIENT_URL}/checkout/momo-callback`
   const requestType = "payWithMethod"
   const amount = Math.floor(totalBill)

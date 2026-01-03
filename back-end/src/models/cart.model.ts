@@ -12,8 +12,10 @@ const cartSchema = new mongoose.Schema(
         quantity: { type: Number, min: 1, default: 1 },
         color: String,
         size: String,
+        totalPrice: Number
       }
-    ]
+    ],
+    totalsPrice: Number
   },
   {
     timestamps: true

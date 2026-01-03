@@ -2,18 +2,19 @@ import { Request, Response, NextFunction } from 'express'
 import Account from '~/models/account.model'
 import { StatusCodes } from 'http-status-codes'
 import { JWTProvider } from '~/providers/jwt.provider'
+import Role from '~/models/role.model'
 
 export const requireAuth = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const accessToken = req.cookies?.accessToken
-  if (!accessToken) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Vui lòng gửi kèm token!' })
-    return
-  }
   try {
+    const accessToken = req.cookies?.accessToken
+    if (!accessToken) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Vui lòng gửi kèm token!' })
+      return
+    }
     const accessTokenDecoded = await JWTProvider.verifyToken(
       accessToken, 
       process.env.JWT_ACCESS_TOKEN_SECRET_ADMIN
@@ -22,18 +23,31 @@ export const requireAuth = async (
       email: string,
       role_id: string  
     }
+    if (!accessTokenDecoded) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Token không hợp lệ!!' })
+      return
+    }
     const accountAdmin = await Account.findOne({
       _id: accessTokenDecoded.accountId,
       deleted: false,
-      status: 'active'
-    }).select('-password')
+      status: 'ACTIVE'
+    })
   
     if (!accountAdmin) {
-      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Token không hợp lệ!' })
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Người quản trị không tồn tại!' })
       return
     }
 
+    const role = await Role.findOne({
+      _id: accountAdmin.role_id,
+      deleted: false
+    })
+    if (!role){
+      res.status(StatusCodes.FORBIDDEN).json({ message: 'Không thể xác định quyền tài khoản!' })
+      return
+    }
     req['accountAdmin'] = accountAdmin
+    req['accountAdmin.roleName'] = role.titleId
     next()
 
   } catch (error) {

@@ -11,8 +11,11 @@ export const index = async (req: Request, res: Response) => {
     const productsFeatured = await Product.find({
       featured: '1',
       deleted: false,
-      status: 'active'
-    }).limit(6)
+      status: 'ACTIVE'
+    })
+      .sort({ createdAt: -1 })
+      .limit(6)
+
     const newProductsFeatured = productsHelper.priceNewProducts(
       productsFeatured as OneProduct[]
     )
@@ -20,9 +23,9 @@ export const index = async (req: Request, res: Response) => {
     // Lấy ra sản phẩm mới nhất
     const productsNew = await Product.find({
       deleted: false,
-      status: 'active'
+      status: 'ACTIVE'
     })
-      .sort({ position: 'desc' })
+      .sort({ createdAt: -1 })
       .limit(6)
 
     const newProductsNew = productsHelper.priceNewProducts(
@@ -33,15 +36,17 @@ export const index = async (req: Request, res: Response) => {
     const articlesFeatured = await Article.find({
       featured: '1',
       deleted: false,
-      status: 'active'
-    }).limit(5)
+      status: 'ACTIVE'
+    })
+      .sort({ createdAt: -1 })
+      .limit(5)
 
     // Lấy ra bài viết mới nhất
     const articlesNew = await Article.find({
       deleted: false,
-      status: 'active'
+      status: 'ACTIVE'
     })
-      .sort({ position: 'desc' })
+      .sort({ createdAt: -1 })
       .limit(5)
     
     res.json({
