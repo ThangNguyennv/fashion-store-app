@@ -3,148 +3,185 @@ import { API_KEY } from '~/utils/constants'
 import { useEdit } from '~/hooks/Admin/ProductCategory/useEdit'
 import SelectTree from '~/components/Admin/TableTree/SelectTreeProduct'
 import { Link } from 'react-router-dom'
+import Skeleton from '@mui/material/Skeleton'
 
 const EditProductCategory = () => {
   const {
+    isLoading,
     allProductCategories,
-    productCategoryInfo,
-    setProductCategoryInfo,
     uploadImageInputRef,
-    uploadImagePreviewRef,
+    thumbnailPreview,
     handleChange,
     handleSubmit,
     handleClick,
-    role
+    role,
+    register,
+    errors,
+    isSubmitting,
+    setValue,
+    watch
   } = useEdit()
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-[15px] bg-[#FFFFFF] p-[15px]">
+        <Skeleton variant="text" width={300} height={40} />
+        <Skeleton variant="rectangular" width="100%" height={60} />
+        <Skeleton variant="rectangular" width="100%" height={60} />
+        <Skeleton variant="rectangular" width="100%" height={200} />
+        <Skeleton variant="rectangular" width={150} height={150} />
+      </div>
+    )
+  }
 
   return (
     <>
       {role && role.permissions.includes('products-category_edit') && (
-        productCategoryInfo && (
-          <form
-            onSubmit={(event) => handleSubmit(event)}
-            className="flex flex-col gap-[15px] text-[17px] font-[500] bg-[#FFFFFF] p-[15px] shadow-md"
-            encType="multipart/form-data"
-          >
-            <h1 className="text-[24px] font-[600] text-[#192335]">Chỉnh sửa danh mục sản phẩm</h1>
-            <div className="form-group">
-              <label htmlFor="title">Tiêu đề</label>
-              <input
-                onChange={(event) => setProductCategoryInfo(productCategoryInfo ? { ...productCategoryInfo, title: event.target.value } : productCategoryInfo)}
-                type="text"
-                id="title"
-                name="title"
-                className='py-[3px] text-[16px]'
-                value={productCategoryInfo.title}
-              />
-            </div>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-[15px] text-[17px] font-[500] bg-[#FFFFFF] p-[15px] shadow-md"
+        >
+          <h1 className="text-[24px] font-[600] text-[#192335]">
+            Chỉnh sửa danh mục sản phẩm
+          </h1>
 
-            <div className="form-group">
-              <label htmlFor="parent_id">Danh mục</label>
-              <select
-                name="parent_id"
-                id="parent_id"
-                className="outline-none border rounded-[5px] border-[#00171F] py-[3px] text-[16px]"
-                value={productCategoryInfo.parent_id}
-                onChange={(event) => setProductCategoryInfo({ ...productCategoryInfo, parent_id: event.target.value })}
-              >
-                <option value={''}>-- Chọn danh mục --</option>
-                {allProductCategories && allProductCategories.length > 0 && (
-                  allProductCategories.map(productCategory => (
-                    <SelectTree
-                      key={productCategory._id}
-                      productCategory={productCategory}
-                      level={1}
-                      allProductCategories={allProductCategories}
-                      parent_id={productCategoryInfo.parent_id}
-                    />
-                  ))
-                )}
-              </select>
-            </div>
+          {/* TIÊU ĐỀ */}
+          <div className="form-group">
+            <label htmlFor="title">
+              Tiêu đề <span className="text-red-500">*</span>
+            </label>
+            <input
+              {...register('title')}
+              type="text"
+              id="title"
+              className='py-[3px] text-[16px]'
+            />
+            {errors.title && (
+              <span className="text-red-500 text-sm">{errors.title.message}</span>
+            )}
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="desc">Mô tả</label>
-              <Editor
-                apiKey={API_KEY}
-                init={{
-                  plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat'
-                }}
-                value={productCategoryInfo.description}
-                onEditorChange={(newValue) => setProductCategoryInfo(productCategoryInfo ? { ...productCategoryInfo, description: newValue }: productCategoryInfo)}
-                id="desc"
-              />
-            </div>
+          {/* DANH MỤC CHA */}
+          <div className="form-group">
+            <label htmlFor="parent_id">Danh mục cha</label>
+            <select
+              {...register('parent_id')}
+              id="parent_id"
+              className="outline-none border rounded-[5px] border-[#00171F] py-[3px] text-[16px]"
+            >
+              <option value={''}>-- Chọn danh mục --</option>
+              {allProductCategories && allProductCategories.length > 0 && (
+                allProductCategories.map(productCategory => (
+                  <SelectTree
+                    key={productCategory._id}
+                    productCategory={productCategory}
+                    level={1}
+                    allProductCategories={allProductCategories}
+                    parent_id={watch('parent_id') as string}
+                  />
+                ))
+              )}
+            </select>
+          </div>
 
-            <div className="flex flex-col gap-[10px]">
-              <label htmlFor="thumbnail">Ảnh</label>
-              <input
-                onChange={(event) => handleChange(event)}
-                ref={uploadImageInputRef}
-                type="file"
-                id="thumbnail"
-                name="thumbnail"
-                className='hidden'
-                accept="image/*"
-              />
-              <button
-                onClick={event => handleClick(event)}
-                className="bg-[#9D9995] font-[500] border rounded-[5px] w-[6%] py-[4px] text-[14px]"
-              >
+          {/* MÔ TẢ */}
+          <div className="form-group">
+            <label htmlFor="desc">Mô tả</label>
+            <Editor
+              apiKey={API_KEY}
+              init={{
+                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat'
+              }}
+              value={watch('description')}
+              onEditorChange={(newValue) => setValue('description', newValue)}
+              id="desc"
+            />
+          </div>
+
+          {/* ẢNH ĐẠI DIỆN */}
+          <div className="flex flex-col gap-[10px]">
+            <label htmlFor="thumbnail">
+              Ảnh <span className="text-red-500">*</span>
+            </label>
+            <input
+              onChange={handleChange}
+              ref={uploadImageInputRef}
+              type="file"
+              id="thumbnail"
+              name="thumbnail"
+              className='hidden'
+              accept="image/*"
+            />
+            <button
+              type="button"
+              onClick={handleClick}
+              className="bg-[#9D9995] text-white font-[500] border rounded-[5px] w-[6%] py-[4px] text-[14px]"
+            >
               Chọn ảnh
-              </button>
+            </button>
+            {thumbnailPreview && (
               <img
-                ref={uploadImagePreviewRef}
-                src={productCategoryInfo.thumbnail}
+                src={thumbnailPreview}
                 alt="Thumbnail preview"
-                className="border rounded-[5px] w-[150px] h-[150px]"
+                className="border rounded-[5px] w-[150px] h-[150px] object-cover"
               />
-            </div>
+            )}
+            {errors.thumbnail && (
+              <span className="text-red-500 text-sm">{errors.thumbnail.message as string}</span>
+            )}
+          </div>
 
+          {/* TRẠNG THÁI */}
+          <div className="flex flex-col gap-2">
+            <label>
+              Trạng thái <span className="text-red-500">*</span>
+            </label>
             <div className="flex items-center justify-start gap-[10px] text-[16px]">
               <div className="flex gap-[5px]">
                 <input
-                  onChange={(event) => setProductCategoryInfo(productCategoryInfo ? { ...productCategoryInfo, status: event.target.value }: productCategoryInfo)}
+                  {...register('status')}
                   type="radio"
                   className="border rounded-[5px] border-[#192335]"
                   id="statusActive"
-                  name="status"
                   value={'ACTIVE'}
-                  checked={productCategoryInfo.status === 'ACTIVE' ? true : false}
                 />
                 <label htmlFor="statusActive">Hoạt động</label>
               </div>
 
               <div className="flex gap-[5px]">
                 <input
-                  onChange={(event) => setProductCategoryInfo(productCategoryInfo ? { ...productCategoryInfo, status: event.target.value }: productCategoryInfo)}
+                  {...register('status')}
                   type="radio"
                   className="border rounded-[5px] border-[#192335]"
                   id="statusInActive"
-                  name="status"
                   value={'INACTIVE'}
-                  checked={productCategoryInfo.status === 'INACTIVE' ? true : false}
                 />
                 <label htmlFor="statusInActive">Dừng hoạt động</label>
               </div>
             </div>
-            <div className='flex items-center justify-start text-center gap-[5px]'>
-              <Link
-                to="/admin/products-category"
-                className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
-              >
-              Quay lại
-              </Link>
-              <button
-                type="submit"
-                className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
-              >
-              Cập nhật
-              </button>
-            </div>
-          </form>
-        )
+            {errors.status && (
+              <span className="text-red-500 text-sm">{errors.status.message}</span>
+            )}
+          </div>
+
+          {/* BUTTONS */}
+          <div className='flex items-center justify-start text-center gap-[5px]'>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-[8%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+            </button>
+            <Link
+              to="/admin/products-category"
+              className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
+            >
+              Hủy
+            </Link>
+          </div>
+        </form>
       )}
     </>
   )

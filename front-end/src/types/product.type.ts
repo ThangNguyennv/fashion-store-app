@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import type { AccountInfoInterface } from './account.type'
 import type { GeneralInfoInterface, HelperInterface } from './helper.type'
 
@@ -5,7 +6,7 @@ export interface ProductInfoInterface extends GeneralInfoInterface {
   price: number,
   discountPercentage: number,
   stock: number,
-  featured: string,
+  featured: '1' | '0',
   product_category_id: string,
   description: string,
   priceNew?: number
@@ -71,7 +72,7 @@ export interface ProductStates extends HelperInterface {
   keyword: string
   sortKey: string
   sortValue: string
-  loading: boolean,
+  isLoading: boolean,
 }
 
 export type ProductActions =
@@ -81,8 +82,6 @@ export type ProductActions =
 export type ProductClientActions =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_DATA'; payload: Partial<ProductStates> }
-  | { type: 'RESET' }
-  | { type: 'SET_KEYWORD'; payload: { keyword: string }}
 
 export interface ProductDetailInterface {
   product: ProductInfoInterface
@@ -91,4 +90,11 @@ export interface ProductDetailInterface {
 export interface ProductsWithCategoryDetailInterface {
   products: ProductInfoInterface[],
   pageTitle: string
+}
+
+export interface SortDropdownProps {
+  sortKey: string
+  sortValue: string
+  onSortChange: (key: string, value: string) => void
+  isMobile?: boolean
 }

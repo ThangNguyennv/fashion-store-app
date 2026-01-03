@@ -7,6 +7,6 @@ export interface SettingGeneralInfoInterface {
     copyright: string
 }
 
-export interface SettingGeneralDetailInterface {
+export interface SettingGeneralAPIResponse {
   settingGeneral: SettingGeneralInfoInterface[]
 }

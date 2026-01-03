@@ -44,15 +44,15 @@ const useCart = () => {
     setOpenDeleteOne(false)
   }
 
-  const totalBill = useMemo(() => {
-    if (!cartDetail?.products) return 0
-    return cartDetail?.products.reduce((acc, item) => {
-      const priceNewForOneProduct =
-    item.product_id.price * (100 - item.product_id.discountPercentage) / 100
+  // const totalBill = useMemo(() => {
+  //   if (!cartDetail?.products) return 0
+  //   return cartDetail?.products.reduce((acc, item) => {
+  //     const priceNewForOneProduct =
+  //   item.product_id.price * (100 - item.product_id.discountPercentage) / 100
 
-      return acc + priceNewForOneProduct * item.quantity
-    }, 0)
-  }, [cartDetail])
+  //     return acc + priceNewForOneProduct * item.quantity
+  //   }, 0)
+  // }, [cartDetail])
 
   const handleDelete = async () => {
     if (!selectedItem) return
@@ -130,7 +130,6 @@ const useCart = () => {
     handleVariantChange,
     handleQuantityChange,
     handleOpenDeleteDialog,
-    totalBill,
     openDeleteOne,
     handleCloseDeleteDialog,
     handleDelete,

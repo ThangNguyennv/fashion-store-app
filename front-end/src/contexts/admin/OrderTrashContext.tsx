@@ -15,7 +15,7 @@ interface OrderTrashContextType {
 
 const OrderTrashContext = createContext<OrderTrashContextType | null>(null)
 
-export const OrderTrashProvider = ({ children }: { children: React.ReactNode }) => {
+export const OrderTrashAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateOrder, dispatchOrder] = useReducer(orderReducer, initialOrderState)
 
   const fetchOrdersTrash = useCallback(async (params: AllParams = {}) => {

@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
+import { FaChevronDown, FaChevronUp, FaMoneyBillWaveAlt, FaRegHandPeace } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import { MdDashboard } from 'react-icons/md'
 import { FaProductHunt } from 'react-icons/fa'
 import { FaCodeBranch } from 'react-icons/fa'
 import { MdArticle } from 'react-icons/md'
@@ -12,6 +11,7 @@ import { TbMenu4 } from 'react-icons/tb'
 import { IoMenu } from 'react-icons/io5'
 import { BsChatLeftText } from 'react-icons/bs'
 import { useAuth } from '~/contexts/admin/AuthContext'
+import { FcStatistics } from 'react-icons/fc'
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -21,7 +21,7 @@ const Sidebar = () => {
   const [isOpenBranch, setIsOpenBranch] = useState(false)
   const [isOpenArticle, setIsOpenArticle] = useState(false)
   const [isOpenRole, setIsOpenRole] = useState(false)
-  const [isOpenDashboard, setIsOpenDashboard] = useState(false)
+
   const { role } = useAuth()
 
   return (
@@ -54,29 +54,28 @@ const Sidebar = () => {
       {/* Menu */}
       {isOpen ? (
         <>
-          {/* Tổng quan */}
-          <div
+          {/* <div
             className='hover-sidebar text-white cursor-pointer'
-            onClick={() => setIsOpenDashboard(!isOpenDashboard)}
+            onClick={() => setIsOpenStatistic(!isOpenStatistic)}
           >
             <div className='title-sidebar flex justify-between items-center p-[5px]'>
               <div className='flex items-center justify-start gap-[15px]'>
-                <MdDashboard className='text-[18px]'/>
+                <MdStatistic className='text-[18px]'/>
                 <p>Tổng quan</p>
               </div>
               {isOpen && (
-                <span>{isOpenDashboard ? <FaChevronUp /> : <FaChevronDown />}</span>
+                <span>{isOpenStatistic ? <FaChevronUp /> : <FaChevronDown />}</span>
               )}
             </div>
             <div
               className={`
                 overflow-hidden transition-all duration-700 ease-in-out
-                ${isOpenDashboard ? 'max-h-40 mt-2' : 'max-h-0'}
+                ${isOpenStatistic ? 'max-h-40 mt-2' : 'max-h-0'}
               `}
             >
               <ul className="flex flex-col gap-2 items-center">
                 <li className="border-b border-[#9D9995] pb-[7px]">
-                  <Link to={'/admin/dashboard'}>Thống kê</Link>
+                  <Link to={'/admin/statistic'}>Thống kê</Link>
                 </li>
                 {role && role.permissions.includes('orders_view') && (
                   <li className="border-b border-[#9D9995] pb-[7px]">
@@ -85,11 +84,38 @@ const Sidebar = () => {
                 )}
               </ul>
             </div>
-          </div>
-          {/* Hết tổng quan */}
+          </div> */}
+
+          {/* Trang xin chào */}
+          <Link to={'/admin/admin-welcome'} className="hover-sidebar flex items-center justify-start gap-[15px] p-[5px]">
+            <FaRegHandPeace className='text-[18px]'/>
+            <span>Xin chào</span>
+            {/* <BsChatLeftText className='text-[18px]'/> */}
+          </Link>
+          {/* Hết trang xin chào */}
+
+          {/* Thống kê */}
+          {role && role.permissions.includes('statistics_view') && (
+            <Link to={'/admin/statistics'} className="hover-sidebar flex items-center justify-start gap-[15px] p-[5px]">
+              <FcStatistics className='text-[18px]'/>
+              <span>Thống kê</span>
+              {/* <BsChatLeftText className='text-[18px]'/> */}
+            </Link>
+          )}
+          {/* Hết thống kê */}
+
+          {/* Danh sách đơn hàng */}
+          {role && role.permissions.includes('orders_view') && (
+            <Link to={'/admin/orders'} className="hover-sidebar flex items-center justify-start gap-[15px] p-[5px]">
+              <FaMoneyBillWaveAlt className='text-[18px]'/>
+              <span>Danh sách đơn hàng</span>
+            </Link>
+          )}
+
+          {/* Hết danh sách đơn hàng */}
 
           {/* Sản phẩm */}
-          {role && role.permissions.includes('products_view') && role.permissions.includes('accessories_view') && (
+          {role && role.permissions.includes('products_view') && (
             <div
               className='hover-sidebar flex flex-col text-white cursor-pointer'
               onClick={() => setIsOpenProduct(!isOpenProduct)}
@@ -123,7 +149,7 @@ const Sidebar = () => {
           {/* Hết sản phẩm */}
 
           {/* Thương hiệu */}
-          {role && role.permissions.includes('brands-category_view') && role.permissions.includes('brands_view') && (
+          {role && role.permissions.includes('brands_view') && role.permissions.includes('brands_view') && (
             <div
               className='hover-sidebar flex flex-col text-white cursor-pointer'
               onClick={() => setIsOpenBranch(!isOpenBranch)}
@@ -305,13 +331,19 @@ const Sidebar = () => {
       ) : (
         <>
           <div className='flex flex-col text-[18px] gap-[35px] items-center justify-center'>
-            <MdDashboard />
+            <FaRegHandPeace />
             {role && (
               <>
+                {role.permissions.includes('statistics_view') && (
+                  <FcStatistics />
+                )}
+                {role.permissions.includes('orders_view') && (
+                  <FaMoneyBillWaveAlt />
+                )}
                 {role.permissions.includes('products-category_view') && role.permissions.includes('products_view') && (
                   <FaProductHunt />
                 )}
-                {role.permissions.includes('brands-category_view') && role.permissions.includes('brands_view') && (
+                {role.permissions.includes('brands_view') && (
                   <FaCodeBranch />
                 )}
                 {role.permissions.includes('articles-category_view') && role.permissions.includes('articles_view') && (

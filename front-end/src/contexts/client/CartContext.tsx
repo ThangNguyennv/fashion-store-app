@@ -19,7 +19,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
+export const CartClientProvider = ({ children }: { children: ReactNode }) => {
   const [cartDetail, setCartDetail] = useState<CartInfoInterface | null>(null)
 
   const refreshCart = async () => {

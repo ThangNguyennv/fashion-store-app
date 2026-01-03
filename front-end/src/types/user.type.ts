@@ -3,9 +3,10 @@ export interface UserInfoInterface {
   fullName: string,
   email: string,
   address: string,
-  status: string,
+  status: 'ACTIVE' | 'INACTIVE',
   avatar: string,
   phone: string,
+  password: string
 }
 
 
@@ -13,7 +14,7 @@ export interface UsersDetailInterface {
   users: UserInfoInterface[],
 }
 
-export interface UserDetailInterface {
+export interface UserAPIResponse {
   accountUser: UserInfoInterface,
   code: number,
   message: string

@@ -10,7 +10,7 @@ export const useHeader = () => {
   const { dispatchAlert } = useAlertContext()
   const { myAccount, logout } = useAuth()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-
+  const { role } = useAuth()
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -38,6 +38,7 @@ export const useHeader = () => {
     handleOpen,
     handleClose,
     anchorEl,
-    setAnchorEl
+    setAnchorEl,
+    role
   }
 }

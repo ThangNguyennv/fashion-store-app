@@ -1,35 +1,51 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, type FormEvent } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { fetchForgotPasswordAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 
+const forgotPasswordSchema = z.object({
+  email: z.string()
+    .trim()
+    .lowercase()
+    .min(1, 'Vui lòng nhập email của bạn!')
+    .pipe(z.email('Email không đúng định dạng!'))
+})
+
+type ForgotFormData = z.infer<typeof forgotPasswordSchema>
+
 const useForgot = () => {
   // const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
   const { dispatchAlert } = useAlertContext()
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    setIsLoading(true)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<ForgotFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: ''
+    }
+  })
+
+  const onSubmit = async (data: ForgotFormData): Promise<void> => {
     try {
-      const form = event.currentTarget
-      const email = form.email.value
-      const response = await fetchForgotPasswordAPI(email)
+      const response = await fetchForgotPasswordAPI(data.email)
+
       if (response.code === 200) {
         dispatchAlert({
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'success' }
         })
+
+        // Chuyển hướng sang trang nhập OTP sau 1.5s
         // setTimeout(() => {
-        //   navigate(`/user/password/otp?email=${email}`)
+        //   navigate(`/user/password/otp?email=${data.email}`)
         // }, 1500)
-      } else if (response.code === 401) {
-        dispatchAlert({
-          type: 'SHOW_ALERT',
-          payload: { message: response.message, severity: 'error' }
-        })
-      } else if (response.code === 400) {
+      } else {
         dispatchAlert({
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'error' }
@@ -38,17 +54,20 @@ const useForgot = () => {
     } catch (error) {
       dispatchAlert({
         type: 'SHOW_ALERT',
-        payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
+        payload: {
+          message: 'Hệ thống đang bận, vui lòng thử lại sau.',
+          severity: 'error'
+        }
       })
-    } finally {
-      setIsLoading(false)
     }
-
   }
 
   return {
+    register,
     handleSubmit,
-    isLoading
+    errors,
+    isSubmitting,
+    onSubmit
   }
 }
 

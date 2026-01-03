@@ -11,7 +11,10 @@ const SelectTreeArticle = ({ articleCategory, level, allArticleCategories, paren
   const prefix = '- '.repeat(level)
   return (
     <>
-      <option value={articleCategory._id}>
+      <option
+        value={articleCategory._id}
+        selected={parent_id == articleCategory._id}
+      >
         {prefix}{articleCategory.title}
       </option>
       {articleCategory.children?.map((child) => (

@@ -6,7 +6,7 @@ const LayoutDefaultAdmin = () => {
   return (
     <>
       <Header />
-      <div className='flex bg-[#D9D9D9] bg-cover min-h-screen'>
+      <div className='flex bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 bg-cover min-h-screen'>
         <Sidebar />
         <div className='flex justify-center flex-1 ml-[130px] my-[75px]'>
           <div className='container flex flex-col'>

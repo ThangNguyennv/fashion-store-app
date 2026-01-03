@@ -3,7 +3,7 @@ import Header from '~/components/Client/Header/Header'
 import Footer from '~/components/Client/Footer/Footer'
 import ChatPage from '~/pages/Client/Chat/ChatPage'
 
-const LayoutDefault = () => {
+const LayoutDefaultClient = () => {
   return (
     <>
       <Header />
@@ -14,4 +14,4 @@ const LayoutDefault = () => {
   )
 }
 
-export default LayoutDefault
+export default LayoutDefaultClient

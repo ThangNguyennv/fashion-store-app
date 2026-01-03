@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import BoxHead from '~/components/Client/BoxHead/BoxHead'
 import CardItem from '~/components/Client/CardItem/CardItem'
-import { useHome } from '~/contexts/client/HomeContext'
 import Skeleton from '@mui/material/Skeleton'
+import useProductsFeatured from '~/hooks/client/product/useProductsFeatured'
 
 const ProductsFeatured = () => {
-  const { dataHome } = useHome()
-  const isLoading = !dataHome || !dataHome.productsFeatured
+  const {
+    dataHome,
+    isLoading
+  } = useProductsFeatured()
 
   const CardItemSkeleton = () => (
     <div className="flex flex-col items-center gap-[15px] rounded-[5px] border border-gray-200 bg-white p-[10px] text-center h-full">

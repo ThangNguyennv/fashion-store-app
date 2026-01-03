@@ -13,7 +13,7 @@ const MyAccountAdmin = () => {
       {accountInfo ? (
         <>
           <div className="text-[16px] mt-[15px] flex flex-col gap-[15px] w-[50%] bg-[#FFFFFF] py-[15px] pl-[50px] shadow-md">
-            <h1 className="text-[24px] font-[700] mt-[10px]">Thông tin tài khoản</h1>
+            <h1 className="text-[24px] font-[700] mt-[10px]">Thông tin tài khoản của tôi</h1>
             <img
               src={accountInfo.avatar}
               alt="Avatar"
@@ -40,7 +40,7 @@ const MyAccountAdmin = () => {
             <span>
               <b>Trạng thái: </b>
               {
-                accountInfo.status === 'active' ?
+                accountInfo.status === 'ACTIVE' ?
                   <span className="text-green-500 font-[600]">Hoạt động</span> :
                   <span className="text-red-500 font-[600]"> Dừng hoạt động</span>
               }

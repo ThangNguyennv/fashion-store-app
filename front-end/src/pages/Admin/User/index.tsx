@@ -4,11 +4,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchChangeStatusAPI, fetchDeleteUserAPI, fetchUsersAPI } from '~/apis/admin/user.api'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { UserInfoInterface, UsersDetailInterface } from '~/types/user.type'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -16,75 +12,19 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Skeleton from '@mui/material/Skeleton'
-import { useAuth } from '~/contexts/admin/AuthContext'
+import useUser from '~/hooks/Admin/user/useUser'
 
 const User = () => {
-  const [users, setUsers] = useState<UserInfoInterface[]>([])
-  const { dispatchAlert } = useAlertContext()
-  const [loading, setLoading] = useState(false)
-  const [open, setOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { role } = useAuth()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res: UsersDetailInterface = await fetchUsersAPI()
-        setUsers(res.users)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Fetch roles error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const handleToggleStatus = async (id: string, currentStatus: string): Promise<void> => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-    const response = await fetchChangeStatusAPI(id, newStatus)
-    if (response.code === 200) {
-      setUsers((prev) => prev.map((user) => user._id === id ? {
-        ...user,
-        status: newStatus
-      }: user))
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
-
-  const handleOpen = (id: string) => {
-    setSelectedId(id)
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setSelectedId(null)
-    setOpen(false)
-  }
-
-  const handleDelete = async () => {
-    if (!selectedId) return
-    const response = await fetchDeleteUserAPI(selectedId)
-    if (response.code === 204) {
-      setUsers((prev) => prev.filter((item) => item._id != selectedId))
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setOpen(false)
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
+  const {
+    users,
+    loading,
+    open,
+    role,
+    handleToggleStatus,
+    handleOpen,
+    handleClose,
+    handleDelete
+  } = useUser()
 
   if (loading) {
     return (
@@ -223,9 +163,9 @@ const User = () => {
                         <button
                           onClick={() => handleToggleStatus(user._id, user.status)}
                           className={`cursor-pointer border rounded-[5px] p-[5px] text-white 
-                          ${user.status === 'active' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
+                          ${user.status === 'ACTIVE' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
                         >
-                          {user.status === 'active' ? 'Hoạt động' : 'Ngừng hoạt động'}
+                          {user.status === 'ACTIVE' ? 'Hoạt động' : 'Ngừng hoạt động'}
                         </button>
                       </TableCell>
                       <TableCell align='center'>

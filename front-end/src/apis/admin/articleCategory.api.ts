@@ -1,6 +1,6 @@
 import type { ArticleCategoryAPIResponse, ArticleCategoryDetailInterface } from '~/types/articleCategory.type'
 import type { AllParams } from '~/types/helper.type'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchArticleCategoryAPI = async (
@@ -21,16 +21,14 @@ export const fetchArticleCategoryAPI = async (
 
 export const fetchDeleteArticleCategoryAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/articles-category/delete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/articles-category/delete/${id}`
   )
   return response.data
 }
 
 export const fetchDetailArticleCategoryAPI = async (id: string): Promise<ArticleCategoryDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/articles-category/detail/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/articles-category/detail/${id}`
   )
   return response.data
 }
@@ -38,8 +36,7 @@ export const fetchDetailArticleCategoryAPI = async (id: string): Promise<Article
 export const fetchEditArticleCategoryAPI = async (id: string, formData: FormData) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles-category/edit/${id}`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
@@ -47,8 +44,7 @@ export const fetchEditArticleCategoryAPI = async (id: string, formData: FormData
 export const fetchCreateArticleCategoryAPI = async (formData: FormData) => {
   const response = await authorizedAxiosInstance.post(
     `${API_ROOT}/admin/articles-category/create`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
@@ -56,8 +52,7 @@ export const fetchCreateArticleCategoryAPI = async (formData: FormData) => {
 export const fetchChangeStatusWithChildren = async (status: string, id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles-category/change-status-with-children/${status}/${id}`,
-    {},
-    { withCredentials: true }
+    {}
   )
   return response.data
 }
@@ -65,8 +60,7 @@ export const fetchChangeStatusWithChildren = async (status: string, id: string) 
 export const fetchChangeMultiAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles-category/change-multi`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }

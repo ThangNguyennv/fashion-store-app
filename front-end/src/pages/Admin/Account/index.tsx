@@ -1,10 +1,5 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchAccountsAPI, fetchChangeStatusAPI, fetchDeleteAccountAPI } from '~/apis/admin/account.api'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountsDetailInterface, AccountInfoInterface } from '~/types/account.type'
-import type { RolesInfoInterface } from '~/types/role.type'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -12,77 +7,21 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Skeleton from '@mui/material/Skeleton'
-import { useAuth } from '~/contexts/admin/AuthContext'
+import useAccount from '~/hooks/Admin/account/useAccount'
 
 const Account = () => {
-  const [accounts, setAccounts] = useState<AccountInfoInterface[]>([])
-  const [roles, setRoles] = useState<RolesInfoInterface[]>([])
-  const { dispatchAlert } = useAlertContext()
-  const [open, setOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const { role } = useAuth()
+  const {
+    accounts,
+    roles,
+    open,
+    loading,
+    role,
+    handleToggleStatus,
+    handleOpen,
+    handleClose,
+    handleDelete
+  } = useAccount()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res: AccountsDetailInterface = await fetchAccountsAPI()
-        setAccounts(res.accounts)
-        setRoles(res.roles)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Fetch roles error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const handleToggleStatus = async (id: string, currentStatus: string): Promise<void> => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-    const response = await fetchChangeStatusAPI(newStatus, id)
-    if (response.code === 200) {
-      setAccounts((prev) => prev.map((account) => account._id === id ? {
-        ...account,
-        status: newStatus
-      }: account))
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
-
-  const handleOpen = (id: string) => {
-    setSelectedId(id)
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setSelectedId(null)
-    setOpen(false)
-  }
-
-  const handleDelete = async () => {
-    if (!selectedId) return
-    const response = await fetchDeleteAccountAPI(selectedId)
-    if (response.code === 204) {
-      setAccounts((prev) => prev.filter((item) => item._id != selectedId))
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setOpen(false)
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
   if (loading) {
     return (
       <div className='flex flex-col gap-[10px] bg-[#FFFFFF] p-[15px] shadow-md mt-[15px]'>
@@ -231,9 +170,9 @@ const Account = () => {
                         <button
                           onClick={() => handleToggleStatus(account._id, account.status)}
                           className={`cursor-pointer border rounded-[5px] p-[5px] text-white 
-                          ${account.status === 'active' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
+                          ${account.status === 'ACTIVE' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
                         >
-                          {account.status === 'active' ? 'Hoạt động' : 'Ngừng hoạt động'}
+                          {account.status === 'ACTIVE' ? 'Hoạt động' : 'Ngừng hoạt động'}
                         </button>
                       </TableCell>
                       <TableCell align='center'>

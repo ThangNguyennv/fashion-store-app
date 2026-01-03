@@ -15,7 +15,8 @@ const Header = () => {
     handleOpen,
     handleClose,
     anchorEl,
-    setAnchorEl
+    setAnchorEl,
+    role
   } = useHeader()
 
   return (
@@ -30,7 +31,7 @@ const Header = () => {
             w-full z-50 shadow-md
             "
           >
-            <Link to={'/admin/dashboard'} className='flex items-center justify-center gap-[10px]'>
+            <Link to={'/admin/admin-welcome'} className='flex items-center justify-center gap-[10px]'>
               <img src={logo} className='contain w-[40px] h-[40px]'/>
               <p className='uppercase'>ADMIN</p>
             </Link>
@@ -72,17 +73,20 @@ const Header = () => {
                         <span>Hồ sơ</span>
                       </Link>
                     </MenuItem>
-                    <MenuItem sx={{
-                      '&:hover': {
-                        backgroundColor: '#E0F2FE',
-                        color: '#00A7E6'
-                      }
-                    }}>
-                      <Link to={'/admin/settings/general'} className='flex items-center justify-start gap-[10px] w-full'>
-                        <IoSettingsOutline />
-                        <span>Cài đặt</span>
-                      </Link>
-                    </MenuItem>
+                    {role && role.permissions.includes('settings-general_view') && (
+                      <MenuItem sx={{
+                        '&:hover': {
+                          backgroundColor: '#E0F2FE',
+                          color: '#00A7E6'
+                        }
+                      }}>
+
+                        <Link to={'/admin/settings/general'} className='flex items-center justify-start gap-[10px] w-full'>
+                          <IoSettingsOutline />
+                          <span>Cài đặt</span>
+                        </Link>
+                      </MenuItem>
+                    )}
                     <MenuItem sx={{
                       '&:hover': {
                         backgroundColor: '#E0F2FE',

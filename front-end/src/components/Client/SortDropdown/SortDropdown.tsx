@@ -1,21 +1,6 @@
-/* eslint-disable no-unused-vars */
 import { FaCheck } from 'react-icons/fa6'
-
-const sortOptions = [
-  { name: 'Mặc định (Nổi bật)', key: 'position', value: 'desc' },
-  { name: 'Giá: Cao đến Thấp', key: 'discountedPrice', value: 'desc' },
-  { name: 'Giá: Thấp đến Cao', key: 'discountedPrice', value: 'asc' },
-  { name: 'Tên: A-Z', key: 'title', value: 'asc' },
-  { name: 'Tên: Z-A', key: 'title', value: 'desc' }
-]
-
-// 2. Định nghĩa Props
-interface SortDropdownProps {
-  sortKey: string
-  sortValue: string
-  onSortChange: (key: string, value: string) => void
-  isMobile?: boolean // Prop để thay đổi giao diện
-}
+import type { SortDropdownProps } from '~/types/product.type'
+import { sortOptions } from '~/utils/constants'
 
 export const SortDropdown = ({
   sortKey,
@@ -24,16 +9,15 @@ export const SortDropdown = ({
   isMobile = false
 }: SortDropdownProps) => {
 
-  // 3. Tạo một giá trị duy nhất để quản lý state của dropdown
+  // Tạo một giá trị duy nhất để quản lý state của dropdown
   const currentSortValue = `${sortKey}-${sortValue}`
 
-  // 4. Hàm xử lý khi chọn
+  // Hàm xử lý khi chọn
   const handleSelectChange = (selectedValue: string) => {
     const [key, value] = selectedValue.split('-')
     onSortChange(key, value)
   }
 
-  // 5. Giao diện cho Mobile (dạng danh sách)
   if (isMobile) {
     return (
       <div className="flex flex-col gap-1">
@@ -59,7 +43,6 @@ export const SortDropdown = ({
     )
   }
 
-  // 6. Giao diện cho Desktop (dạng dropdown)
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="sort-select" className="text-sm font-medium text-gray-700">

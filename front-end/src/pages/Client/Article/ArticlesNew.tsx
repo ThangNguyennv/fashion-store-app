@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import ArticleCard from '~/components/Client/ArticleCard/ArticleCard'
 import BoxHead from '~/components/Client/BoxHead/BoxHead'
-import { useHome } from '~/contexts/client/HomeContext'
 import Skeleton from '@mui/material/Skeleton'
+import useArticlesNew from '~/hooks/client/article/useArticlesNew'
 
 const ArticlesNew = () => {
-  const { dataHome } = useHome()
-  const isLoading = !dataHome || !dataHome.articlesNew
+  const {
+    isLoading,
+    dataHome
+  } = useArticlesNew()
+
   const CardItemSkeleton = () => (
     <div className="flex flex-col items-center gap-[15px] rounded-[5px] border border-gray-200 bg-white p-[10px] text-center h-full">
       <Skeleton variant="rectangular" width="100%" height={250} />

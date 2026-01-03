@@ -48,13 +48,18 @@ export interface AllParams {
   keyword?: string
   sortKey?: string
   sortValue?: string
+  category?: string
+  maxPrice?: string
+  color?: string
+  size?: string
+  date?: string
 }
 
 export interface GeneralInfoInterface {
   _id?: string,
   title: string,
   thumbnail: string,
-  status: string,
+  status: 'ACTIVE' | 'INACTIVE',
   slug?: string,
   createdBy: CreatedBy
   createdAt: Date | null

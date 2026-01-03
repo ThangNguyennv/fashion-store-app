@@ -3,22 +3,19 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { fetchLogoutAPI } from '~/apis/client/auth.api'
-import type { UserInfoInterface } from '~/types/user.type'
-import { fetchInfoUserAPI } from '~/apis/client/user.api'
 import { useSettingGeneral } from '~/contexts/client/SettingGeneralContext'
-import { fetchSettingGeneralAPI } from '~/apis/client/settingGeneral.api'
 import { fetchHomeAPI } from '~/apis/client/home.api'
 import { useHome } from '~/contexts/client/HomeContext'
 import { useCart } from '~/contexts/client/CartContext'
 import type { ProductInfoInterface } from '~/types/product.type'
 import { fetchSearchSuggestionsAPI } from '~/apis/client/product.api'
+import { useAuth } from '~/contexts/client/AuthContext'
 
 const useHeader = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [accountUser, setAccountUser] = useState<UserInfoInterface | null>(null)
-  const [loading, setLoading] = useState(false)
+  // const [accountUser, setAccountUser] = useState<UserInfoInterface | null>(null)
   const [openProduct, setOpenProduct] = useState(false)
   const [openArticle, setOpenArticle] = useState(false)
   const [searchTerm, setSearchTerm] = useState(searchParams.get('keyword') || '')
@@ -26,6 +23,8 @@ const useHeader = () => {
   const [isSuggestLoading, setIsSuggestLoading] = useState(false)
   const [visibleCount, setVisibleCount] = useState(4)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const { accountUser, logout } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
 
   // === THÊM STATE CHO RESPONSIVE ===
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -33,7 +32,7 @@ const useHeader = () => {
 
   const { dispatchAlert } = useAlertContext()
   const { dataHome, setDataHome } = useHome()
-  const { settingGeneral, setSettingGeneral } = useSettingGeneral()
+  const { settingGeneral } = useSettingGeneral()
   const { cartDetail } = useCart()
 
   const [closeTopHeader, setCloseTopHeader] = useState<boolean>(() => {
@@ -44,19 +43,13 @@ const useHeader = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
-        const [settingRes, userRes, homeRes] = await Promise.all([
-          fetchSettingGeneralAPI(),
-          fetchInfoUserAPI(),
-          fetchHomeAPI()
-        ])
-        setSettingGeneral(settingRes.settingGeneral)
-        setAccountUser(userRes.accountUser)
+        setIsLoading(true)
+        const homeRes = await fetchHomeAPI()
         setDataHome(homeRes)
       } catch (error) {
         console.log('error' + error)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
     fetchData()
@@ -124,10 +117,9 @@ const useHeader = () => {
         type: 'SHOW_ALERT',
         payload: { message: response.message, severity: 'success' }
       })
-      setAccountUser(null)
-      setTimeout(() => {
-        navigate('/')
-      })
+      // setAccountUser(null)
+      await logout()
+      navigate('/')
     } else if (response.code === 400) {
       alert('error: ' + response.error)
     }
@@ -181,7 +173,6 @@ const useHeader = () => {
   }
 
   return {
-    loading,
     accountUser,
     closeTopHeader,
     handleCloseTopHeader,
@@ -209,7 +200,8 @@ const useHeader = () => {
     isMobileSearchOpen,
     toggleMobileMenu,
     toggleMobileSearch,
-    searchTerm
+    searchTerm,
+    isLoading
   }
 }
 

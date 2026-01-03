@@ -15,7 +15,7 @@ export const initialState: ProductStates = {
   keyword: '',
   sortKey: '',
   sortValue: '',
-  loading: false,
+  isLoading: false,
   allProducts: []
 }
 
@@ -25,7 +25,7 @@ export function productReducer(
 ): ProductStates {
   switch (actionProduct.type) {
     case 'SET_LOADING':
-      return { ...stateProduct, loading: actionProduct.payload }
+      return { ...stateProduct, isLoading: actionProduct.payload }
     case 'SET_DATA':
       return { ...stateProduct, ...actionProduct.payload }
     default:

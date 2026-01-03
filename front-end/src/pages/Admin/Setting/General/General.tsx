@@ -1,20 +1,12 @@
 import Skeleton from '@mui/material/Skeleton'
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchSettingGeneralAPI } from '~/apis/admin/settingGeneral.api'
-import { useAuth } from '~/contexts/admin/AuthContext'
-
-import type { SettingGeneralDetailInterface, SettingGeneralInfoInterface } from '~/types/setting.type'
+import useSettingsGeneral from '~/hooks/Admin/settingsGeneral/useSettingsGeneral'
 
 const General = () => {
-  const [general, setGeneral] = useState<SettingGeneralInfoInterface | null>(null)
-  const { role } = useAuth()
-
-  useEffect(() => {
-    fetchSettingGeneralAPI().then((response: SettingGeneralDetailInterface) => {
-      setGeneral(response.settingGeneral[0])
-    })
-  }, [])
+  const {
+    general,
+    role
+  } = useSettingsGeneral()
 
   return (
     <>

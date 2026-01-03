@@ -1,24 +1,60 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { fetchCreateArticleCategoryAPI } from '~/apis/admin/articleCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleCategoryContext } from '~/contexts/admin/ArticleCategoryContext'
-import type { ArticleCategoryForm } from '~/types/articleCategory.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
-export const useCreate = () => {
-  const initialArticleCategory: ArticleCategoryForm = {
-    title: '',
-    status: 'ACTIVE',
-    descriptionShort: '',
-    descriptionDetail: '',
-    thumbnail: '',
-    children: [],
-    slug: '',
-    parent_id: ''
-  }
+const createArticleCategorySchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, 'Tiêu đề là bắt buộc')
+    .max(100, 'Tiêu đề không được quá 100 ký tự')
+    .transform((val) => val.replace(/\s+/g, ' ')),
 
-  const [articleCategoryInfo, setArticleCategoryInfo] = useState<ArticleCategoryForm>(initialArticleCategory)
+  parent_id: z.string()
+    .optional(),
+
+  descriptionShort: z.string()
+    .trim()
+    .optional(),
+
+  descriptionDetail: z.string()
+    .trim()
+    .optional(),
+
+  status: z.enum(['ACTIVE', 'INACTIVE'], {
+    message: 'Trạng thái không hợp lệ!'
+  }),
+
+  thumbnail: z.any()
+    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
+})
+
+type CreateArticleCategoryFormData = z.infer<typeof createArticleCategorySchema>
+
+export const useCreate = () => {
+  const {
+    register,
+    handleSubmit: handleSubmitForm,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch
+  } = useForm<CreateArticleCategoryFormData>({
+    resolver: zodResolver(createArticleCategorySchema),
+    defaultValues: {
+      title: '',
+      parent_id: '',
+      descriptionShort: '',
+      descriptionDetail: '',
+      status: 'ACTIVE',
+      thumbnail: null
+    }
+  })
+
   const { stateArticleCategory } = useArticleCategoryContext()
   const { dispatchAlert } = useAlertContext()
   const { allArticleCategories } = stateArticleCategory
@@ -26,24 +62,47 @@ export const useCreate = () => {
   const navigate = useNavigate()
   const [preview, setPreview] = useState<string | null>(null)
   const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
-  // const uploadImagePreviewRef = useRef<HTMLImageElement | null>(null)
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+
+  const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      setPreview(imageUrl)
+      // Validate
+      if (file.size > 5 * 1024 * 1024) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Kích thước ảnh không được vượt quá 5MB', severity: 'error' }
+        })
+        return
+      }
+      if (!file.type.startsWith('image/')) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Vui lòng chọn file ảnh', severity: 'error' }
+        })
+        return
+      }
+
+      // Cleanup old preview
+      if (preview) URL.revokeObjectURL(preview)
+
+      setPreview(URL.createObjectURL(file))
+      setValue('thumbnail', file)
     }
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    formData.append('descriptionShort', articleCategoryInfo.descriptionShort)
-    formData.append('descriptionDetail', articleCategoryInfo.descriptionDetail)
-    const file = uploadImageInputRef.current?.files?.[0]
-    if (file) {
-      formData.set('thumbnail', file) // hoặc append nếu bạn chưa có key
+  const onSubmit = async (data: CreateArticleCategoryFormData): Promise<void> => {
+    const formData = new FormData()
+
+    formData.append('title', data.title)
+    formData.append('parent_id', data.parent_id || '')
+    formData.append('descriptionShort', data.descriptionShort || '')
+    formData.append('descriptionDetail', data.descriptionDetail || '')
+    formData.append('status', data.status)
+
+    if (data.thumbnail instanceof File) {
+      formData.append('thumbnail', data.thumbnail)
     }
+
     const response = await fetchCreateArticleCategoryAPI(formData)
     if (response.code === 201) {
       dispatchAlert({
@@ -53,6 +112,11 @@ export const useCreate = () => {
       setTimeout(() => {
         navigate('/admin/articles-category')
       }, 2000)
+    } else {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: response.message, severity: 'error' }
+      })
     }
   }
 
@@ -60,15 +124,20 @@ export const useCreate = () => {
     event.preventDefault()
     uploadImageInputRef.current?.click()
   }
+
   return {
     allArticleCategories,
-    articleCategoryInfo,
-    setArticleCategoryInfo,
     uploadImageInputRef,
     preview,
-    handleChange,
-    handleSubmit,
+    handleThumbnailChange,
     handleClick,
-    role
+    handleSubmit: handleSubmitForm(onSubmit),
+    role,
+    // React Hook Form
+    register,
+    errors,
+    isSubmitting,
+    setValue,
+    watch
   }
 }

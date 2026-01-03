@@ -15,7 +15,7 @@ interface ProductCategoryTrashContextType {
 
 const ProductCategoryTrashContext = createContext<ProductCategoryTrashContextType | null>(null)
 
-export const ProductCategoryTrashProvider = ({ children }: { children: React.ReactNode }) => {
+export const ProductCategoryTrashAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateProductCategory, dispatchProductCategory] = useReducer(productCategoryReducer, initialState)
 
   const fetchProductCategoryTrash = useCallback(

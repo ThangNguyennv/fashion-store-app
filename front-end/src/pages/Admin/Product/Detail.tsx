@@ -1,24 +1,15 @@
 import Skeleton from '@mui/material/Skeleton'
 import { Link } from 'react-router-dom'
 import { useDetail } from '~/hooks/Admin/Product/useDetail'
-import { FaStar, FaRegStar } from 'react-icons/fa'
 
 const DetailProduct = () => {
   const {
     productDetail,
     id,
-    role
+    role,
+    renderStars
   } = useDetail()
-  const renderStars = (average: number) => {
-    const fullStars = Math.floor(average)
-    const emptyStars = 5 - fullStars
-    return (
-      <>
-        {Array.from({ length: fullStars }, (_, i) => <FaStar key={`star-${i}`} />)}
-        {Array.from({ length: emptyStars }, (_, i) => <FaRegStar key={`reg-star-${i}`} />)}
-      </>
-    )
-  }
+
   return (
     <>
       {role && role.permissions.includes('products_view') && (
@@ -28,21 +19,16 @@ const DetailProduct = () => {
               <h1 className='text-3xl font-bold text-gray-800'>{productDetail.title}</h1>
             </div>
 
-            {/* Bố cục 2 cột */}
             <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-              {/* Cột trái: Hình ảnh */}
               <div className='flex items-center justify-center'>
                 <img
                   src={productDetail.thumbnail}
                   alt={productDetail.title}
                   className='w-[full] h-[400px] object-cover rounded-lg shadow-md'
                 />
-                {/* Có thể thêm gallery ảnh nhỏ ở đây */}
               </div>
 
-              {/* Cột phải: Thông tin chi tiết */}
               <div className='flex flex-col gap-6'>
-                {/* Nhóm giá và đánh giá */}
                 <div>
                   <div className='flex items-baseline gap-3 mb-3'>
                     <span className='text-3xl font-bold text-red-600'>
@@ -67,7 +53,6 @@ const DetailProduct = () => {
 
                 <hr/>
 
-                {/* Nhóm màu sắc và kích cỡ */}
                 <div className='flex flex-col gap-4'>
                   <div>
                     <h3 className='font-semibold mb-2'>Màu sắc:</h3>
@@ -100,7 +85,6 @@ const DetailProduct = () => {
 
                 <hr/>
 
-                {/* Nhóm thông tin kho & trạng thái */}
                 <div className='text-sm grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-lg'>
                   <div><b>Tồn kho:</b> {productDetail.stock} sản phẩm</div>
                   <div><b>Trạng thái:</b> {
@@ -111,25 +95,23 @@ const DetailProduct = () => {
                   </div>
                 </div>
 
-                {/* Nút chỉnh sửa */}
                 <div className='flex items-center justify-start gap-[5px]'>
-                  <Link
-                    to={'/admin/products'}
-                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
-                  >
-                  Quay lại
-                  </Link>
                   <Link
                     to={`/admin/products/edit/${id}`}
                     className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
                   >
                     Chỉnh sửa
                   </Link>
+                  <Link
+                    to={'/admin/products'}
+                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
+                  >
+                  Quay lại
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Phần mô tả ở dưới cùng */}
             <div className='mt-10 pt-6 border-t'>
               <h2 className='text-2xl font-bold mb-4'>Mô tả sản phẩm</h2>
               <div className='prose max-w-none' dangerouslySetInnerHTML={{ __html: productDetail.description }} />

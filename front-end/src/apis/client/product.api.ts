@@ -1,24 +1,13 @@
 import axios from 'axios'
-import type { ProductAllResponseInterface, ProductDetailInterface, ProductsWithCategoryDetailInterface } from '~/types/product.type'
+import type { AllParams } from '~/types/helper.type'
+import type { ProductAPIResponse, ProductDetailInterface, ProductsWithCategoryDetailInterface } from '~/types/product.type'
 import { API_ROOT } from '~/utils/constants'
 
-export interface FetchProductParams {
-  page?: number
-  keyword?: string
-  sortKey?: string
-  sortValue?: string
-  category?: string
-  maxPrice?: string
-  color?: string
-  size?: string
-}
-
-export const fetchAllProductsAPI = async (
-  params: FetchProductParams = {}
-): Promise<ProductAllResponseInterface> => {
+export const fetchProductAPI = async (
+  params: AllParams = {}
+): Promise<ProductAPIResponse> => {
   const queryParams = new URLSearchParams()
 
-  // Tự động thêm các tham số vào URL nếu chúng tồn tại
   if (params.page) queryParams.set('page', params.page.toString())
   if (params.keyword) queryParams.set('keyword', params.keyword)
   if (params.sortKey) queryParams.set('sortKey', params.sortKey)
@@ -29,14 +18,16 @@ export const fetchAllProductsAPI = async (
   if (params.size) queryParams.set('size', params.size)
 
   const response = await axios.get(
-    `${API_ROOT}/products?${queryParams.toString()}`
+    `${API_ROOT}/products?${queryParams.toString()}`,
+    { withCredentials: true }
   )
   return response.data
 }
 
-export const fetchProductsAPI = async (): Promise<ProductAllResponseInterface> => {
+export const fetchProductsAPI = async (): Promise<ProductAPIResponse> => {
   const response = await axios.get(
-    `${API_ROOT}/products`
+    `${API_ROOT}/products`,
+    { withCredentials: true }
   )
   return response.data
 }
@@ -59,13 +50,17 @@ export const fetchDetailProductCategoryAPI = async (slugCategory: string): Promi
 
 export const fetchSearchSuggestionsAPI = async (keyword: string) => {
   const response = await axios.get(
-    `${API_ROOT}/products/suggestions?keyword=${keyword}`
+    `${API_ROOT}/products/suggestions?keyword=${keyword}`,
+    { withCredentials: true }
   )
   return response.data
 }
 
 export const fetchRelatedProductsAPI = async (productId: string) => {
-  const response = await axios.get(`${API_ROOT}/products/related/${productId}`)
+  const response = await axios.get(
+    `${API_ROOT}/products/related/${productId}`,
+    { withCredentials: true }
+  )
   return response.data
 }
 
@@ -84,7 +79,10 @@ export const submitReviewAPI = async (productId: string, formData: FormData) => 
 }
 
 export const fetchTopRatedReviewsAPI = async () => {
-  const response = await axios.get(`${API_ROOT}/products/reviews/top-rated`)
+  const response = await axios.get(
+    `${API_ROOT}/products/reviews/top-rated`,
+    { withCredentials: true }
+  )
   return response.data
 }
 

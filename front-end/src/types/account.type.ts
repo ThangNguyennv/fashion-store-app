@@ -1,4 +1,4 @@
-import type { RolesInfoInterface } from './role.type'
+import type { RoleInfoInterface } from './role.type'
 
 export interface AccountInfoInterface {
   _id: string,
@@ -7,22 +7,21 @@ export interface AccountInfoInterface {
   email: string,
   password: string,
   phone: string,
-  status: string,
-  token: string,
+  status: 'ACTIVE' | 'INACTIVE',
   role_id: string
 }
 
-export interface MyAccountDetailInterface {
+export interface MyAccountAPIResponse {
   myAccount: AccountInfoInterface,
-  role: RolesInfoInterface
+  role: RoleInfoInterface
 }
 
 export interface AccountsDetailInterface {
   accounts: AccountInfoInterface[],
-  roles: RolesInfoInterface[]
+  roles: RoleInfoInterface[]
 }
 
 export interface AccountDetailInterface {
   account: AccountInfoInterface,
-  roles: RolesInfoInterface[]
+  roles: RoleInfoInterface[]
 }

@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import BoxHead from '~/components/Client/BoxHead/BoxHead'
 import CardItem from '~/components/Client/CardItem/CardItem'
 import Pagination from '~/components/Admin/Pagination/Pagination'
-import { useProductContext } from '~/contexts/client/ProductContext'
 import Skeleton from '@mui/material/Skeleton'
 import { FilterSidebar } from '~/components/Client/FilterSidebar/FilterSidebar'
 import { FaFilter, FaTimes, FaSort } from 'react-icons/fa'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SortDropdown } from '~/components/Client/SortDropdown/SortDropdown'
+import useProduct from '~/hooks/client/product/useProduct'
 
 const CardItemSkeleton = () => (
   <div className="flex flex-col items-center gap-[15px] rounded-[5px] border border-gray-200 bg-white p-[10px] text-center h-full">
@@ -22,60 +21,20 @@ const CardItemSkeleton = () => (
 )
 
 const ProductClient = () => {
-  const { stateProduct, fetchProduct } = useProductContext()
-  const { products, pagination, loading } = stateProduct
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isSortOpen, setIsSortOpen] = useState(false)
-  const currentPage = parseInt(searchParams.get('page') || '1', 10)
-  const currentKeyword = searchParams.get('keyword') || ''
-  const currentSortKey = searchParams.get('sortKey') || 'position'
-  const currentSortValue = searchParams.get('sortValue') || 'desc'
-  const currentCategory = searchParams.get('category') || ''
-  const currentMaxPrice = searchParams.get('maxPrice') || ''
-  const currentColor = searchParams.get('color') || ''
-  const currentSize = searchParams.get('size') || ''
+  const {
+    products,
+    setIsFilterOpen,
+    setIsSortOpen,
+    pagination,
+    updateParams,
+    isFilterOpen,
+    isSortOpen,
+    handleSort,
+    sortKey,
+    sortValue,
+    isLoading
+  } = useProduct()
 
-  useEffect(() => {
-    // === SỬA LỖI: TRUYỀN TẤT CẢ PARAMS VÀO FETCHPRODUCT ===
-    fetchProduct({
-      page: currentPage,
-      keyword: currentKeyword,
-      sortKey: currentSortKey,
-      sortValue: currentSortValue,
-      category: currentCategory,
-      maxPrice: currentMaxPrice,
-      color: currentColor,
-      size: currentSize
-    })
-  }, [
-    currentPage, currentKeyword, currentSortKey, currentSortValue,
-    currentCategory, currentMaxPrice, currentColor, currentSize,
-    fetchProduct
-  ])
-
-  // Khóa cuộn trang khi mở filter trên mobile
-  useEffect(() => {
-    document.body.style.overflow = (isFilterOpen || isSortOpen) ? 'hidden' : 'auto'
-  }, [isFilterOpen, isSortOpen])
-
-  const updateSearchParams = (key: string, value: string): void => {
-    const newParams = new URLSearchParams(searchParams)
-    if (value) {
-      newParams.set(key, value)
-    } else {
-      newParams.delete(key)
-    }
-    setSearchParams(newParams)
-  }
-  const handleSortChange = (key: string, value: string) => {
-    const newParams = new URLSearchParams(searchParams)
-    newParams.set('sortKey', key)
-    newParams.set('sortValue', value)
-    newParams.set('page', '1') // Luôn reset về trang 1 khi sắp xếp
-    setSearchParams(newParams)
-    setIsSortOpen(false) // Đóng drawer sort (nếu đang mở)
-  }
   return (
     <>
       <div className="flex items-center justify-center">
@@ -115,12 +74,12 @@ const ProductClient = () => {
                   {pagination.currentPage}/{pagination.totalPage || 0} trang
                 </span>
                 <SortDropdown
-                  sortKey={currentSortKey}
-                  sortValue={currentSortValue}
-                  onSortChange={handleSortChange}
+                  sortKey={sortKey}
+                  sortValue={sortValue}
+                  onSortChange={handleSort}
                 />
               </div>
-              {loading ? (
+              {isLoading ? (
               // 5. Hiển thị Skeleton UI
                 <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6'>
                   {Array.from({ length: 9 }).map((_, index) => (
@@ -141,9 +100,9 @@ const ProductClient = () => {
                   {pagination && pagination.totalPage > 1 && (
                     <Pagination
                       pagination={pagination}
-                      handlePagination={(page: number) => updateSearchParams('page', (page).toString())}
-                      handlePaginationPrevious={(page: number) => updateSearchParams('page', (page - 1).toString())}
-                      handlePaginationNext={(page: number) => updateSearchParams('page', (page + 1).toString())}
+                      handlePagination={(page: number) => updateParams({ page: page })}
+                      handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
+                      handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
                       items={products}
                     />
                   )}
@@ -217,9 +176,9 @@ const ProductClient = () => {
                 </div>
                 <div className="flex flex-col gap-2">
                   <SortDropdown
-                    sortKey={currentSortKey}
-                    sortValue={currentSortValue}
-                    onSortChange={handleSortChange}
+                    sortKey={sortKey}
+                    sortValue={sortValue}
+                    onSortChange={handleSort}
                     isMobile={true} // Báo cho component con biết đây là bản mobile
                   />
                 </div>

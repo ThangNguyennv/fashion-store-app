@@ -1,7 +1,7 @@
 import type { ArticleAPIResponse } from '~/types/article.type'
 import type { ArticleDetailInterface } from '~/types/article.type'
 import type { AllParams } from '~/types/helper.type'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchArticleAPI = async (
@@ -15,8 +15,7 @@ export const fetchArticleAPI = async (
   if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/articles?${queryParams.toString()}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/articles?${queryParams.toString()}`
   )
   return response.data
 }
@@ -24,16 +23,14 @@ export const fetchArticleAPI = async (
 export const fetchChangeStatusAPI = async (status: string, id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles/change-status/${status}/${id}`,
-    { status },
-    { withCredentials: true }
+    { status }
   )
   return response.data
 }
 
 export const fetchDetailArticleAPI = async (id: string): Promise<ArticleDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/articles/detail/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/articles/detail/${id}`
   )
   return response.data
 }
@@ -41,16 +38,14 @@ export const fetchDetailArticleAPI = async (id: string): Promise<ArticleDetailIn
 export const fetchEditArticleAPI = async (id: string, formData: FormData) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles/edit/${id}`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
 
 export const fetchDeleteArticleAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/articles/delete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/articles/delete/${id}`
   )
   return response.data
 }
@@ -58,8 +53,7 @@ export const fetchDeleteArticleAPI = async (id: string) => {
 export const fetchChangeMultiAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/articles/change-multi`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
@@ -67,8 +61,7 @@ export const fetchChangeMultiAPI = async (data: { ids: string[], type: string })
 export const fetchCreateArticleAPI = async (formData: FormData) => {
   const response = await authorizedAxiosInstance.post(
     `${API_ROOT}/admin/articles/create`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }

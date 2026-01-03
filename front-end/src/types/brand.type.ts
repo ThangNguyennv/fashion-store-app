@@ -1,46 +1,47 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GeneralInfoInterface, HelperInterface, ParamsInterface } from './helper.type'
+import type { GeneralInfoInterface, HelperInterface, PaginationInterface, ParamsInterface } from './helper.type'
 
 export interface BrandCategory extends GeneralInfoInterface {
- parent_id?: string
- description?: string
- children?: BrandCategory[] // Dùng để tạo cây (tree)
+  parent_id?: string
+  description?: string
+  children?: BrandCategory[] // Dùng để tạo cây (tree)
 }
 
 export interface BrandCategoriesResponseInterface {
- code: number
- message: string
- categories: BrandCategory[]
+  code: number
+  message: string
+  categories: BrandCategory[]
 }
 
 export interface Brand extends GeneralInfoInterface {
- description?: string
- brand_category_id?: string
+  description?: string
+  brand_category_id?: string
 }
 
-// --- Brand Group (Dữ liệu trả về từ API Client) ---
-// Đây là kiểu dữ liệu mà aggregation pipeline trong brand.controller.ts trả về
 export interface BrandGroup {
-  categoryTitle: string
-  categorySlug?: string
-  brands: Brand[]
+  _id?: string
+  title: string
+  slug?: string
+  thumbnail: string
+  status: 'ACTIVE' | 'INACTIVE'
+  pagination: PaginationInterface
 }
 
 export interface BrandsClientResponseInterface {
- code: number
- message: string
- data: BrandGroup[]
+  code: number
+  message: string
+  brands: BrandGroup[]
 }
 
 export interface BrandsAdminResponseInterface {
- code: number
- message: string
- brands: Brand[]
- pagination?: any
+  code: number
+  message: string
+  brands: Brand[]
+  pagination?: any
 }
 
 export interface BrandStates extends HelperInterface, ParamsInterface {
- brands: Brand[]
+  brands: Brand[]
 }
 
 export type BrandActions =

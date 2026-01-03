@@ -13,7 +13,7 @@ const UnauthorizedRoutesAdmin = () => {
     )
   }
   if (isAuthenticated) {
-    return <Navigate to="/admin/dashboard" replace={true}/>
+    return <Navigate to="/admin/admin-welcome" replace={true}/>
   }
   return <Outlet />
 }

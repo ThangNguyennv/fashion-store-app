@@ -1,6 +1,6 @@
 import type { AllParams } from '~/types/helper.type'
 import type { OrderAPIResponse, OrderDetailInterface } from '~/types/order.type'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchOrdersAPI = async (
@@ -14,8 +14,7 @@ export const fetchOrdersAPI = async (
   if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/orders?${queryParams.toString()}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/orders?${queryParams.toString()}`
   )
   return response.data
 }
@@ -23,8 +22,7 @@ export const fetchOrdersAPI = async (
 export const fetchChangeStatusAPI = async (status: string, id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/change-status/${status}/${id}`,
-    { status },
-    { withCredentials: true }
+    { status }
   )
   return response.data
 }
@@ -32,24 +30,21 @@ export const fetchChangeStatusAPI = async (status: string, id: string) => {
 export const fetchChangeMultiAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/change-multi`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
 
 export const fetchDeleteOrderAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/orders/delete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/orders/delete/${id}`
   )
   return response.data
 }
 
 export const fetchDetailOrderAPI = async (id: string): Promise<OrderDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/orders/detail/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/orders/detail/${id}`
   )
   return response.data
 }
@@ -57,8 +52,7 @@ export const fetchDetailOrderAPI = async (id: string): Promise<OrderDetailInterf
 export const fetchEditEstimatedDeliveryDay = async ( data: { estimatedDeliveryDay: string, id: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/edit-estimatedDeliveryDay`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
@@ -66,8 +60,7 @@ export const fetchEditEstimatedDeliveryDay = async ( data: { estimatedDeliveryDa
 export const fetchEditEstimatedConfirmedDay = async (data: { estimatedConfirmedDay: string, id: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/edit-estimatedConfirmedDay`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
@@ -82,8 +75,7 @@ export const fetchOrderTrashAPI = async (
   if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/orders/trash?${queryParams.toString()}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/orders/trash?${queryParams.toString()}`
   )
   return response.data
 }
@@ -91,16 +83,14 @@ export const fetchOrderTrashAPI = async (
 export const fetchChangeMultiTrashAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/trash/form-change-multi-trash`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
 
 export const fetchPermanentlyDeleteOrderAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/orders/trash/permanentlyDelete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/orders/trash/permanentlyDelete/${id}`
   )
   return response.data
 }
@@ -108,8 +98,7 @@ export const fetchPermanentlyDeleteOrderAPI = async (id: string) => {
 export const fetchRecoverOrderAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/orders/trash/recover/${id}`,
-    {},
-    { withCredentials: true }
+    {}
   )
   return response.data
 }

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { fetchDashboardAPI } from '~/apis/admin/dashboard.api'
-import type { DashboardInterface } from '~/types/dashboard.type'
+import { fetchStatisticAPI } from '~/apis/admin/statistic.api'
+import type { StatisticInterface } from '~/types/statistic.type'
 import type { ChartData } from 'chart.js'
+import { useAuth } from '~/contexts/admin/AuthContext'
 
 type AnyChartData =
   | ChartData<'line'>
   | ChartData<'bar'>
   | ChartData<'doughnut'>
 
-export const useDashboard = () => {
+export const useStatistic = () => {
   const [statistic, setStatistic] = useState({
     user: {
       total: 0
@@ -27,11 +28,12 @@ export const useDashboard = () => {
     labels: [],
     datasets: []
   })
+  const { role } = useAuth()
 
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
-        const res: DashboardInterface = await fetchDashboardAPI()
+        const res: StatisticInterface = await fetchStatisticAPI()
         setStatistic(res.statistic)
         if (res && res.labels && res.data) {
           setChartData({
@@ -58,6 +60,7 @@ export const useDashboard = () => {
 
   return {
     statistic,
-    chartData
+    chartData,
+    role
   }
 }

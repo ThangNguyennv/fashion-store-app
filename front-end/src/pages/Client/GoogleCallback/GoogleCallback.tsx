@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-console */
 // src/pages/GoogleCallback.tsx
 import { useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { useAuth } from '~/contexts/client/AuthContext'
 import { CircularProgress, Box } from '@mui/material'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosClient'
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams()
@@ -13,42 +12,43 @@ const GoogleCallback = () => {
   const { setAccountUser } = useAuth()
 
   useEffect(() => {
-    handleCallback()
-  }, [])
+    const handleCallback = async () => {
+      const accessTokenUser = searchParams.get('accessTokenUser')
+      const refreshTokenUser = searchParams.get('refreshTokenUser')
+      const cartId = searchParams.get('cartId')
 
-  const handleCallback = async () => {
-    const tokenUser = searchParams.get('tokenUser')
-    const cartId = searchParams.get('cartId')
-
-    if (!tokenUser) {
+      if (!accessTokenUser || !refreshTokenUser) {
       // Không có tokenUser, redirect về login
-      navigate('/user/login', { replace: true })
-      return
+        navigate('/user/login', { replace: true })
+        return
+      }
+
+      try {
+        // 1. Gọi API để Backend set cặp Cookies HttpOnly
+        await authorizedAxiosInstance.post(
+          `${import.meta.env.VITE_API_ROOT}/user/set-auth-cookies`,
+          { accessTokenUser, refreshTokenUser, cartId },
+          { withCredentials: true }
+        )
+
+        // 2. Lấy thông tin User để đưa vào Context
+        const response = await authorizedAxiosInstance.get(
+          `${import.meta.env.VITE_API_ROOT}/user/account/info`,
+          { withCredentials: true }
+        )
+        setAccountUser(response.data.accountUser)
+
+        // 3. Xong xuôi, về trang chủ
+        navigate('/', { replace: true })
+      } catch (error) {
+        console.error('Lỗi Google callback:', error)
+        navigate('/user/login?error=callback_failed', { replace: true })
+      }
     }
 
-    try {
-      // Set cookies
-      await axios.post(
-        `${import.meta.env.VITE_API_ROOT}/user/set-auth-cookies`,
-        { tokenUser, cartId },
-        { withCredentials: true }
-      )
+    handleCallback()
+  }, [searchParams, navigate, setAccountUser])
 
-      // Fetch user info
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_ROOT}/user/account/info`,
-        { withCredentials: true }
-      )
-      setAccountUser(response.data.accountUser)
-
-      // Redirect về trang chủ
-      navigate('/', { replace: true })
-
-    } catch (error) {
-      console.error('Lỗi Google callback:', error)
-      navigate('/user/login?error=callback_failed', { replace: true })
-    }
-  }
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">

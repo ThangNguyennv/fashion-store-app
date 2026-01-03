@@ -11,3 +11,4 @@ export const fetchSearchAPI = async (currentKeyword: string): Promise<SearchInte
   )
   return response.data
 }
+

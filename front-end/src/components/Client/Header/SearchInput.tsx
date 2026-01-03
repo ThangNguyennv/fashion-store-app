@@ -1,6 +1,6 @@
 import { memo, type FormEvent } from 'react'
 import { IoSearch } from 'react-icons/io5'
-import type { SearchInputProps } from '~/hooks/client/components/searchInput/useSearchInput'
+import type { SearchInputProps } from '~/hooks/client/searchInput/useSearchInput'
 import clsx from 'clsx'
 
 

@@ -1,47 +1,166 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailProductCategoryAPI, fetchEditProductCategoryAPI } from '~/apis/admin/productCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
-import type { ProductCategoryDetailInterface, ProductCategoryInfoInterface } from '~/types/productCategory.type'
+import type { ProductCategoryDetailInterface } from '~/types/productCategory.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const editProductCategorySchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, 'Tiêu đề là bắt buộc')
+    .max(100, 'Tiêu đề không được quá 100 ký tự')
+    .transform((val) => val.replace(/\s+/g, ' ')),
+
+  parent_id: z.string().optional(),
+
+  description: z.string()
+    .trim()
+    .optional(),
+
+  status: z.enum(['ACTIVE', 'INACTIVE'], {
+    message: 'Trạng thái không hợp lệ!'
+  }),
+
+  thumbnail: z.any()
+    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
+})
+
+type EditProductCategoryFormData = z.infer<typeof editProductCategorySchema>
 
 export const useEdit = () => {
-  const [productCategoryInfo, setProductCategoryInfo] = useState<ProductCategoryInfoInterface | null>(null)
   const params = useParams()
   const id = params.id as string
+  const [isLoading, setIsLoading] = useState(true)
   const { stateProductCategory } = useProductCategoryContext()
   const { allProductCategories } = stateProductCategory
   const { dispatchAlert } = useAlertContext()
   const navigate = useNavigate()
   const { role } = useAuth()
 
+  const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+  const [originalThumbnail, setOriginalThumbnail] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit: handleSubmitForm,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+    watch
+  } = useForm<EditProductCategoryFormData>({
+    resolver: zodResolver(editProductCategorySchema),
+    defaultValues: {
+      title: '',
+      parent_id: '',
+      description: '',
+      status: 'ACTIVE',
+      thumbnail: null
+    }
+  })
+
+  // Load data từ API
   useEffect(() => {
     if (!id) return
-    fetchDetailProductCategoryAPI(id)
-      .then((response: ProductCategoryDetailInterface) => {
-        setProductCategoryInfo(response.productCategory)
-      })
-  }, [id])
 
-  const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
-  const uploadImagePreviewRef = useRef<HTMLImageElement | null>(null)
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        const response: ProductCategoryDetailInterface = await fetchDetailProductCategoryAPI(id)
+        const category = response.productCategory
+
+        reset({
+          title: category.title,
+          parent_id: category.parent_id || '',
+          description: category.description || '',
+          status: category.status,
+          thumbnail: category.thumbnail
+        })
+
+        setThumbnailPreview(category.thumbnail)
+        setOriginalThumbnail(category.thumbnail)
+      } catch (error) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: {
+            message: 'Không thể tải thông tin danh mục. Vui lòng thử lại!',
+            severity: 'error'
+          }
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [id, reset, dispatchAlert])
+
+  // Cleanup blob URL
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(thumbnailPreview)
+      }
+    }
+  }, [thumbnailPreview])
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0]
-    if (file && uploadImagePreviewRef.current) {
-      uploadImagePreviewRef.current.src = URL.createObjectURL(file)
+    if (file) {
+      // Validate file size
+      if (file.size > 5 * 1024 * 1024) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Kích thước ảnh không được vượt quá 5MB', severity: 'error' }
+        })
+        return
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Vui lòng chọn file ảnh', severity: 'error' }
+        })
+        return
+      }
+
+      // Cleanup old blob
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(thumbnailPreview)
+      }
+
+      setThumbnailFile(file)
+      setThumbnailPreview(URL.createObjectURL(file))
+      setValue('thumbnail', file)
     }
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    if (!productCategoryInfo) return
+  const onSubmit = async (data: EditProductCategoryFormData): Promise<void> => {
+    const formData = new FormData()
 
-    const formData = new FormData(event.currentTarget)
-    formData.set('title', productCategoryInfo.title)
-    formData.set('description', productCategoryInfo.description)
+    formData.append('title', data.title)
+    formData.append('parent_id', data.parent_id || '')
+    formData.append('description', data.description || '')
+    formData.append('status', data.status)
+
+    // Nếu có file mới, gửi file. Nếu không, giữ URL cũ
+    if (thumbnailFile) {
+      formData.append('thumbnail', thumbnailFile)
+    } else {
+      formData.append('thumbnail', originalThumbnail || '')
+    }
 
     const response = await fetchEditProductCategoryAPI(id, formData)
+
     if (response.code === 200) {
       dispatchAlert({
         type: 'SHOW_ALERT',
@@ -50,6 +169,11 @@ export const useEdit = () => {
       setTimeout(() => {
         navigate(`/admin/products-category/detail/${id}`)
       }, 2000)
+    } else {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: response.message || 'Có lỗi xảy ra', severity: 'error' }
+      })
     }
   }
 
@@ -59,14 +183,18 @@ export const useEdit = () => {
   }
 
   return {
+    isLoading,
     allProductCategories,
-    productCategoryInfo,
-    setProductCategoryInfo,
     uploadImageInputRef,
-    uploadImagePreviewRef,
+    thumbnailPreview,
     handleChange,
-    handleSubmit,
+    handleSubmit: handleSubmitForm(onSubmit),
     handleClick,
-    role
+    role,
+    register,
+    errors,
+    isSubmitting,
+    setValue,
+    watch
   }
 }

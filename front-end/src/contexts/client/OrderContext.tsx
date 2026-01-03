@@ -3,19 +3,13 @@
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchOrdersAPI } from '~/apis/client/order.api'
 import { initialState, orderReducer } from '~/reducers/client/orderReducer'
-import type { OrderActions, OrderAllResponseInterface, OrderStates } from '~/types/order.type'
+import type { AllParams } from '~/types/helper.type'
+import type { OrderAction, OrderAPIResponse, OrderState } from '~/types/order.type'
 
 interface OrderContextType {
-  stateOrder: OrderStates
-  fetchOrder: (params?: {
-    status?: string
-    page?: number
-    keyword?: string
-    sortKey?: string
-    sortValue?: string,
-    date?: string,
-  }) => Promise<void>
-  dispatchOrder: React.Dispatch<OrderActions>
+  stateOrder: OrderState
+  fetchOrder: (params?: AllParams) => Promise<void>
+  dispatchOrder: React.Dispatch<OrderAction>
 }
 
 const OrderContext = createContext<OrderContextType | null>(null)
@@ -24,33 +18,19 @@ export const OrderClientProvider = ({ children }: { children: React.ReactNode })
   const [stateOrder, dispatchOrder] = useReducer(orderReducer, initialState)
 
   const fetchOrder = useCallback(
-    async ({
-      status = '',
-      page = 1,
-      keyword = '',
-      sortKey = '',
-      sortValue = '',
-      date = ''
-    } = {}) => {
+    async (params: AllParams = {}) => {
       dispatchOrder({ type: 'SET_LOADING', payload: true })
       try {
-        const res: OrderAllResponseInterface = await fetchOrdersAPI(
-          status,
-          page,
-          keyword,
-          sortKey,
-          sortValue,
-          date
-        )
+        const res: OrderAPIResponse = await fetchOrdersAPI(params)
         dispatchOrder({
           type: 'SET_DATA',
           payload: {
             orders: res.orders,
             pagination: res.pagination,
             keyword: res.keyword,
-            sortKey,
-            sortValue,
-            date
+            sortKey: params.sortKey || '',
+            sortValue: params.sortValue || '',
+            date: params.date || ''
           }
         })
       } finally {

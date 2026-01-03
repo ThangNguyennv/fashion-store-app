@@ -1,12 +1,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchDeleteRoleAPI, fetchRoleAPI } from '~/apis/admin/role.api'
 import FormatDateTime from '~/components/Admin/Moment/FormatDateTime'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountInfoInterface } from '~/types/account.type'
 import type { UpdatedBy } from '~/types/helper.type'
-import type { RolesInfoInterface, RolesResponseInterface } from '~/types/role.type'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -14,59 +9,19 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Skeleton from '@mui/material/Skeleton'
-import { useAuth } from '~/contexts/admin/AuthContext'
+import useRole from '~/hooks/Admin/role/useRole'
 
 const Role = () => {
-  const [roles, setRoles] = useState<RolesInfoInterface[]>([])
-  const [accounts, setAccounts] = useState<AccountInfoInterface[]>([])
-  const { dispatchAlert } = useAlertContext()
-  const [open, setOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const { role } = useAuth()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res: RolesResponseInterface = await fetchRoleAPI()
-        setRoles(res.roles)
-        setAccounts(res.accounts)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Fetch roles error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const handleOpen = (id: string) => {
-    setSelectedId(id)
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setSelectedId(null)
-    setOpen(false)
-  }
-
-  const handleDelete = async () => {
-    if (!selectedId) return
-    const response = await fetchDeleteRoleAPI(selectedId)
-    if (response.code === 204) {
-      setRoles((prev) => prev.filter((role) => role._id !== selectedId))
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setOpen(false)
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
+  const {
+    roles,
+    accounts,
+    open,
+    loading,
+    role,
+    handleOpen,
+    handleClose,
+    handleDelete
+  } = useRole()
 
   if (loading) {
     return (
@@ -100,6 +55,7 @@ const Role = () => {
                 <TableRow>
                   <TableCell align='center'>STT</TableCell>
                   <TableCell align='center'>Nhóm quyền</TableCell>
+                  <TableCell align='center'>Mã định danh</TableCell>
                   <TableCell align='center'>Mô tả ngắn</TableCell>
                   <TableCell align='center'>Cập nhật lần cuối</TableCell>
                   <TableCell align='center'>Hành động</TableCell>
@@ -113,6 +69,9 @@ const Role = () => {
                     </TableCell>
                     <TableCell align='center'>
                       <Skeleton variant="text" width={110} height={32} sx={{ bgcolor: 'grey.400' }}/>
+                    </TableCell>
+                    <TableCell align='center'>
+                      <Skeleton variant="rectangular" width={20} height={20} sx={{ bgcolor: 'grey.400' }}/>
                     </TableCell>
                     <TableCell align='center'>
                       <Skeleton variant="text" width={130} height={32} sx={{ bgcolor: 'grey.400' }}/>
@@ -165,6 +124,7 @@ const Role = () => {
                 <TableRow className='bg-gray-100'>
                   <TableCell align='center'>STT</TableCell>
                   <TableCell align='center'>Nhóm quyền</TableCell>
+                  <TableCell align='center'>Mã định danh</TableCell>
                   <TableCell align='center'>Mô tả ngắn</TableCell>
                   <TableCell align='center'>Cập nhật lần cuối</TableCell>
                   <TableCell align='center'>Hành động</TableCell>
@@ -176,6 +136,7 @@ const Role = () => {
                     <TableRow key={role._id}>
                       <TableCell align='center'>{index + 1}</TableCell>
                       <TableCell align='center'>{role.title}</TableCell>
+                      <TableCell align='center'>{role.titleId}</TableCell>
                       <TableCell align='center'>
                         <div dangerouslySetInnerHTML={{ __html: role.description }}/>
                       </TableCell>

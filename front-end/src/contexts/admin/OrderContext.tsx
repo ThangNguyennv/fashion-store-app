@@ -15,7 +15,7 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | null>(null)
 
-export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
+export const OrderAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateOrder, dispatchOrder] = useReducer(orderReducer, initialOrderState)
 
   const fetchOrders = useCallback(async (params: AllParams = {}) => {

@@ -18,6 +18,15 @@ export const fetchLogoutAPI = async () => {
   return response.data
 }
 
+export const refreshTokenAPI = async () => {
+  const response = await axios.post(
+    `${API_ROOT}/user/refresh-token`,
+    {},
+    { withCredentials: true }
+  )
+  return response.data
+}
+
 export const fetchRegisterAPI = async (fullName: string, email: string, password: string, confirmPassword: string) => {
   const response = await axios.post(
     `${API_ROOT}/user/register`,
@@ -54,10 +63,10 @@ export const fetchOTPPasswordAPI = async (email: string, otp: string) => {
 //   return response.data
 // }
 
-export const fetchResetPasswordAPI = async (password: string, confirmPassword: string, token: string) => {
+export const fetchResetPasswordAPI = async (password: string, confirmPassword: string, resetToken: string) => {
   const response = await axios.post(
     `${API_ROOT}/user/password/reset`,
-    { password, confirmPassword, token },
+    { password, confirmPassword, resetToken },
     { withCredentials: true }
   )
   return response.data

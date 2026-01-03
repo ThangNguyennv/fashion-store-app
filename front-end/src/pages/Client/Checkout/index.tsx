@@ -1,98 +1,27 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-import { useEffect, useMemo, useState } from 'react'
-import { fetchCartAPI } from '~/apis/client/cart.api'
-import type { CartInfoInterface } from '~/types/cart.type'
-import { fetchOrderAPI } from '~/apis/client/checkout.api'
-import { useCart } from '~/contexts/client/CartContext'
-import { useNavigate } from 'react-router-dom'
 import { MdOutlineLocalShipping } from 'react-icons/md'
 import vnpayLogo from '~/assets/images/Payment/vnpay-logo.png'
 import zalopayLogo from '~/assets/images/Payment/zalopay-logo.png'
 import momoLogo from '~/assets/images/Payment/momo-logo.png'
-import { useAuth } from '~/contexts/client/AuthContext'
+import useCheckout from '~/hooks/client/checkout/useCheckout'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const Checkout = () => {
-  const [cartDetail, setCartDetail] = useState<CartInfoInterface | null>(null)
-  const [, setLoading] = useState(false)
-  const { refreshCart } = useCart()
-  const [paymentMethod, setPaymentMethod] = useState('COD')
-  const navigate = useNavigate()
-  const { accountUser } = useAuth()
-
-  const [formValues, setFormValues] = useState({
-    fullName: '',
-    phone: '',
-    address: '',
-    note: ''
-  })
-
-  useEffect(() => {
-    // Tự động điền thông tin người dùng khi có
-    if (accountUser) {
-      setFormValues(prev => ({
-        ...prev,
-        fullName: accountUser.fullName || '',
-        phone: accountUser.phone || '',
-        address: accountUser.address || ''
-      }))
-    }
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const cartRes = await fetchCartAPI()
-        setCartDetail(cartRes.cartDetail)
-      } catch (error) {
-        console.error('Lỗi khi fetch dữ liệu:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [accountUser])
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormValues(prev => ({ ...prev, [name]: value }))
-  }
-  const totalBill = useMemo(() => {
-    if (!cartDetail?.products) return 0
-    return cartDetail?.products.reduce((acc, item) => {
-      const priceNewForOneProduct =
-      item.product_id.price * (100 - item.product_id.discountPercentage) / 100
-
-      return acc + priceNewForOneProduct * item.quantity
-    }, 0)
-  }, [cartDetail])
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const payload = { ...formValues, paymentMethod }
-    try {
-      const response = await fetchOrderAPI(payload)
-      if (response.code === 201) {
-        await refreshCart()
-        if (paymentMethod === 'COD') {
-          navigate(`/checkout/success/${response.order._id}`)
-        } else if (paymentMethod === 'VNPAY' && response.paymentUrl) {
-          window.location.href = response.paymentUrl
-        } else if (paymentMethod === 'ZALOPAY' && response.order_url) {
-          window.location.href = response.order_url
-        } else if (paymentMethod === 'MOMO' && response.data?.payUrl) {
-          window.location.href = response.data.payUrl
-        }
-        setPaymentMethod('')
-      } else {
-        alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại.')
-      }
-    } catch (error) {
-      alert('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.')
-    }
-  }
+  const {
+    register,
+    handleSubmit,
+    errors,
+    paymentMethod,
+    setPaymentMethod,
+    cartDetail,
+    isSubmitting
+  } = useCheckout()
 
   return (
     <>
+      <Backdrop sx={{ color: '#fff', zIndex: 1000 }} open={isSubmitting}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <div className='bg-gray-50 py-12 mb-[100px]'>
         <div className='container mx-auto px-4'>
           <h1 className='text-3xl font-bold mb-8'>Thanh toán</h1>
@@ -103,102 +32,101 @@ const Checkout = () => {
               <div>
                 <h2 className='text-xl font-semibold mb-4'>Thông tin giao hàng</h2>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                  <div className='form-group'>
-                    <label>Họ và tên</label>
+
+                  <div className='flex flex-col gap-1'>
+                    <label className="font-medium">Họ và tên</label>
                     <input
+                      {...register('fullName')}
                       type="text"
-                      name="fullName"
-                      value={formValues.fullName}
-                      onChange={handleInputChange}
-                      required
+                      className={`border p-2 rounded outline-none focus:ring-1 ${errors.fullName ? 'border-red-500' : 'border-gray-300'}`}
                     />
+                    {errors.fullName && <span className="text-red-500 text-xs">{errors.fullName.message}</span>}
                   </div>
-                  <div className='form-group'>
-                    <label>Số điện thoại</label>
+
+                  <div className='flex flex-col gap-1'>
+                    <label className="font-medium">Số điện thoại</label>
                     <input
+                      {...register('phone')}
                       type="tel"
-                      name="phone"
-                      value={formValues.phone}
-                      onChange={handleInputChange}
-                      required
+                      className={`border p-2 rounded outline-none focus:ring-1 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
                     />
+                    {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
                   </div>
-                  <div className='form-group sm:col-span-2'>
-                    <label>Địa chỉ</label>
+
+                  {/* Địa chỉ */}
+                  <div className='flex flex-col gap-1 sm:col-span-2'>
+                    <label className="font-medium">Địa chỉ</label>
                     <input
+                      {...register('address')}
                       type="text"
-                      name="address"
-                      value={formValues.address}
-                      onChange={handleInputChange}
-                      required
+                      className={`border p-2 rounded outline-none focus:ring-1 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
                     />
+                    {errors.address && <span className="text-red-500 text-xs">{errors.address.message}</span>}
                   </div>
-                  <div className='form-group sm:col-span-2'>
-                    <label>Ghi chú (tùy chọn)</label>
-                    <textarea name="note" value={formValues.note} onChange={handleInputChange} rows={3}></textarea>
+
+                  {/* Ghi chú */}
+                  <div className='flex flex-col gap-1 sm:col-span-2'>
+                    <label className="font-medium">Ghi chú (tùy chọn)</label>
+                    <textarea
+                      {...register('note')}
+                      rows={3}
+                      className="border border-gray-300 p-2 rounded outline-none"
+                    ></textarea>
                   </div>
+
                 </div>
               </div>
 
               <div>
                 <h2 className='text-xl font-semibold mb-4'>Phương thức thanh toán</h2>
                 <div className="flex flex-col gap-3">
-                  <label className={
-                    `flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all 
-                    ${paymentMethod === 'COD' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`
-                  }>
+                  <label className={`flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all ${paymentMethod === 'COD' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`}>
                     <input
                       type="radio"
-                      name="paymentMethod"
-                      value="COD" checked={paymentMethod === 'COD'}
+                      value="COD"
+                      checked={paymentMethod === 'COD'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                     />
                     <MdOutlineLocalShipping size={28} />
                     <span>Thanh toán khi nhận hàng (COD)</span>
                   </label>
-                  <label className={
-                    `flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all 
-                    ${paymentMethod === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`
-                  }>
+
+                  <label className={`flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all ${paymentMethod === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`}>
                     <input
                       type="radio"
-                      name="paymentMethod"
                       value="VNPAY"
                       checked={paymentMethod === 'VNPAY'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                     />
-                    <img src={vnpayLogo} alt="vnpay-logo" className='h-[30px] object-contain'/>
-                    <span>Thanh toán chuyển khoản VNPay</span>
+                    <img src={vnpayLogo} alt="vnpay" className='h-[30px]'/>
+                    <span>VNPay</span>
                   </label>
-                  <label className={
-                    `flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all 
-                    ${paymentMethod === 'ZALOPAY' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`
-                  }>
+
+                  <label className={`flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all ${paymentMethod === 'ZALOPAY' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`}>
                     <input
                       type="radio"
-                      name="paymentMethod"
                       value="ZALOPAY"
                       checked={paymentMethod === 'ZALOPAY'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                     />
-                    <img src={zalopayLogo} alt="vnpay-logo" className='h-[30px] object-contain'/>
-                    <span>Thanh toán chuyển khoản ZaloPay</span>
+                    <img src={zalopayLogo} alt="zalopay" className='h-[30px]'/>
+                    <span>ZaloPay</span>
                   </label>
-                  <label className={
-                    `flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all 
-                    ${paymentMethod === 'MOMO' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`
-                  }>
+
+                  <label className={`flex items-center gap-4 cursor-pointer border p-4 rounded-lg transition-all ${paymentMethod === 'MOMO' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'}`}>
                     <input
                       type="radio"
-                      name="paymentMethod"
                       value="MOMO"
                       checked={paymentMethod === 'MOMO'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                     />
-                    <img src={momoLogo} alt="vnpay-logo" className='h-[30px] object-contain'/>
-                    <span>Thanh toán chuyển khoản MoMo</span>
+                    <img src={momoLogo} alt="momo" className='h-[30px]'/>
+                    <span>MoMo</span>
                   </label>
                 </div>
+                {errors.paymentMethod && (
+                  <span className="text-red-500 text-sm mt-2">{errors.paymentMethod.message}</span>
+                )}
               </div>
             </div>
 
@@ -223,22 +151,34 @@ const Checkout = () => {
               <div className="border-t pt-4 flex flex-col gap-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Tạm tính:</span>
-                  <span>{Math.floor(totalBill).toLocaleString('vi-VN')}đ</span>
+                  <span>{Math.floor(cartDetail?.totalsPrice || 0).toLocaleString('vi-VN')}đ</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Phí vận chuyển:</span>
-                  <span>Miễn phí</span>
+                  {Math.floor(cartDetail?.totalsPrice || 0) > 500000 ? (
+                    <span>Miễn phí</span>
+                  ) : (
+                    <span>15.000đ</span>
+                  )}
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>(Miễn phí vận chuyển cho đơn hàng lớn hơn 500.000đ)</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg mt-2">
                   <span>Tổng cộng:</span>
-                  <span className="text-red-600">{Math.floor(totalBill).toLocaleString('vi-VN')}đ</span>
+                  {Math.floor(cartDetail?.totalsPrice || 0) > 500000 ? (
+                    <span className="text-red-600">{Math.floor(cartDetail?.totalsPrice || 0).toLocaleString('vi-VN')}đ</span>
+                  ) : (
+                    <span className="text-red-600">{(Math.floor(cartDetail?.totalsPrice || 0) - 15000).toLocaleString('vi-VN')}đ</span>
+                  )}
                 </div>
               </div>
               <button
                 type='submit'
-                className='w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors mt-4'
+                className='w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors mt-4 disabled:opacity-50'
+                disabled={isSubmitting}
               >
-                Đặt hàng
+                {isSubmitting ? 'Đang xử lý...' : 'Đặt hàng'}
               </button>
             </div>
           </form>

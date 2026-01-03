@@ -1,21 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { fetchDetailUserAPI } from '~/apis/admin/user.api'
-import type { UserInfoInterface, UserDetailInterface } from '~/types/user.type'
+import { Link } from 'react-router-dom'
 import Skeleton from '@mui/material/Skeleton'
-import { useAuth } from '~/contexts/admin/AuthContext'
+import useDetail from '~/hooks/Admin/user/useDetail'
 
 const DetailUser = () => {
-  const [user, setUser] = useState<UserInfoInterface | null>(null)
-  const params = useParams()
-  const id = params.id as string
-  const { role } = useAuth()
-
-  useEffect(() => {
-    fetchDetailUserAPI(id).then((response: UserDetailInterface) => {
-      setUser(response.accountUser)
-    })
-  }, [id])
+  const {
+    user,
+    role
+  } = useDetail()
 
   return (
     <>
@@ -48,17 +39,23 @@ const DetailUser = () => {
               <div>
                 <b>Trạng thái: </b>
                 {
-                  user.status === 'active' ?
+                  user.status === 'ACTIVE' ?
                     <span className="text-green-500 font-[600]">Hoạt động</span> :
                     <span className="text-red-500 font-[600]"> Dừng hoạt động</span>
                 }
               </div>
-              <Link
-                to={`/admin/users/edit/${user._id}`}
-                className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[6%] text-center text-[14px]'
-              >
+              <div className='flex items-center justify-start gap-[5px]'>
+                <Link
+                  to={`/admin/users/edit/${user._id}`}
+                  className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[6%] text-center text-[14px]'
+                >
               Chỉnh sửa
-              </Link>
+                </Link>
+                <Link to="/admin/users" className='nav-link border rounded-[5px] bg-[#00171F] p-[5px] text-white w-[6%] text-center text-[14px] mr-[10px]'>
+                Quay lại
+                </Link>
+              </div>
+
             </div>
           </div>
         ) : (

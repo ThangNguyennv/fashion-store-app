@@ -1,52 +1,196 @@
+
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchCreateProductAPI } from '~/apis/admin/product.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
-import type { ProductForm } from '~/types/product.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { availableColors, availableSizes } from '~/utils/constants'
+
+const productSchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, 'Tiêu đề là bắt buộc')
+    .max(50, 'Họ và tên không được quá 50 ký tự!')
+    .transform((val) => val.replace(/\s+/g, ' ')),
+
+  product_category_id: z.string()
+    .min(1, 'Vui lòng chọn danh mục sản phẩm'),
+
+  featured: z.enum(['1', '0'], {
+    message: 'Đặc trưng không hợp lệ!'
+  }),
+
+  description: z.string()
+    .trim()
+    .optional(),
+
+  price: z.number()
+    .min(0, 'Giá phải lớn hơn hoặc bằng 0')
+    .optional(),
+
+  discountPercentage: z.number()
+    .min(0, '% Giảm giá phải lớn hơn hoặc bằng 0')
+    .max(100, '% Giảm giá không được vượt quá 100')
+    .optional(),
+
+  stock: z.number()
+    .min(1, 'Số lượng phải ít nhất là 1'),
+
+  colors: z.array(
+    z.object({
+      name: z.string(),
+      code: z.string(),
+      images: z.array(z.any())
+    })
+  ).min(1, 'Vui lòng chọn ít nhất 1 màu'),
+
+  sizes: z.array(
+    z.string().min(1, 'Size không được rỗng')
+  ).min(1, 'Vui lòng chọn ít nhất 1 kích cỡ'),
+
+  status: z.enum(['ACTIVE', 'INACTIVE'], {
+    message: 'Trạng thái không hợp lệ!'
+  }),
+
+  thumbnail: z.any()
+    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
+})
+
+type ProductFormData = z.infer<typeof productSchema>
 
 export const useCreate = () => {
-  const initialProduct: ProductForm = {
-    title: '',
-    thumbnail: '',
-    status: 'ACTIVE',
-    price: 0,
-    discountPercentage: 0,
-    stock: 0,
-    featured: '1',
-    product_category_id: '',
-    description: '',
-    colors: [],
-    sizes: []
-  }
-
-  const [productInfo, setProductInfo] = useState<ProductForm>(initialProduct)
   const { stateProductCategory } = useProductCategoryContext()
   const { allProductCategories } = stateProductCategory
   const { dispatchAlert } = useAlertContext()
   const navigate = useNavigate()
   const { role } = useAuth()
-  const [currentColor, setCurrentColor] = useState({ name: '', code: '#000000' })
-  const [currentSize, setCurrentSize] = useState('')
 
-  const uploadImageInputRef = useRef<HTMLInputElement | null>(null) // Ref cho thumbnail
+  const [showPopupSize, setShowPopupSize] = useState(false)
+  const [showPopupColor, setShowPopupColor] = useState(false)
+  const [tempSelectedColors, setTempSelectedColors] = useState<{
+    name: string
+    code: string
+    images: (File | string)[]
+      }[]>([])
+  const [tempSelectedSizes, setTempSelectedSizes] = useState<string[]>([])
+
+  // Ref cho thumbnail
+  const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
   // Tạo một mảng ref để quản lý các input file của từng màu
   const colorFileInputRefs = useRef<(HTMLInputElement | null)[]>([])
-
 
   // State chỉ để lưu file và URL preview, không lưu trực tiếp vào productInfo
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
 
+  const {
+    register,
+    handleSubmit: handleSubmitForm,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+    trigger
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      title: '',
+      thumbnail: null,
+      status: 'ACTIVE',
+      price: 0,
+      discountPercentage: 0,
+      stock: 1,
+      featured: '1',
+      product_category_id: '',
+      description: '',
+      colors: [],
+      sizes: []
+    }
+  })
+
+  // Watch colors và sizes để validate
+  const watchedColors = watch('colors')
+  const watchedSizes = watch('sizes')
+
   // Hàm xử lý ảnh đại diện
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      // Validate image size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Kích thước ảnh không được vượt quá 5MB', severity: 'error' }
+        })
+        return
+      }
+      // Validate image type
+      if (!file.type.startsWith('image/')) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: 'Vui lòng chọn file ảnh', severity: 'error' }
+        })
+        return
+      }
+
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview) // Giải phóng bộ nhớ
       setThumbnailFile(file)
       setThumbnailPreview(URL.createObjectURL(file))
+      setValue('thumbnail', file)
+      trigger('thumbnail') // Trigger validation
     }
+  }
+
+  // Phần xử lý màu sắc
+  const handleOpenPopupColor = () => {
+    setTempSelectedColors([...watchedColors])
+    setShowPopupColor(true)
+  }
+  // Đóng popup mà không lưu
+  const handleClosePopupColor = () => {
+    setShowPopupColor(false)
+    setTempSelectedColors([])
+  }
+
+  // Toggle chọn/bỏ chọn màu trong popup
+  const handleToggleColor = (color: { code: string, name: string }) => {
+    const isSelected = tempSelectedColors.some(c => c.code === color.code)
+
+    if (isSelected) {
+      // Bỏ chọn
+      setTempSelectedColors(tempSelectedColors.filter(c => c.code !== color.code))
+    } else {
+      // Chọn
+      setTempSelectedColors([...tempSelectedColors, { ...color, images: [] }])
+    }
+  }
+
+  // Chọn tất cả màu
+  const handleSelectAllColors = () => {
+    const allColors = availableColors.map(color => ({ ...color, images: [] }))
+    setTempSelectedColors(allColors)
+  }
+
+  // Bỏ chọn tất cả màu
+  const handleDeselectAllColors = () => {
+    setTempSelectedColors([])
+  }
+
+  // Lưu màu đã chọn khi ấn nút "Xong"
+  const handleConfirmSelectionColors = () => {
+    // Giữ lại images của các màu đã có trước đó
+    const updatedColors = tempSelectedColors.map(tempColor => {
+      const existingColor = watchedColors.find(c => c.code === tempColor.code)
+      return existingColor ? existingColor : tempColor
+    })
+
+    setValue('colors', updatedColors)
+    trigger('colors') // Trigger validation
+    setShowPopupColor(false)
+    setTempSelectedColors([])
   }
 
   // Hàm xử lý thêm ảnh cho một màu cụ thể
@@ -54,76 +198,118 @@ export const useCreate = () => {
     const files = event.target.files
     if (files) {
       const newFiles = Array.from(files)
-      setProductInfo(prev => {
-        const newColors = [...prev.colors]
-        // Lưu trữ File object trực tiếp vào mảng images của màu đó
-        const updatedImages = (newColors[colorIndex].images || []).concat(newFiles)
-        newColors[colorIndex] = { ...newColors[colorIndex], images: updatedImages }
-        return { ...prev, colors: newColors }
-      })
+      // Validate each file
+      for (const file of newFiles) {
+        if (file.size > 5 * 1024 * 1024) {
+          dispatchAlert({
+            type: 'SHOW_ALERT',
+            payload: { message: 'Kích thước ảnh không được vượt quá 5MB', severity: 'error' }
+          })
+          return
+        }
+        if (!file.type.startsWith('image/')) {
+          dispatchAlert({
+            type: 'SHOW_ALERT',
+            payload: { message: 'Vui lòng chọn file ảnh', severity: 'error' }
+          })
+          return
+        }
+      }
+      const newColors = [...watchedColors]
+      // Lưu trữ File object trực tiếp vào mảng images của màu đó
+      const updatedImages = (newColors[colorIndex].images || []).concat(newFiles)
+      newColors[colorIndex] = { ...newColors[colorIndex], images: updatedImages }
+      setValue('colors', newColors)
     }
   }
 
   // Hàm xóa một ảnh khỏi gallery của một màu
   const handleRemoveImageFromColor = (colorIndex: number, imageIndex: number) => {
-    setProductInfo(prev => {
-      const newColors = [...prev.colors]
-      const imageToRemove = newColors[colorIndex].images[imageIndex]
-      // Nếu là File, giải phóng bộ nhớ
-      if (imageToRemove instanceof File) {
-        URL.revokeObjectURL(URL.createObjectURL(imageToRemove))
-      }
-      const newImages = newColors[colorIndex].images.filter((_, idx) => idx !== imageIndex)
-      newColors[colorIndex] = { ...newColors[colorIndex], images: newImages }
-      return { ...prev, colors: newColors }
-    })
+    const newColors = [...watchedColors]
+    const imageToRemove = newColors[colorIndex].images[imageIndex]
+    if (imageToRemove instanceof File) {
+      URL.revokeObjectURL(URL.createObjectURL(imageToRemove))
+    }
+    const newImages = newColors[colorIndex].images.filter((_, idx) => idx !== imageIndex)
+    newColors[colorIndex] = { ...newColors[colorIndex], images: newImages }
+    setValue('colors', newColors)
   }
 
-  // --- Logic cho Colors ---
-  const handleAddColor = () => {
-    if (currentColor.name.trim() === '') return
-    setProductInfo(prev => ({
-      ...prev,
-      // Khi thêm màu mới, khởi tạo mảng images là mảng rỗng
-      colors: [...prev.colors, { ...currentColor, images: [] }]
-    }))
-    setCurrentColor({ name: '', code: '#000000' })
-  }
-
+  // Xóa màu
   const handleRemoveColor = (indexToRemove: number) => {
-    setProductInfo(prev => ({
-      ...prev,
-      colors: prev.colors.filter((_, index) => index !== indexToRemove)
-    }))
+    const newColors = watchedColors.filter((_, index) => index !== indexToRemove)
+    setValue('colors', newColors)
+    trigger('colors')
+  }
+  // Hết Phần xử lý màu sắc
+
+  // Phần xử lý size
+  const handleOpenPopupSize = () => {
+    setTempSelectedSizes([...watchedSizes])
+    setShowPopupSize(true)
+  }
+  // Đóng popup mà không lưu
+  const handleClosePopupSize = () => {
+    setShowPopupSize(false)
+    setTempSelectedSizes([])
   }
 
-  // --- Logic cho Sizes ---
-  const handleAddSize = () => {
-    if (currentSize.trim() === '' || productInfo.sizes.includes(currentSize.trim())) return // Không thêm nếu rỗng hoặc đã tồn tại
-    setProductInfo(prev => ({
-      ...prev,
-      sizes: [...prev.sizes, currentSize.trim()]
-    }))
-    // Reset input
-    setCurrentSize('')
+  // Toggle chọn/bỏ chọn size trong popup
+  const handleToggleSize = (size: string) => {
+    const isSelected = tempSelectedSizes.some(s => s === size)
+
+    if (isSelected) {
+      // Bỏ chọn
+      setTempSelectedSizes(tempSelectedSizes.filter(s => s !== size))
+    } else {
+      // Chọn
+      setTempSelectedSizes([...tempSelectedSizes, size])
+    }
+  }
+
+  // Chọn tất cả size
+  const handleSelectAllSizes = () => {
+    const allSizes = availableSizes.map(size => size)
+    setTempSelectedSizes(allSizes)
+  }
+
+  // Bỏ chọn tất cả size
+  const handleDeselectAllSizes = () => {
+    setTempSelectedSizes([])
+  }
+
+  // Lưu màu đã chọn khi ấn nút "Xong"
+  const handleConfirmSelectionSizes = () => {
+    setValue('sizes', tempSelectedSizes)
+    trigger('sizes') // Trigger validation
+    setShowPopupSize(false)
+    setTempSelectedSizes([])
   }
 
   const handleRemoveSize = (indexToRemove: number) => {
-    setProductInfo(prev => ({
-      ...prev,
-      sizes: prev.sizes.filter((_, index) => index !== indexToRemove)
-    }))
+    const newSizes = watchedSizes.filter((_, index) => index !== indexToRemove)
+    setValue('sizes', newSizes)
+    trigger('sizes')
   }
+  // Hết Phần xử lý size
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
+  const onSubmit = async (data: ProductFormData): Promise<void> => {
+    // Validate colors have images
+    const hasColorWithoutImages = data.colors.some(color => !color.images || color.images.length === 0)
+    if (hasColorWithoutImages) {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: 'Mỗi màu phải có ít nhất 1 ảnh', severity: 'error' }
+      })
+      return
+    }
     const formData = new FormData()
     // 1. Chuẩn bị dữ liệu và tập hợp các file cần upload
     const filesToUpload: File[] = []
 
     // Tạo một bản sao sạch của productInfo để gửi đi, đảm bảo nhất quán
     const productDataPayload = {
-      ...productInfo,
+      ...data,
       thumbnail: '', // Tạm thời xóa, sẽ được thay thế bằng placeholder
       colors: [] as { name: string; code: string; images: string[] }[]
     }
@@ -135,7 +321,7 @@ export const useCreate = () => {
     }
 
     // Xử lý ảnh theo từng màu
-    productInfo.colors.forEach(color => {
+    data.colors.forEach(color => {
       const colorPayload = { name: color.name, code: color.code, images: [] as string[] }
       if (color.images && Array.isArray(color.images)) {
         (color.images).forEach(image => {
@@ -167,6 +353,11 @@ export const useCreate = () => {
       setTimeout(() => {
         navigate('/admin/products')
       }, 2000)
+    } else {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: response.message, severity: 'error' }
+      })
     }
   }
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>, inputRef: React.RefObject<HTMLInputElement | null>) => {
@@ -177,25 +368,42 @@ export const useCreate = () => {
 
   return {
     allProductCategories,
-    productInfo,
-    setProductInfo,
     uploadImageInputRef,
-    colorFileInputRefs, // Trả về mảng ref
-    handleSubmit,
+    colorFileInputRefs,
+    handleSubmit: handleSubmitForm(onSubmit),
     role,
-    currentColor,
-    setCurrentColor,
-    currentSize,
-    setCurrentSize,
-    handleAddColor,
     handleRemoveColor,
-    handleAddSize,
     handleRemoveSize,
     thumbnailPreview,
     handleThumbnailChange,
     handleAddImagesToColor,
     handleRemoveImageFromColor,
-    // Sửa lại handleClick để nhận ref
-    handleClick
+    handleClick,
+    showPopupSize,
+    showPopupColor,
+    availableSizes,
+    availableColors,
+    handleOpenPopupColor,
+    handleClosePopupColor,
+    handleToggleColor,
+    handleSelectAllColors,
+    handleDeselectAllColors,
+    handleConfirmSelectionColors,
+    tempSelectedColors,
+    handleOpenPopupSize,
+    handleClosePopupSize,
+    handleToggleSize,
+    handleSelectAllSizes,
+    handleDeselectAllSizes,
+    handleConfirmSelectionSizes,
+    tempSelectedSizes,
+    // Thêm các props từ react-hook-form
+    register,
+    errors,
+    isSubmitting,
+    setValue,
+    watch,
+    colors: watchedColors,
+    sizes: watchedSizes
   }
 }

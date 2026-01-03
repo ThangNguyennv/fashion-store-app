@@ -87,7 +87,6 @@ export const useProduct = () => {
       .filter((id): id is string => typeof id === 'string')
 
     const response = await fetchChangeMultiAPI({ ids: result, type: typeChange })
-
     if ([200, 204].includes(response.code)) {
       dispatchAlert({
         type: 'SHOW_ALERT',

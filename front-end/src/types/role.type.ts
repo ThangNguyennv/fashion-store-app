@@ -1,9 +1,10 @@
 import type { AccountInfoInterface } from './account.type'
 import type { UpdatedBy } from './helper.type'
 
-export interface RolesInfoInterface {
+export interface RoleInfoInterface {
   _id: string,
   title: string,
+  titleId: string,
   description: string,
   permissions: string[],
   updatedBy?: UpdatedBy[],
@@ -16,9 +17,9 @@ export interface PermissionsInterface {
   permissions: string[]
 }
 export interface RolesResponseInterface {
-  roles: RolesInfoInterface[],
+  roles: RoleInfoInterface[],
   accounts: AccountInfoInterface[]
 }
 export interface RolesDetailInterface {
-  role: RolesInfoInterface
+  role: RoleInfoInterface
 }

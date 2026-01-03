@@ -1,173 +1,139 @@
 import Skeleton from '@mui/material/Skeleton'
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { fetchEditSettingGeneralAPI, fetchSettingGeneralAPI } from '~/apis/admin/settingGeneral.api'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { SettingGeneralDetailInterface, SettingGeneralInfoInterface } from '~/types/setting.type'
+import useEdit from '~/hooks/Admin/settingsGeneral/useEdit'
 
 const EditSettingGeneral = () => {
-  const [general, setGeneral] = useState<SettingGeneralInfoInterface | null>(null)
-  const { dispatchAlert } = useAlertContext()
-  const navigate = useNavigate()
-  useEffect(() => {
-    fetchSettingGeneralAPI().then((response: SettingGeneralDetailInterface) => {
-      setGeneral(response.settingGeneral[0])
-    })
-  }, [])
-
-  const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
-  const uploadImagePreviewRef = useRef<HTMLImageElement | null>(null)
-
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = event.target.files?.[0]
-    if (file && uploadImagePreviewRef.current) {
-      uploadImagePreviewRef.current.src = URL.createObjectURL(file)
-    }
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    if (!general) return
-    const formData = new FormData(event.currentTarget)
-    formData.set('websiteName', general.websiteName)
-    formData.set('email', general.email)
-    formData.set('phone', general.phone)
-    formData.set('address', general.address)
-    formData.set('copyright', general.copyright)
-
-    const response = await fetchEditSettingGeneralAPI(formData)
-    if (response.code === 200) {
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setTimeout(() => {
-        navigate('/admin/settings/general')
-      }, 2000)
-    } else if (response.code === 400) {
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'error' }
-      })
-    }
-  }
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    uploadImageInputRef.current?.click()
-  }
+  const {
+    isLoading,
+    register,
+    handleSubmit,
+    errors,
+    isSubmitting,
+    handleImageChange,
+    onSubmit,
+    preview,
+    navigate
+  } = useEdit()
 
   return (
     <>
-      {general ? (
+      {!isLoading ? (
         <>
           <form
-            onSubmit={(event) => handleSubmit(event)}
+            onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-[15px] w-full text-[17px] bg-[#FFFFFF] py-[15px] px-[50px] shadow-md mt-[15px]'
-            encType="multipart/form-data"
           >
             <h1 className='text-[24px] font-[700]'>Chỉnh sửa cài đặt chung</h1>
             <div className='form-group'>
               <label htmlFor='websiteName'>
-                <b>Tên website</b>
+                <b>Tên website <span className="text-red-500">*</span></b>
               </label>
               <input
-                onChange={(event) => setGeneral({ ...general, websiteName: event.target.value })}
-                type='text'
-                id='websiteName'
-                name='websiteName'
                 className='border p-[5px] rounded-[5px] text-[16px]'
-                value={general.websiteName}
-                required
+                {...register('websiteName')}
               />
+              {errors.websiteName && (
+                <p className="text-red-500 text-[14px]">{errors.websiteName.message}</p>
+              )}
             </div>
-            <div className='flex flex-col gap-[10px]'>
-              <label htmlFor='logo'>
-                <b>Logo: </b>
+            <div className="flex flex-col gap-[10px]">
+              <label className="text-[#192335]">
+                <b>Logo</b>
               </label>
               <input
-                onChange={(event) => handleChange(event)}
-                ref={uploadImageInputRef}
-                type='file'
-                id='logo'
-                name='logo'
-                className='hidden'
-                accept='image/*'
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="avatar-upload"
+                onChange={handleImageChange}
               />
-              <div className='flex flex-col gap-[10px]'>
-                <button
-                  onClick={event => handleClick(event)}
-                  className="bg-[#9D9995] text-black font-[500] border rounded-[5px] w-[5%] py-[4px] text-[14px]"
-                >
-                    Chọn ảnh
-                </button>
+              <label
+                htmlFor="avatar-upload"
+                className="bg-[#9D9995] hover:bg-[#87857F] transition-colors border rounded-[5px] w-[100px] inline-block px-4 py-2 text-[14px] cursor-pointer text-center text-white"
+              >
+                Chọn ảnh
+              </label>
+              {preview ? (
                 <img
-                  ref={uploadImagePreviewRef}
-                  src={general.logo}
+                  src={preview}
                   alt="Avatar preview"
-                  className="w-[100px] h-[100px]"
+                  className="w-[150px] h-[150px] rounded-full object-cover border-2 border-gray-200"
                 />
-              </div>
+              ) : (
+                <Skeleton variant="circular" width={150} height={150} />
+              )}
             </div>
             <div className='form-group'>
               <label htmlFor='phone'>
-                <b>Số điện thoại</b>
+                <b>Số điện thoại <span className="text-red-500">*</span></b>
               </label>
               <input
-                onChange={(event) => setGeneral({ ...general, phone: event.target.value })}
+                {...register('phone')}
                 type='text'
                 id='phone'
                 name='phone'
                 className='border p-[5px] rounded-[5px] text-[16px]'
-                value={general.phone}
               />
+              {errors.phone && (
+                <p className="text-red-500 text-[14px]">{errors.phone.message}</p>
+              )}
             </div>
             <div className='form-group'>
               <label htmlFor='email'>
-                <b>Email</b>
+                <b>Email <span className="text-red-500">*</span></b>
               </label>
               <input
-                onChange={(event) => setGeneral({ ...general, email: event.target.value })}
+                {...register('email')}
                 type='email'
                 id='email'
                 name='email'
                 className='border p-[5px] rounded-[5px] text-[16px]'
-                value={general.email}
-                required
               />
+              {errors.email && (
+                <p className="text-red-500 text-[14px]">{errors.email.message}</p>
+              )}
             </div>
             <div className='form-group'>
               <label htmlFor='address'>
-                <b>Địa chỉ</b>
+                <b>Địa chỉ <span className="text-red-500">*</span></b>
               </label>
               <input
-                onChange={(event) => setGeneral({ ...general, address: event.target.value })}
+                {...register('address')}
                 type='text'
                 id='address'
                 name='address'
                 className='border p-[5px] rounded-[5px] text-[16px]'
-                value={general.address}
               />
+              {errors.address && (
+                <p className="text-red-500 text-[14px]">{errors.address.message}</p>
+              )}
             </div>
             <div className='form-group'>
               <label htmlFor='copyright'>
-                <b>Bản quyền</b>
+                <b>Bản quyền <span className="text-red-500">*</span></b>
               </label>
               <input
-                onChange={(event) => setGeneral({ ...general, copyright: event.target.value })}
+                {...register('copyright')}
                 type='text'
                 id='copyright'
                 name='copyright'
                 className='border p-[5px] rounded-[5px] text-[16px]'
-                value={general.copyright}
-                required
               />
+              {errors.copyright && (
+                <p className="text-red-500 text-[14px]">{errors.copyright.message}</p>
+              )}
             </div>
-            <button
-              type='submit'
-              className='cursor-pointer border rounded-[5px] bg-[#525FE1] text-white p-[5px] w-[6%] text-[14px]'
-            >
-                Cập nhật
-            </button>
+            <div>
+              <button
+                type='submit'
+                disabled={isSubmitting}
+                className='cursor-pointer border rounded-[5px] bg-[#525FE1] text-white p-[5px] w-[9%] text-[14px]'>
+                {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+              </button>
+              <button type='button' onClick={() => navigate('/admin/settings/general')} disabled={isSubmitting}
+                className='ml-[10px] cursor-pointer border rounded-[5px] bg-gray-400 text-white p-[5px] w-[6%] text-[14px]'>
+                Hủy
+              </button>
+            </div>
           </form>
         </>
       ) : (

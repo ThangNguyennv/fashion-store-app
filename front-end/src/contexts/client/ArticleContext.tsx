@@ -4,17 +4,12 @@ import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchAllArticlesAPI } from '~/apis/client/article.api'
 import { articleReducer } from '~/reducers/client/articleReducer'
 import { initialState } from '~/reducers/client/articleReducer'
-import type { ArticleActions, ArticleAllResponseInterface, ArticleStates } from '~/types/article.type'
+import type { ArticleActions, ArticleAPIResponse, ArticleStates } from '~/types/article.type'
+import type { AllParams } from '~/types/helper.type'
 
 interface ArticleContextType {
   stateArticle: ArticleStates
-  fetchArticle: (params?: {
-    status?: string
-    page?: number
-    keyword?: string
-    sortKey?: string
-    sortValue?: string
-  }) => Promise<void>
+  fetchArticle: (params?: AllParams) => Promise<void>
   dispatchArticle: React.Dispatch<ArticleActions>
 }
 
@@ -24,30 +19,18 @@ export const ArticleClientProvider = ({ children }: { children: React.ReactNode 
   const [stateArticle, dispatchArticle] = useReducer(articleReducer, initialState)
 
   const fetchArticle = useCallback(
-    async ({
-      status = '',
-      page = 1,
-      keyword = '',
-      sortKey = '',
-      sortValue = ''
-    } = {}) => {
+    async (params: AllParams = {}) => {
       dispatchArticle({ type: 'SET_LOADING', payload: true })
       try {
-        const res: ArticleAllResponseInterface = await fetchAllArticlesAPI(
-          status,
-          page,
-          keyword,
-          sortKey,
-          sortValue
-        )
+        const res: ArticleAPIResponse = await fetchAllArticlesAPI(params)
         dispatchArticle({
           type: 'SET_DATA',
           payload: {
             articles: res.articles,
             pagination: res.pagination,
             keyword: res.keyword,
-            sortKey,
-            sortValue
+            sortKey: params.sortKey || '',
+            sortValue: params.sortValue || ''
           }
         })
       } finally {

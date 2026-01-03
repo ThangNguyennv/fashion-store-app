@@ -1,21 +1,17 @@
 import axios from 'axios'
-import type { ArticleAllResponseInterface, ArticlesWithCategoryDetailInterface } from '~/types/article.type'
+import type { ArticleAPIResponse, ArticlesWithCategoryDetailInterface } from '~/types/article.type'
 import type { ArticleDetailInterface } from '~/types/article.type'
+import type { AllParams } from '~/types/helper.type'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchAllArticlesAPI = async (
-  status: string,
-  page: number,
-  currentKeyword: string,
-  currentSortKey: string,
-  currentSortValue: string
-): Promise<ArticleAllResponseInterface> => {
+  params: AllParams
+): Promise<ArticleAPIResponse> => {
   const queryParams = new URLSearchParams()
-  if (status) queryParams.set('status', status)
-  if (page) queryParams.set('page', page.toString())
-  if (currentKeyword) queryParams.set('keyword', currentKeyword)
-  if (currentSortKey) queryParams.set('sortKey', currentSortKey)
-  if (currentSortValue) queryParams.set('sortValue', currentSortValue)
+  if (params.page) queryParams.set('page', params.page.toString())
+  if (params.keyword) queryParams.set('keyword', params.keyword)
+  if (params.sortKey) queryParams.set('sortKey', params.sortKey)
+  if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await axios.get(
     `${API_ROOT}/articles?${queryParams.toString()}`,
@@ -24,9 +20,10 @@ export const fetchAllArticlesAPI = async (
   return response.data
 }
 
-export const fetchArticlesAPI = async (): Promise<ArticleAllResponseInterface> => {
+export const fetchArticlesAPI = async (): Promise<ArticleAPIResponse> => {
   const response = await axios.get(
-    `${API_ROOT}/articles`
+    `${API_ROOT}/articles`,
+    { withCredentials: true }
   )
   return response.data
 }

@@ -1,6 +1,6 @@
 import type { AllParams } from '~/types/helper.type'
 import type { ProductAPIResponse, ProductDetailInterface } from '~/types/product.type'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchProductAPI = async (
@@ -14,8 +14,7 @@ export const fetchProductAPI = async (
   if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/products?${queryParams.toString()}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/products?${queryParams.toString()}`
   )
   return response.data
 }
@@ -23,16 +22,14 @@ export const fetchProductAPI = async (
 export const fetchChangeStatusAPI = async (status: string, id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/products/change-status/${status}/${id}`,
-    { status },
-    { withCredentials: true }
+    { status }
   )
   return response.data
 }
 
 export const fetchDetailProductAPI = async (id: string): Promise<ProductDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/products/detail/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/products/detail/${id}`
   )
   return response.data
 }
@@ -40,16 +37,14 @@ export const fetchDetailProductAPI = async (id: string): Promise<ProductDetailIn
 export const fetchEditProductAPI = async (id: string, formData: FormData) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/products/edit/${id}`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
 
 export const fetchDeleteProductAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/products/delete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/products/delete/${id}`
   )
   return response.data
 }
@@ -57,8 +52,7 @@ export const fetchDeleteProductAPI = async (id: string) => {
 export const fetchChangeMultiAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/products/change-multi`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
@@ -66,8 +60,7 @@ export const fetchChangeMultiAPI = async (data: { ids: string[], type: string })
 export const fetchCreateProductAPI = async (formData: FormData) => {
   const response = await authorizedAxiosInstance.post(
     `${API_ROOT}/admin/products/create`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
@@ -82,8 +75,7 @@ export const fetchProductTrashAPI = async (
   if (params.sortValue) queryParams.set('sortValue', params.sortValue)
 
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/products/trash?${queryParams.toString()}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/products/trash?${queryParams.toString()}`
   )
   return response.data
 }
@@ -91,16 +83,14 @@ export const fetchProductTrashAPI = async (
 export const fetchChangeMultiTrashAPI = async (data: { ids: string[], type: string }) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/products/trash/form-change-multi-trash`,
-    data,
-    { withCredentials: true }
+    data
   )
   return response.data
 }
 
 export const fetchPermanentlyDeleteProductAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/products/trash/permanentlyDelete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/products/trash/permanentlyDelete/${id}`
   )
   return response.data
 }
@@ -108,8 +98,7 @@ export const fetchPermanentlyDeleteProductAPI = async (id: string) => {
 export const fetchRecoverProductAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/products/trash/recover/${id}`,
-    {},
-    { withCredentials: true }
+    {}
   )
   return response.data
 }

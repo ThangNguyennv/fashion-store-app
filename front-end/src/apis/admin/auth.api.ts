@@ -1,8 +1,8 @@
-import type { LoginInterface, LogoutInterface } from '~/types/auth.type'
+import type { LoginAPIResponse, LogoutInterface } from '~/types/auth.type'
 import { API_ROOT } from '~/utils/constants'
 import axios from 'axios'
 
-export const fetchLoginAPI = async (email: string, password: string): Promise<LoginInterface> => {
+export const fetchLoginAPI = async (email: string, password: string): Promise<LoginAPIResponse> => {
   const response = await axios.post(
     `${API_ROOT}/admin/auth/login`,
     { email, password },

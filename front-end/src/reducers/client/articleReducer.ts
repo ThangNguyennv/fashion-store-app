@@ -9,14 +9,14 @@ export const initialState: ArticleStates = {
     currentPage: 1,
     limitItems: 3,
     skip: 0,
-    totalPage: 0
+    totalPage: 0,
+    totalItems: 0
   },
   keyword: '',
   sortKey: '',
   sortValue: '',
   loading: false,
-  allArticles: [],
-  date: ''
+  allArticles: []
 }
 
 export function articleReducer(
@@ -28,8 +28,6 @@ export function articleReducer(
       return { ...stateArticle, loading: actionArticle.payload }
     case 'SET_DATA':
       return { ...stateArticle, ...actionArticle.payload }
-    case 'RESET':
-      return initialState
     default:
       return stateArticle
   }

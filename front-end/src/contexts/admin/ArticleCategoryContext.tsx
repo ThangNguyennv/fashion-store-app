@@ -16,7 +16,7 @@ interface ArticleCategoryContextType {
 
 const ArticleCategoryContext = createContext<ArticleCategoryContextType | null>(null)
 
-export const ArticleCategoryProvider = ({ children }: { children: React.ReactNode }) => {
+export const ArticleCategoryAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateArticleCategory, dispatchArticleCategory] = useReducer(articleCategoryReducer, initialState)
   const { isAuthenticated, isLoading } = useAuth()
   const isAuthLoading = isLoading

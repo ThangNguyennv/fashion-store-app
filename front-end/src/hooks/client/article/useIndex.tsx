@@ -1,46 +1,42 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useArticleContext } from '~/contexts/client/ArticleContext'
+import type { AllParams } from '~/types/helper.type'
 
 const useIndex = () => {
   const { stateArticle, fetchArticle } = useArticleContext()
-  const { articles, pagination } = stateArticle
+  const { articles, pagination, loading } = stateArticle
   const [searchParams, setSearchParams] = useSearchParams()
-  const currentPage = parseInt(searchParams.get('page') || '1', 10)
-  const currentKeyword = searchParams.get('keyword') || ''
-  const currentSortKey = searchParams.get('sortKey') || ''
-  const currentSortValue = searchParams.get('sortValue') || ''
+
+  // Parse URL params một lần
+  const urlParams = useMemo(() => ({
+    page: parseInt(searchParams.get('page') || '1', 10),
+    keyword: searchParams.get('keyword') || '',
+    sortKey: searchParams.get('sortKey') || '',
+    sortValue: searchParams.get('sortValue') || ''
+  }), [searchParams])
 
   useEffect(() => {
-    fetchArticle({
-      page: currentPage,
-      keyword: currentKeyword,
-      sortKey: currentSortKey,
-      sortValue: currentSortValue
-    })
-  }, [currentPage, currentKeyword, currentSortKey, currentSortValue, fetchArticle])
+    fetchArticle(urlParams)
+  }, [urlParams.page, urlParams.keyword, urlParams.sortKey, urlParams.sortValue, fetchArticle, urlParams])
 
-  const updateSearchParams = (key: string, value: string): void => {
+  const updateParams = useCallback((params: Partial<AllParams>) => {
     const newParams = new URLSearchParams(searchParams)
-    if (value) {
-      newParams.set(key, value)
-    } else {
-      newParams.delete(key)
-    }
-
-    // Nếu xóa sortKey hoặc sortValue → xóa cả 2
-    if ((key === 'sortKey' || key === 'sortValue') && !value) {
-      newParams.delete('sortKey')
-      newParams.delete('sortValue')
-    }
-
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        newParams.set(key, value.toString())
+      } else {
+        newParams.delete(key)
+      }
+    })
     setSearchParams(newParams)
-  }
+  }, [searchParams, setSearchParams])
 
   return {
     articles,
     pagination,
-    updateSearchParams
+    updateParams,
+    loading
   }
 }
 

@@ -4,6 +4,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchLoginAPI } from '~/apis/admin/auth.api'
+import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 
 export const useLoginAdmin = () => {
@@ -11,6 +12,7 @@ export const useLoginAdmin = () => {
   const { dispatchAlert } = useAlertContext()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { setMyAccount, setRole } = useAuth()
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     setIsLoading(true)
@@ -21,14 +23,15 @@ export const useLoginAdmin = () => {
       const response = await fetchLoginAPI(email, password)
 
       if (response.code === 200 && response.accountAdmin) {
-
+        setMyAccount(response.accountAdmin)
+        setRole(response.role)
         dispatchAlert({
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'success' }
         })
         // await refreshUser()
-        ;(window as any).bumpAuth?.() // ép remount AuthAdminProvider
-        navigate('/admin/dashboard', { replace: true })
+        // ;(window as any).bumpAdminAuth?.() // ép remount AuthAdminProvider
+        navigate('/admin/admin-welcome', { replace: true })
       } else {
         dispatchAlert({
           type: 'SHOW_ALERT',
@@ -38,7 +41,7 @@ export const useLoginAdmin = () => {
     } catch (error) {
       dispatchAlert({
         type: 'SHOW_ALERT',
-        payload: { message: 'Lỗi máy chủ, vui lòng thử lại.', severity: 'error' }
+        payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
       })
     } finally {
       setIsLoading(false)

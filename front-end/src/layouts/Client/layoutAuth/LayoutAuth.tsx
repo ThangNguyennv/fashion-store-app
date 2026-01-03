@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom'
 import Footer from '~/components/Client/Footer/Footer'
 
-const LayoutAuth = () => {
+const LayoutAuthClient = () => {
   return (
     <>
       <header className='py-6 md:py-12 flex items-center justify-center border-b'>
@@ -26,4 +26,4 @@ const LayoutAuth = () => {
   )
 }
 
-export default LayoutAuth
+export default LayoutAuthClient

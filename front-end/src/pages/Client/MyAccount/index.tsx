@@ -3,6 +3,7 @@ import { useAuth } from '~/contexts/client/AuthContext'
 
 const MyAccountClient = () => {
   const { accountUser } = useAuth()
+
   return (
     <>
       {accountUser && (

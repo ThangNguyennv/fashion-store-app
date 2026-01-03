@@ -1,6 +1,6 @@
 import type { AccountDetailInterface, AccountsDetailInterface } from '~/types/account.type'
 import { API_ROOT } from '~/utils/constants'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 
 export const fetchAccountsAPI = async (): Promise<AccountsDetailInterface> => {
   const resposne = await authorizedAxiosInstance.get(
@@ -12,8 +12,7 @@ export const fetchAccountsAPI = async (): Promise<AccountsDetailInterface> => {
 export const fetchChangeStatusAPI = async (status: string, id: string) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/accounts/change-status/${status}/${id}`,
-    { status },
-    { withCredentials: true }
+    { status }
   )
   return response.data
 }
@@ -21,16 +20,14 @@ export const fetchChangeStatusAPI = async (status: string, id: string) => {
 export const fetchCreateAccountAPI = async (formData: FormData) => {
   const response = await authorizedAxiosInstance.post(
     `${API_ROOT}/admin/accounts/create`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
 
 export const fetchDetailAccountAPI = async (id: string): Promise<AccountDetailInterface> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/accounts/detail/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/accounts/detail/${id}`
   )
   return response.data
 }
@@ -38,16 +35,14 @@ export const fetchDetailAccountAPI = async (id: string): Promise<AccountDetailIn
 export const fetchEditAccountAPI = async (id: string, formData: FormData) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/accounts/edit/${id}`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }
 
 export const fetchDeleteAccountAPI = async (id: string) => {
   const response = await authorizedAxiosInstance.delete(
-    `${API_ROOT}/admin/accounts/delete/${id}`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/accounts/delete/${id}`
   )
   return response.data
 }

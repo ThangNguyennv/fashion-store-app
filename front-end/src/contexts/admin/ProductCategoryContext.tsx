@@ -16,7 +16,7 @@ interface ProductCategoryContextType {
 
 const ProductCategoryContext = createContext<ProductCategoryContextType | null>(null)
 
-export const ProductCategoryProvider = ({ children }: { children: React.ReactNode }) => {
+export const ProductCategoryAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateProductCategory, dispatchProductCategory] = useReducer(productCategoryReducer, initialState)
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 

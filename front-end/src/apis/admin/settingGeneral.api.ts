@@ -1,11 +1,10 @@
-import type { SettingGeneralDetailInterface } from '~/types/setting.type'
-import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import type { SettingGeneralAPIResponse } from '~/types/setting.type'
+import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 
-export const fetchSettingGeneralAPI = async (): Promise<SettingGeneralDetailInterface> => {
+export const fetchSettingGeneralAPI = async (): Promise<SettingGeneralAPIResponse> => {
   const response = await authorizedAxiosInstance.get(
-    `${API_ROOT}/admin/settings/general`,
-    { withCredentials: true }
+    `${API_ROOT}/admin/settings/general`
   )
   return response.data
 }
@@ -13,8 +12,7 @@ export const fetchSettingGeneralAPI = async (): Promise<SettingGeneralDetailInte
 export const fetchEditSettingGeneralAPI = async (formData: FormData) => {
   const response = await authorizedAxiosInstance.patch(
     `${API_ROOT}/admin/settings/general/edit`,
-    formData,
-    { withCredentials: true }
+    formData
   )
   return response.data
 }

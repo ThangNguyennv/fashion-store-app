@@ -2,7 +2,7 @@ import type { GeneralInfoInterface, HelperInterface } from './helper.type'
 
 export interface ArticleInfoInterface extends GeneralInfoInterface {
   article_category_id: string,
-  featured: string,
+  featured: '1' | '0',
   descriptionShort: string,
   descriptionDetail: string,
   accountFullName: string,

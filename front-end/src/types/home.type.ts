@@ -3,7 +3,7 @@ import type { ArticleCategoryInfoInterface } from './articleCategory.type'
 import type { ProductInfoInterface } from './product.type'
 import type { ProductCategoryInfoInterface } from './productCategory.type'
 
-export interface HomeInterface {
+export interface HomeAPIReponse {
   productCategories: ProductCategoryInfoInterface[],
   articleCategories: ArticleCategoryInfoInterface[],
   productsFeatured: ProductInfoInterface[],

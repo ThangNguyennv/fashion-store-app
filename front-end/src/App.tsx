@@ -1,11 +1,10 @@
 import { Route, Routes } from 'react-router-dom'
-import LayoutDefault from '~/layouts/Client/LayoutDefault/LayoutDefault'
 import LayoutDefaultAdmin from '~/layouts/Admin/LayoutDefault/LayoutDefault'
 import Home from '~/pages/Client/Home'
 import AOS from 'aos'
 import 'aos'
 import { useEffect } from 'react'
-import Dashboard from '~/pages/Admin/Dashboard/Dashboard'
+import Statistic from '~/pages/Admin/Statistic/Statistic'
 import Account from '~/pages/Admin/Account'
 import ArticleAdmin from '~/pages/Admin/Article'
 import ArticleCategoryAdmin from '~/pages/Admin/ArticleCategory'
@@ -40,7 +39,6 @@ import EditAccount from '~/pages/Admin/Account/Edit'
 import DetailUser from '~/pages/Admin/User/Detail'
 import EditUser from '~/pages/Admin/User/Edit'
 import EditSettingGeneral from '~/pages/Admin/Setting/General/Edit'
-import LayoutAuth from '~/layouts/Client/layoutAuth/LayoutAuth'
 import LoginClient from '~/pages/Client/Auth/Login/Login'
 import RegisterClient from '~/pages/Client/Auth/Register/Register'
 import Forgot from '~/pages/Client/Auth/Password/Forgot/Forgot'
@@ -83,6 +81,14 @@ import UnauthorizedRoutesAdmin from './components/Admin/UnauthorizedRoutes/Unaut
 import TrashOrder from './pages/Admin/Order/TrashOrder'
 import TrashProductCategory from './pages/Admin/ProductCategory/TrashProductCategory'
 import TrashProduct from './pages/Admin/Product/TrashProduct'
+import AdminWelcome from './pages/Admin/AdminWelcome/AdminWelcome'
+import UnauthorizedRoutesClient from './components/Client/UnauthorizedRoutes/UnauthorizedRoutes'
+import { AdminProviders, ClientProviders } from './AppProviders'
+import LayoutDefaultClient from '~/layouts/Client/LayoutDefault/LayoutDefault'
+import LayoutAuthClient from '~/layouts/Client/layoutAuth/LayoutAuth'
+import FAQ from './pages/Client/HelpCenter/FAQ'
+import ShippingPolicy from './pages/Client/HelpCenter/ShippingPolicy'
+import ReturnPolicy from './pages/Client/HelpCenter/ReturnPolicy'
 
 function App() {
 
@@ -98,10 +104,18 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
-        <Route path='/' element={<LayoutDefault />}>
+        {/* --- NHÓM CLIENT --- */}
+        <Route path='/' element={
+          <ClientProviders>
+            <LayoutDefaultClient />
+          </ClientProviders>
+        }>
           <Route index element={<Home />}/>
           <Route path='search' element={<Search />}/>
           <Route path='help' element={<HelpCenter />} />
+          <Route path='faq' element={<FAQ />}/>
+          <Route path='shipping-policy' element={<ShippingPolicy />}/>
+          <Route path='return-policy' element={<ReturnPolicy />}/>
           <Route path='brands' element={<BrandPage />}/>
           <Route path='products'>
             <Route index element={<ProductClient />}/>
@@ -137,7 +151,13 @@ function App() {
             <Route path='coin'></Route>
           </Route>
         </Route>
-        <Route path='user' element={<LayoutAuth />}>
+        <Route path='user' element={
+          <ClientProviders>
+            <UnauthorizedRoutesClient>
+              <LayoutAuthClient />
+            </UnauthorizedRoutesClient>
+          </ClientProviders>
+        }>
           <Route path='login' element={<LoginClient />} />
           <Route path='register' element={<RegisterClient />} />
           <Route path='password'>
@@ -146,10 +166,23 @@ function App() {
             <Route path='reset' element={ <Reset />}/>
           </Route>
         </Route>
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-        <Route path='admin' element={<PrivateRouteAdmin><LayoutDefaultAdmin /></PrivateRouteAdmin>}>
-          <Route index element={ <Dashboard />} />
-          <Route path='dashboard' element={ <Dashboard />}/>
+        <Route path="/auth/google/callback" element={
+          <ClientProviders>
+            <GoogleCallback />
+          </ClientProviders>}
+        />
+        {/* --- HẾT NHÓM CLIENT --- */}
+
+        {/* --- NHÓM ADMIN --- */}
+        <Route path='admin' element={
+          <AdminProviders>
+            <PrivateRouteAdmin>
+              <LayoutDefaultAdmin />
+            </PrivateRouteAdmin>
+          </AdminProviders>
+        }>
+          <Route path='admin-welcome' element={ <AdminWelcome />} />
+          <Route path='statistics' element={ <Statistic />}/>
           <Route path='orders'>
             <Route index element={ <OrderAdmin />}/>
             <Route path='detail/:id' element={<DetailOrder />}/>
@@ -219,10 +252,16 @@ function App() {
             <Route path='advance' element={<Advance />}/>
           </Route>
         </Route>
-        <Route path='admin/auth' element={<UnauthorizedRoutesAdmin />}>
+        <Route path='admin/auth' element={
+          <AdminProviders>
+            <UnauthorizedRoutesAdmin />
+          </AdminProviders>
+        }>
           <Route path='login' element={ <Login />}/>
           <Route path='forgot-password' element={<ForgotPassword />}/>
         </Route>
+        {/* --- HẾT NHÓM ADMIN --- */}
+
         <Route path="*" element={<Error404Page />} />
       </Routes>
     </>

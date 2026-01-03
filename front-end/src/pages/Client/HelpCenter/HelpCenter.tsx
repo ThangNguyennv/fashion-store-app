@@ -34,7 +34,7 @@ const HelpCenter = () => {
         </Link>
 
         {/* Thẻ Liên hệ */}
-        <Link to={'/contact'} className="block p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+        <Link to={''} className="block p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
           <FaEnvelope className="text-4xl text-blue-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Liên hệ với chúng tôi</h2>
           <p className="text-gray-600">Không tìm thấy câu trả lời? Gửi email cho chúng tôi tại:</p>

@@ -3,13 +3,14 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { fetchMyAccountAPI } from '~/apis/admin/myAccount.api'
-import type { MyAccountDetailInterface } from '~/types/account.type'
+import type { MyAccountAPIResponse } from '~/types/account.type'
+import CircularProgress from '@mui/material/CircularProgress'
 
 interface AuthContextType {
-  myAccount: MyAccountDetailInterface['myAccount'] | null
-  role: MyAccountDetailInterface['role'] | null
-  setMyAccount: (account: MyAccountDetailInterface['myAccount'] | null) => void
-  setRole: (role: MyAccountDetailInterface['role'] | null) => void
+  myAccount: MyAccountAPIResponse['myAccount'] | null
+  role: MyAccountAPIResponse['role'] | null
+  setMyAccount: (account: MyAccountAPIResponse['myAccount'] | null) => void
+  setRole: (role: MyAccountAPIResponse['role'] | null) => void
   isLoading: boolean
   isAuthenticated: boolean
   logout: () => Promise<void>
@@ -29,7 +30,7 @@ export const AuthAdminProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const response: MyAccountDetailInterface = await fetchMyAccountAPI()
+        const response: MyAccountAPIResponse = await fetchMyAccountAPI()
         if (response.myAccount && response.role) {
           setMyAccount(response.myAccount)
           setRole(response.role)
@@ -44,7 +45,6 @@ export const AuthAdminProvider = ({ children }: { children: ReactNode }) => {
         setAuthChecked(true)
         setIsLoading(false)
       }
-
     }
 
     initAuth()
@@ -60,7 +60,13 @@ export const AuthAdminProvider = ({ children }: { children: ReactNode }) => {
     window.addEventListener('force-logout', handleForceLogout)
     return () => window.removeEventListener('force-logout', handleForceLogout)
   }, [])
-
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <CircularProgress />
+      </div>
+    )
+  }
   const logout = async (): Promise<void> => {
     setMyAccount(null)
     setRole(null)
@@ -68,7 +74,7 @@ export const AuthAdminProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const refreshUser = async (): Promise<void> => {
-    const response: MyAccountDetailInterface = await fetchMyAccountAPI()
+    const response: MyAccountAPIResponse = await fetchMyAccountAPI()
     if (response.myAccount && response.role) {
       setMyAccount(response.myAccount)
       setRole(response.role)

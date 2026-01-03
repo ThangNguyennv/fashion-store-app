@@ -1,35 +1,15 @@
-/* eslint-disable no-console */
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { fetchDetailProductCategoryAPI } from '~/apis/client/product.api'
+import { Link } from 'react-router-dom'
 import BoxHead from '~/components/Client/BoxHead/BoxHead'
 import CardItem from '~/components/Client/CardItem/CardItem'
-import type { ProductInfoInterface, ProductsWithCategoryDetailInterface } from '~/types/product.type'
 import Skeleton from '@mui/material/Skeleton'
+import useCategory from '~/hooks/client/product/useCategory'
 
 const ProductCategory = () => {
-  const [productCategory, setProductCategory] = useState<ProductInfoInterface[]>([])
-  const [pageTitle, setPageTitle] = useState('')
-  const params = useParams()
-  const slugCategory = params.slugCategory as string
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res: ProductsWithCategoryDetailInterface = await fetchDetailProductCategoryAPI(slugCategory)
-        setProductCategory(res.products)
-        setPageTitle(res.pageTitle)
-      } catch (error) {
-        console.error('Lỗi khi fetch danh mục sản phẩm:', error)
-        setPageTitle('Không tìm thấy danh mục')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [slugCategory])
+  const {
+    productCategory,
+    pageTitle,
+    loading
+  } = useCategory()
 
   const CardItemSkeleton = () => (
     <div className="flex flex-col items-center gap-[15px] rounded-[5px] border border-gray-200 bg-white p-[10px] text-center h-full">

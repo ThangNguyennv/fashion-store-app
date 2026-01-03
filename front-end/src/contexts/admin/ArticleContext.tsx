@@ -15,7 +15,7 @@ interface ArticleContextType {
 
 const ArticleContext = createContext<ArticleContextType | null>(null)
 
-export const ArticleProvider = ({ children }: { children: React.ReactNode }) => {
+export const ArticleAdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [stateArticle, dispatchArticle] = useReducer(articleReducer, initialState)
 
   const fetchArticle = useCallback(

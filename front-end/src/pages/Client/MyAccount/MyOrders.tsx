@@ -1,9 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-import { useEffect, useState, type ChangeEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { useOrderContext } from '~/contexts/client/OrderContext'
+import { Link } from 'react-router-dom'
 import { FaCircleCheck, FaRegStar, FaStar } from 'react-icons/fa6'
 import { BsClockFill } from 'react-icons/bs'
 import { MdLocalShipping } from 'react-icons/md'
@@ -16,216 +11,41 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import { fetchCancelOrder } from '~/apis/client/user.api'
-import type { OrderStatus } from '~/types/order.type'
-import { useCart } from '~/contexts/client/CartContext'
 import Pagination from '~/components/Admin/Pagination/Pagination'
 import { FaFilter } from 'react-icons/fa'
 import { formatDateIntl } from '~/helpers/formatDateIntl'
-import { submitReviewAPI } from '~/apis/client/product.api'
+import useMyOrder from '~/hooks/client/myAccount/useMyOrder'
+import { MYORDER_STATUSES } from '~/utils/constants'
 
 const MyOrders = () => {
-  const { stateOrder, fetchOrder, dispatchOrder } = useOrderContext()
-  const { orders, pagination } = stateOrder
-  const { dispatchAlert } = useAlertContext()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [open, setOpen] = useState(false)
-  const currentStatus = searchParams.get('status') || ''
-  const currentDate = searchParams.get('date') || ''
-  const currentPage = parseInt(searchParams.get('page') || '1', 10)
-  const currentKeyword = searchParams.get('keyword') || ''
-  const currentSortKey = searchParams.get('sortKey') || ''
-  const currentSortValue = searchParams.get('sortValue') || ''
-  const [typeStatusOrder, setTypeStatusOrder] = useState(currentStatus || '')
-  const { addToCart } = useCart()
-
-  // === THÊM STATE CHO POPUP ĐÁNH GIÁ ===
-  const [openReview, setOpenReview] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [productToReview, setProductToReview] = useState<any | null>(null)
-  const [reviewRating, setReviewRating] = useState(5)
-  const [reviewContent, setReviewContent] = useState('')
-  const [reviewImages, setReviewImages] = useState<File[]>([])
-  const [reviewPreviews, setReviewPreviews] = useState<string[]>([])
-
-  useEffect(() => {
-    fetchOrder({
-      status: currentStatus,
-      page: currentPage,
-      keyword: currentKeyword,
-      sortKey: currentSortKey,
-      sortValue: currentSortValue,
-      date: currentDate
-    })
-  }, [currentStatus, currentPage, currentKeyword, currentSortKey, currentSortValue, currentDate, fetchOrder])
-
-  const updateSearchParams = (key: string, value: string): void => {
-    const newParams = new URLSearchParams(searchParams)
-    if (value) {
-      newParams.set(key, value)
-    } else {
-      newParams.delete(key)
-    }
-
-    // Nếu xóa sortKey hoặc sortValue → xóa cả 2
-    if ((key === 'sortKey' || key === 'sortValue') && !value) {
-      newParams.delete('sortKey')
-      newParams.delete('sortValue')
-    }
-
-    setSearchParams(newParams)
-  }
-
-  const handleOpen = (id: string) => {
-    setSelectedId(id)
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setSelectedId(null)
-    setOpen(false)
-  }
-
-  const handleCancel = async () => {
-    if (!selectedId) return
-
-    const response = await fetchCancelOrder(selectedId)
-    if (response.code === 200) {
-      const updatedOrders = orders.map(order =>
-        order._id === selectedId
-          ? { ...order, status: 'CANCELED' as OrderStatus }
-          : order
-      )
-      dispatchOrder({
-        type: 'SET_DATA',
-        payload: {
-          orders: updatedOrders
-        }
-      })
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setOpen(false)
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
-    }
-  }
-
-  // Xử lý cho từng sản phẩm
-  const handleBuyBack = async (product_id: string, quantity: number, color: string, size: string) => {
-    try {
-      await addToCart(product_id, quantity, color, size)
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: {
-          message: 'Đã thêm vào giỏ hàng!',
-          severity: 'success'
-        }
-      })
-    } catch (error) {
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: {
-          message: 'Lỗi khi mua lại',
-          severity: 'error'
-        }
-      })
-    }
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    const selectedDate = event.currentTarget.selectedDate.value
-
-    const newParams = new URLSearchParams(searchParams)
-
-    const setParam = (key: string, value: string) => {
-      if (value) {
-        newParams.set(key, value)
-      } else {
-        newParams.delete(key)
-      }
-    }
-
-    setParam('status', typeStatusOrder)
-    setParam('date', selectedDate)
-    newParams.set('page', '1') // Luôn quay về trang 1 khi lọc
-    setSearchParams(newParams)
-  }
-
-
-  const statusToStep = {
-    PENDING: 0,
-    TRANSPORTING: 1,
-    CONFIRMED: 2,
-    CANCELED: 3
-  }
-
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleOpenReview = (product: any, orderId: string) => {
-    setProductToReview({ ...product, orderId }) // Lưu cả orderId nếu cần
-    setOpenReview(true)
-  }
-
-  const handleCloseReview = () => {
-    setOpenReview(false)
-    // Reset state để lần sau mở lại không bị dính dữ liệu cũ
-    setProductToReview(null)
-    setReviewRating(5)
-    setReviewContent('')
-    setReviewImages([])
-    setReviewPreviews([])
-  }
-
-  const handleReviewImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files) {
-      const newFiles = Array.from(files)
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file))
-      setReviewImages(prev => [...prev, ...newFiles])
-      setReviewPreviews(prev => [...prev, ...newPreviews])
-    }
-  }
-
-  const handleRemoveReviewImage = (index: number) => {
-    URL.revokeObjectURL(reviewPreviews[index])
-    setReviewImages(prev => prev.filter((_, i) => i !== index))
-    setReviewPreviews(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const handleReviewSubmit = async () => {
-    if (!productToReview || reviewRating === 0) {
-      dispatchAlert({ type: 'SHOW_ALERT', payload: { message: 'Vui lòng chọn số sao!', severity: 'error' } })
-      return
-    }
-
-    const formData = new FormData()
-    formData.append('rating', String(reviewRating))
-    formData.append('content', reviewContent)
-    reviewImages.forEach(file => {
-      formData.append('images', file)
-    })
-    if (productToReview.color) {
-      formData.append('color', productToReview.color)
-    }
-    if (productToReview.size) {
-      formData.append('size', productToReview.size)
-    }
-    try {
-      const response = await submitReviewAPI(productToReview.product_id, formData)
-      if (response.code === 201) {
-        dispatchAlert({ type: 'SHOW_ALERT', payload: { message: 'Đánh giá đã được gửi!', severity: 'success' } })
-        handleCloseReview()
-        // Cập nhật lại trạng thái đơn hàng (ví dụ: đã đánh giá) nếu cần
-      }
-    } catch (error) {
-      dispatchAlert({ type: 'SHOW_ALERT', payload: { message: 'Có lỗi xảy ra', severity: 'error' } })
-    }
-  }
+  const {
+    pagination,
+    handleReviewSubmit,
+    handleRemoveReviewImage,
+    handleReviewImageChange,
+    handleOpenReview,
+    handleSubmit,
+    open,
+    setTypeStatusOrder,
+    openReview,
+    updateParams,
+    handleOpen,
+    handleClose,
+    handleCancel,
+    handleBuyBack,
+    typeStatusOrder,
+    selectedDate,
+    setSelectedDate,
+    orders,
+    statusToStep,
+    handleCloseReview,
+    productToReview,
+    reviewContent,
+    setReviewRating,
+    reviewRating,
+    setReviewContent,
+    reviewPreviews
+  } = useMyOrder()
 
   return (
     <div className="flex flex-col gap-[15px] flex-1">
@@ -242,23 +62,21 @@ const MyOrders = () => {
             <FaFilter />
             <select
               name='type'
-              defaultValue={typeStatusOrder}
+              value={typeStatusOrder}
               onChange={(e) => setTypeStatusOrder(e.target.value)}
               className='outline-none'
             >
-              <option disabled>Trạng thái đơn</option>
-              <option value={''}>Tất cả</option>
-              <option value={'PENDING'}>Đang xử lý</option>
-              <option value={'TRANSPORTING'}>Đang vận chuyển</option>
-              <option value={'CONFIRMED'}>Đã hoàn thành</option>
-              <option value={'CANCELED'}>Đã hủy</option>
+              {MYORDER_STATUSES.map((status, idx) => (
+                <option key={idx} value={status.value}>{status.label}</option>
+              ))}
             </select>
           </div>
           <div className="flex items-center justify-center gap-[5px] border rounded-[5px] p-[4px]">
             <input
               type='date'
               name='selectedDate'
-              defaultValue={currentDate}
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
             />
           </div>
           <button type='submit' className='border rounded-[5px] p-[4px] bg-blue-500 text-amber-100'>Áp dụng</button>
@@ -404,9 +222,9 @@ const MyOrders = () => {
       )}
       <Pagination
         pagination={pagination}
-        handlePagination={(page: number) => updateSearchParams('page', (page).toString())}
-        handlePaginationPrevious={(page: number) => updateSearchParams('page', (page - 1).toString())}
-        handlePaginationNext={(page: number) => updateSearchParams('page', (page + 1).toString())}
+        handlePagination={(page: number) => updateParams({ page: page })}
+        handlePaginationPrevious={(page: number) => updateParams({ page: page - 1 })}
+        handlePaginationNext={(page: number) => updateParams({ page: page + 1 })}
         items={orders}
       />
       <Dialog

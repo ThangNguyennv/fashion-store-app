@@ -1,26 +1,64 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { fetchLoginAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/client/AuthContext'
 
-const useLoginClient = () => {
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { dispatchAlert } = useAlertContext()
-  const { setAccountUser } = useAuth()
+const loginSchema = z.object({
+  email: z.string()
+    .trim()
+    .lowercase()
+    .min(1, 'Vui lòng nhập email của bạn!')
+    .pipe(z.email('Email không hợp lệ')),
+  password: z.string()
+    .min(1, 'Vui lòng nhập mật khẩu!')
+})
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    setIsLoading(true)
+type LoginFormData = z.infer<typeof loginSchema>
+
+const useLoginClient = () => {
+  const { setAccountUser } = useAuth()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { dispatchAlert } = useAlertContext()
+
+  const [showPassword, setShowPassword] = useState(false)
+  const API_ROOT = import.meta.env.VITE_API_ROOT
+  const googleAuthUrl = `${API_ROOT}/user/auth/google`
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' }
+  })
+
+  useEffect(() => {
+    const errorType = searchParams.get('error')
+    if (errorType === 'account_locked') {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ!', severity: 'error' }
+      })
+    } else if (errorType === 'auth_failed') {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: 'Đăng nhập Google thất bại!', severity: 'error' }
+      })
+    }
+  }, [searchParams])
+
+  const onSubmit = async (data: LoginFormData): Promise<void> => {
     try {
-      const form = event.currentTarget
-      const email = form.email.value
-      const password = form.password.value
-      const response = await fetchLoginAPI(email, password)
+      const response = await fetchLoginAPI(data.email, data.password)
 
       if (response.code === 200 && response.accountUser) {
         setAccountUser(response.accountUser)
@@ -28,18 +66,8 @@ const useLoginClient = () => {
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'success' }
         })
-        navigate('/')
-      } else if (response.code === 401) {
-        dispatchAlert({
-          type: 'SHOW_ALERT',
-          payload: { message: response.message, severity: 'error' }
-        })
-      } else if (response.code == 403) {
-        dispatchAlert({
-          type: 'SHOW_ALERT',
-          payload: { message: response.message, severity: 'error' }
-        })
-      } else if (response.code === 400) {
+        navigate('/', { replace: true })
+      } else {
         dispatchAlert({
           type: 'SHOW_ALERT',
           payload: { message: response.message, severity: 'error' }
@@ -48,18 +76,20 @@ const useLoginClient = () => {
     } catch (error) {
       dispatchAlert({
         type: 'SHOW_ALERT',
-        payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
+        payload: { message: 'Email hoặc mật khẩu không chính xác.', severity: 'error' }
       })
-    } finally {
-      setIsLoading(false)
     }
   }
 
   return {
+    register,
     handleSubmit,
+    onSubmit,
+    errors,
+    isSubmitting,
     showPassword,
     setShowPassword,
-    isLoading
+    googleAuthUrl
   }
 }
 

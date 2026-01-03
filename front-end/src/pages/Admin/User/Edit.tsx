@@ -1,189 +1,169 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { fetchDetailUserAPI, fetchEditUserAPI } from '~/apis/admin/user.api'
-import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { UserDetailInterface, UserInfoInterface } from '~/types/user.type'
+import { Link } from 'react-router-dom'
 import Skeleton from '@mui/material/Skeleton'
-import { useAuth } from '~/contexts/admin/AuthContext'
+import useEdit from '~/hooks/Admin/user/useEdit'
+
 
 const EditUser = () => {
-  const [userInfo, setUserInfo] = useState<UserInfoInterface | null>(null)
-  const params = useParams()
-  const id = params.id as string
-  const { dispatchAlert } = useAlertContext()
-  const navigate = useNavigate()
-  const { role } = useAuth()
-
-  useEffect(() => {
-    if (!id) return
-    fetchDetailUserAPI(id).then((response: UserDetailInterface) => {
-      setUserInfo(response.accountUser)
-    })
-  }, [id])
-  const uploadImageInputRef = useRef<HTMLInputElement | null>(null)
-  const uploadImagePreviewRef = useRef<HTMLImageElement | null>(null)
-
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = event.target.files?.[0]
-    if (file && uploadImagePreviewRef.current) {
-      uploadImagePreviewRef.current.src = URL.createObjectURL(file)
-    }
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    if (!userInfo) return
-    const formData = new FormData(event.currentTarget)
-    formData.set('fullName', userInfo.fullName)
-    formData.set('email', userInfo.email)
-    formData.set('phone', userInfo.phone)
-    formData.set('address', userInfo.address)
-    formData.set('password', userInfo.password)
-
-    const response = await fetchEditUserAPI(id, formData)
-    if (response.code === 200) {
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: response.message, severity: 'success' }
-      })
-      setTimeout(() => {
-        navigate(`/admin/users/detail/${id}`)
-      }, 2000)
-    }
-  }
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    uploadImageInputRef.current?.click()
-  }
+  const {
+    role,
+    isLoading,
+    register,
+    handleSubmit,
+    errors,
+    watchedStatus,
+    handleImageChange,
+    onSubmit,
+    preview,
+    isSubmitting
+  } = useEdit()
 
   return (
     <>
       {role && role.permissions.includes('users_edit') && (
-        userInfo ? (
+        !isLoading ? (
           <form
-            onSubmit={(event) => handleSubmit(event)}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-[15px] text-[17px] font-[500] bg-[#FFFFFF] p-[15px] shadow-md mt-[15px]"
             encType="multipart/form-data"
           >
             <h1 className="text-[24px] font-[600] text-[#192335]">Chỉnh sửa tài khoản người dùng</h1>
             <div className="flex flex-col gap-[10px]">
-              <label htmlFor="avatar">Avatar</label>
+              <label className="text-[#192335]">Avatar</label>
               <input
-                onChange={(event) => handleChange(event)}
-                ref={uploadImageInputRef}
                 type="file"
-                id="avatar"
-                name="avatar"
-                className='hidden'
                 accept="image/*"
+                className="hidden"
+                id="avatar-upload"
+                onChange={handleImageChange}
               />
-              <button
-                onClick={event => handleClick(event)}
-                className="bg-[#9D9995] font-[500] border rounded-[5px] w-[5%] py-[4px] text-[14px]"
+              <label
+                htmlFor="avatar-upload"
+                className="bg-[#9D9995] hover:bg-[#87857F] transition-colors border rounded-[5px] w-[100px] inline-block px-4 py-2 text-[14px] cursor-pointer text-center text-white"
               >
-                Chọn ảnh
-              </button>
-              <img
-                ref={uploadImagePreviewRef}
-                src={userInfo.avatar}
-                alt="Avatar preview"
-                className="border rounded-[50%] w-[150px] h-[150px]"
+          Chọn ảnh
+              </label>
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Avatar preview"
+                  className="w-[150px] h-[150px] rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <Skeleton variant="circular" width={150} height={150} />
+              )}
+            </div>
+
+            <div className="form-group flex flex-col gap-2">
+              <label className="text-[#192335]">
+          Họ và tên <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...register('fullName')}
+                className="py-[8px] px-[12px] border border-gray-300 rounded-[5px] focus:outline-none focus:border-[#525FE1] transition-colors"
               />
+              {errors.fullName && (
+                <p className="text-red-500 text-[14px]">{errors.fullName.message}</p>
+              )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="fullName">Họ và tên</label>
+            <div className="form-group flex flex-col gap-2">
+              <label className="text-[#192335]">
+                Email <span className="text-red-500">*</span>
+              </label>
               <input
-                onChange={(event) => setUserInfo({ ...userInfo, fullName: event.target.value })}
-                type="text"
-                id="fullName"
-                name="fullName"
-                className='py-[3px] text-[16px]'
-                value={userInfo.fullName}/>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                onChange={(event) => setUserInfo({ ...userInfo, email: event.target.value })}
+                {...register('email')}
                 type="email"
-                id="email"
-                name="email"
-                className='py-[3px] text-[16px]'
-                value={userInfo.email}
+                className="py-[8px] px-[12px] border border-gray-300 rounded-[5px] focus:outline-none focus:border-[#525FE1] transition-colors"
               />
+              {errors.email && (
+                <p className="text-red-500 text-[14px]">{errors.email.message}</p>
+              )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="phone">Số điện thoại</label>
+
+            <div className="form-group flex flex-col gap-2">
+              <label className="text-[#192335]">Số điện thoại</label>
               <input
-                onChange={(event) => setUserInfo({ ...userInfo, phone: event.target.value })}
+                {...register('phone')}
                 type="tel"
-                id="phone"
-                name="phone"
-                className='py-[3px] text-[16px]'
-                value={userInfo.phone}
+                placeholder="VD: 0912345678"
+                className="py-[8px] px-[12px] border border-gray-300 rounded-[5px] focus:outline-none focus:border-[#525FE1] transition-colors"
               />
+              {errors.phone && (
+                <p className="text-red-500 text-[14px]">{errors.phone.message}</p>
+              )}
             </div>
+
 
             <div className="form-group">
               <label htmlFor="address">Địa chỉ</label>
               <input
-                onChange={(event) => setUserInfo({ ...userInfo, address: event.target.value })}
+                {...register('address')}
                 type="text"
                 id="address"
                 name="address"
                 className='py-[3px] text-[16px]'
-                value={userInfo.address}
               />
+              {errors.address && (
+                <p className="text-red-500 text-[14px]">{errors.address.message}</p>
+              )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password">Mật khẩu</label>
+            <div className="form-group flex flex-col gap-2">
+              <label className="text-[#192335]">Mật khẩu mới</label>
               <input
-                onChange={(event) => setUserInfo({ ...userInfo, password: event.target.value })}
-                type="text"
-                id="password"
-                name="password"
-                className='py-[3px] text-[16px]'
+                {...register('password')}
+                type="password"
+                placeholder="Để trống nếu không muốn đổi mật khẩu"
+                className="py-[8px] px-[12px] border border-gray-300 rounded-[5px] focus:outline-none focus:border-[#525FE1] transition-colors"
               />
+              {errors.password && (
+                <p className="text-red-500 text-[14px]">{errors.password.message}</p>
+              )}
             </div>
 
-            <div className='flex items-center justify-start gap-[10px]'>
-              <div className="flex gap-[5px]">
-                <input
-                  onChange={(event) => setUserInfo({ ...userInfo, status: event.target.value })}
-                  type="radio"
-                  className="border rounded-[5px] border-[#192335]"
-                  id="statusActive"
-                  name="status"
-                  value={'active'}
-                  checked={userInfo.status === 'active' ? true : false}
-                />
-                <label htmlFor="statusActive">Hoạt động</label>
-              </div>
-
-              <div className="flex gap-[5px]">
-                <input
-                  onChange={(event) => setUserInfo({ ...userInfo, status: event.target.value })}
-                  type="radio"
-                  className="border rounded-[5px] border-[#192335]"
-                  id="statusInActive"
-                  name="status"
-                  value={'inactive'}
-                  checked={userInfo.status === 'inactive' ? true : false}
-                />
-                <label htmlFor="statusInActive">Dừng hoạt động</label>
+            <div className="flex flex-col gap-2">
+              <label className="text-[#192335]">
+                Trạng thái <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-[15px]">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    {...register('status')}
+                    type="radio"
+                    value="ACTIVE"
+                    checked={watchedStatus === 'ACTIVE'}
+                    className="cursor-pointer"
+                  />
+                  <span>Hoạt động</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    {...register('status')}
+                    type="radio"
+                    value="INACTIVE"
+                    checked={watchedStatus === 'INACTIVE'}
+                    className="cursor-pointer"
+                  />
+                  <span>Dừng hoạt động</span>
+                </label>
               </div>
             </div>
-
-            <button
-              type="submit"
-              className="border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px] w-[5%]"
-            >
-            Cập nhật
-            </button>
+            <div className='flex items-center justify-start text-center gap-[5px]'>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-[8%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px] disabled:opacity-50"
+              >
+                {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+              </button>
+              <Link
+                to="/admin/users"
+                className="w-[6%] border rounded-[5px] bg-[#525FE1] text-white p-[7px] text-[14px]"
+              >
+                Hủy
+              </Link>
+            </div>
           </form>
         ) : (
           <div className="flex flex-col gap-[15px] text-[17px] font-[500] bg-[#FFFFFF] p-[15px] shadow-md">

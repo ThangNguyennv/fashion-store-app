@@ -2,24 +2,6 @@ import useDetail from '~/hooks/client/article/useDetail'
 import Skeleton from '@mui/material/Skeleton'
 import { FaUserCircle } from 'react-icons/fa'
 
-const DetailArticleSkeleton = () => (
-  <div className="container max-w-3xl mx-auto px-4 py-8 md:py-16">
-    <Skeleton variant="text" width="80%" height={60} sx={{ fontSize: '2.5rem' }} />
-    <div className="flex items-center gap-4 my-6">
-      <Skeleton variant="circular" width={40} height={40} />
-      <div className="flex flex-col gap-1">
-        <Skeleton variant="text" width={120} height={20} />
-        <Skeleton variant="text" width={100} height={16} />
-      </div>
-    </div>
-    <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: '16/9' }} />
-    <div className="mt-8">
-      <Skeleton variant="text" width="100%" height={24} />
-      <Skeleton variant="text" width="100%" height={24} />
-      <Skeleton variant="text" width="70%" height={24} />
-    </div>
-  </div>
-)
 
 const DetailArticleClient = () => {
   const {
@@ -28,7 +10,24 @@ const DetailArticleClient = () => {
   } = useDetail()
 
   if (loading) {
-    return <DetailArticleSkeleton />
+    return (
+      <div className="container max-w-3xl mx-auto px-4 py-8 md:py-16">
+        <Skeleton variant="text" width="80%" height={60} sx={{ fontSize: '2.5rem' }} />
+        <div className="flex items-center gap-4 my-6">
+          <Skeleton variant="circular" width={40} height={40} />
+          <div className="flex flex-col gap-1">
+            <Skeleton variant="text" width={120} height={20} />
+            <Skeleton variant="text" width={100} height={16} />
+          </div>
+        </div>
+        <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: '16/9' }} />
+        <div className="mt-8">
+          <Skeleton variant="text" width="100%" height={24} />
+          <Skeleton variant="text" width="100%" height={24} />
+          <Skeleton variant="text" width="70%" height={24} />
+        </div>
+      </div>
+    )
   }
 
   if (!articleDetail) {

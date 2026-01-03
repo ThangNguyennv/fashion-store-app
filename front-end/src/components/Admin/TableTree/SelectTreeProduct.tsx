@@ -9,9 +9,13 @@ interface Props {
 
 const SelectTreeProduct = ({ productCategory, level, allProductCategories, parent_id }: Props) => {
   const prefix = '- '.repeat(level)
+
   return (
     <>
-      <option value={productCategory._id}>
+      <option
+        value={productCategory._id}
+        selected={parent_id === productCategory._id}
+      >
         {prefix}{productCategory.title}
       </option>
       {productCategory.children?.map((child) => (

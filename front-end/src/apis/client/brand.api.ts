@@ -4,7 +4,8 @@ import { API_ROOT } from '~/utils/constants'
 
 export const fetchClientBrandsAPI = async (): Promise<BrandsClientResponseInterface> => {
   const response = await axios.get(
-    `${API_ROOT}/brands`
+    `${API_ROOT}/brands`,
+    { withCredentials: true }
   )
   return response.data
 }

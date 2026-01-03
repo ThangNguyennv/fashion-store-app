@@ -29,7 +29,7 @@ export const fetchAddProductToCartAPI = async (
 }
 
 // export const fetchDeleteProductInCartAPI = async (productId: string) => {
-//   const response = await axios.delete(
+//   const response = await authorizedAxiosInstance.delete(
 //     `${API_ROOT}/cart/delete/${productId}`,
 //     { withCredentials: true }
 //   )
@@ -47,10 +47,11 @@ export const fetchChangeMultiAPI = async (data: { ids: string[], type: string })
 
 // Sửa lại hàm xóa
 export const fetchDeleteProductInCartAPI = async (item: { productId: string; color: string; size: string }) => {
-  const response = await axios.delete(`${API_ROOT}/cart/delete-item`, {
-    data: item,
-    withCredentials: true
-  })
+  const response = await axios.delete(
+    `${API_ROOT}/cart/delete-item`, {
+      data: item,
+      withCredentials: true
+    })
   return response.data
 }
 
@@ -61,9 +62,11 @@ export const fetchUpdateQuantityAPI = async (data: {
   size: string;
   quantity: number;
 }) => {
-  const response = await axios.patch(`${API_ROOT}/cart/update-quantity`, data, {
-    withCredentials: true
-  })
+  const response = await axios.patch(
+    `${API_ROOT}/cart/update-quantity`,
+    data,
+    { withCredentials: true }
+  )
   return response.data
 }
 
@@ -75,8 +78,10 @@ export const fetchUpdateVariantAPI = async (data: {
   newColor: string
   newSize: string
 }) => {
-  const response = await axios.patch(`${API_ROOT}/cart/update-variant`, data, {
-    withCredentials: true
-  })
+  const response = await axios.patch(
+    `${API_ROOT}/cart/update-variant`,
+    data,
+    { withCredentials: true }
+  )
   return response.data
 }

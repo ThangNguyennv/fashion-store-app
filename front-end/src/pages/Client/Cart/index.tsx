@@ -10,7 +10,6 @@ const Cart = () => {
     handleVariantChange,
     handleQuantityChange,
     handleOpenDeleteDialog,
-    totalBill,
     openDeleteOne,
     handleCloseDeleteDialog,
     handleDelete
@@ -18,7 +17,7 @@ const Cart = () => {
 
   return (
     <>
-      {cartDetail && cartDetail.products.length > 0 ? (
+      {cartDetail && cartDetail.products.length > 0 && (
         <div className='p-8'>
           <div className='container mx-auto flex flex-col gap-6 mb-[100px]'>
             <h1 className='text-3xl font-bold uppercase'>Giỏ hàng của bạn</h1>
@@ -118,11 +117,11 @@ const Cart = () => {
                 <h2 className='text-2xl font-bold'>Tóm tắt đơn hàng</h2>
                 <div className='flex items-center justify-between'>
                   <span className="text-gray-600">Tổng tạm tính:</span>
-                  <span className='font-semibold'>{Math.floor(totalBill).toLocaleString()}đ</span>
+                  <span className='font-semibold'>{Math.floor(cartDetail?.totalsPrice || 0).toLocaleString()}đ</span>
                 </div>
                 <div className='border-t pt-4 flex items-center justify-between'>
                   <span className="text-xl font-bold">Tổng tiền:</span>
-                  <span className='font-bold text-2xl text-red-600'>{Math.floor(totalBill).toLocaleString()}đ</span>
+                  <span className='font-bold text-2xl text-red-600'>{Math.floor(cartDetail?.totalsPrice || 0).toLocaleString()}đ</span>
                 </div>
                 <Link to={'/checkout'} className='w-full bg-black text-white font-bold py-3 px-6 rounded-lg text-center hover:bg-gray-800 transition-colors'>
                   Tiến hành thanh toán
@@ -131,15 +130,14 @@ const Cart = () => {
             </div>
           </div>
         </div>
-      ) : (
-        // Giao diện giỏ hàng trống
-        <div className='text-center py-20'>
+      )}
+      {cartDetail && cartDetail.products.length === 0 && (
+        <div className='text-center py-20 mb-[100px]'>
           <h1 className='text-3xl font-bold mb-4'>Giỏ hàng của bạn còn trống</h1>
           <p className="text-gray-500 mb-6">Hãy quay lại và chọn cho mình những sản phẩm ưng ý nhé.</p>
           <Link to={'/'} className='bg-black text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800'>Mua ngay</Link>
         </div>
-      )
-      }
+      )}
 
       {/* Dialog xác nhận xóa  */}
       <Dialog open={openDeleteOne} onClose={handleCloseDeleteDialog}>

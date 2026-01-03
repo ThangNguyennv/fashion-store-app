@@ -1,22 +1,13 @@
 import Skeleton from '@mui/material/Skeleton'
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { fetchDetailRoleAPI } from '~/apis/admin/role.api'
-import { useAuth } from '~/contexts/admin/AuthContext'
-import type { RolesDetailInterface, RolesInfoInterface } from '~/types/role.type'
+import { Link } from 'react-router-dom'
+import useDetail from '~/hooks/Admin/role/useDetail'
 
 const DetailRole = () => {
-  const [roleDetail, setRoleDetail] = useState<RolesInfoInterface | null>(null)
-  const params = useParams()
-  const id = params.id
-  const { role } = useAuth()
-
-  useEffect(() => {
-    if (!id) return
-    fetchDetailRoleAPI(id).then((response: RolesDetailInterface) => {
-      setRoleDetail(response.role)
-    })
-  }, [id])
+  const {
+    roleDetail,
+    role,
+    id
+  } = useDetail()
 
   return (
     <>
@@ -30,15 +21,29 @@ const DetailRole = () => {
               </span>
             </div>
             <div>
+              <b>Mã định danh: </b>
+              <span className='text-[16px]'>
+                {roleDetail.titleId}
+              </span>
+            </div>
+            <div>
               <b>Mô tả ngắn: </b>
               <div className='text-[16px]' dangerouslySetInnerHTML={{ __html: roleDetail.description }} />
             </div>
-            <Link
-              to={`/admin/roles/edit/${id}`}
-              className='border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[6%] text-[14px] text-center'
-            >
-            Chỉnh sửa
-            </Link>
+            <div className='flex items-center justify-start gap-[5px]'>
+              <Link
+                to={`/admin/roles/edit/${id}`}
+                className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
+              >
+                Chỉnh sửa
+              </Link>
+              <Link
+                to={'/admin/roles'}
+                className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[6%] text-center'
+              >
+                Quay lại
+              </Link>
+            </div>
           </div>
         ) : (
           <div className='flex flex-col gap-[15px] bg-[#FFFFFF] p-[25px] shadow-md mt-[15px] text-[18px]'>

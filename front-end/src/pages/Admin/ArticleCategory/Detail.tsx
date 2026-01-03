@@ -49,16 +49,16 @@ const DetailArticleCategory = () => {
                 </div>
                 <div className='flex items-center justify-start gap-[5px]'>
                   <Link
-                    to={'/admin/articles-category'}
-                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
-                  >
-                    Quay lại
-                  </Link>
-                  <Link
                     to={`/admin/articles-category/edit/${id}`}
                     className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
                   >
                     Chỉnh sửa
+                  </Link>
+                  <Link
+                    to={'/admin/articles-category'}
+                    className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white w-[100px] text-center'
+                  >
+                    Quay lại
                   </Link>
                 </div>
               </div>

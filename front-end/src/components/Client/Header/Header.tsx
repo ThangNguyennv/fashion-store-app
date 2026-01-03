@@ -10,18 +10,16 @@ import { IoLogOutOutline } from 'react-icons/io5'
 import { CgProfile } from 'react-icons/cg'
 import { IoIosLogIn } from 'react-icons/io'
 import { FaRegRegistered } from 'react-icons/fa'
-import Skeleton from '@mui/material/Skeleton'
 import SubMenu from '../SubMenu/SubMenu'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IoChevronDown } from 'react-icons/io5'
 import { RiBillLine } from 'react-icons/ri'
 import SearchInput from './SearchInput'
-import useHeader from '~/hooks/client/components/header/useHeader'
+import useHeader from '~/hooks/client/header/useHeader'
 import SubMenuArticle from '../SubMenuArticle/SubMenuArticle'
 
 const Header = () => {
   const {
-    loading,
     accountUser,
     closeTopHeader,
     handleCloseTopHeader,
@@ -54,33 +52,8 @@ const Header = () => {
 
   return (
     <>
-      {loading && (
-        <div className="bg-primary sm:py-[8px] py-[7px]">
-          <div className="container mx-auto px-[16px]">
-            <div className="flex items-center">
-              <div className="flex-1 text-center">
-                <Skeleton
-                  variant="text"
-                  width="60%"
-                  height={20}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.3)', margin: '0 auto' }}
-                  animation="wave"
-                />
-              </div>
-              <Skeleton
-                variant="circular"
-                width={20}
-                height={20}
-                sx={{ bgcolor: 'rgba(255,255,255,0.3)' }}
-                animation="wave"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Top header */}
-      {!loading && !accountUser && (
+      {!accountUser && (
         <div className={`bg-primary sm:py-[8px] py-[7px] ${closeTopHeader ? 'hidden' : 'block'}`}>
           <div className="container mx-auto px-[16px]">
             <div className="flex">
@@ -122,7 +95,7 @@ const Header = () => {
               className="flex items-center justify-center gap-[4px] font-[700] sm:text-[30px] text-[27px] text-primary lg:flex-none flex-1"
               to={'/'}
             >
-              {settingGeneral ? (
+              {settingGeneral && (
                 <>
                   <img
                     alt="logo"
@@ -136,14 +109,6 @@ const Header = () => {
                     <p className='text-[8px] sm:text-[10px] font-bold text-[#0A033C]' style={{ textShadow: '2px 2px 5px rgba(0,0,0,0.5)' }}>
                       Lịch lãm - Sang trọng - Quý phái
                     </p>
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Skeleton variant="rectangular" width={50} height={50} sx={{ bgcolor: 'grey.400' }}/>
-                  <span className='uppercase flex flex-col items-center'>
-                    <Skeleton variant="text" width={213} height={50} sx={{ bgcolor: 'grey.400' }}/>
-                    <Skeleton variant="text" width={176} height={15} sx={{ bgcolor: 'grey.400' }}/>
                   </span>
                 </>
               )}
