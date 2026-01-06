@@ -1,6 +1,6 @@
 # fashion-store-app
 ---
-This is a complete full-stack fashion website project, including a customer-facing site (Client) and an administrative system (Admin). The project is built on the MERN stack (MongoDB, Express, React, Node) but modernized with Vite, TypeScript, and JWT.
+This is a complete fashion website project, including a customer-facing site (Client) and an administrative system (Admin). The project is built on the MERN stack (MongoDB, Express, React, Node) but modernized with Vite, TypeScript, and JWT.
 
 <img width="1918" height="919" alt="image" src="https://github.com/user-attachments/assets/e168bbfe-cf73-4ebe-85ac-47bdc1fcc411" />
 
@@ -66,7 +66,7 @@ The project is divided into two separate parts: front-end (Client) and back-end 
 
 - Authorization: Integrates role_id logic into the JWT payload to control API access (e.g., Super Admin vs. Editor).
 
-- Dashboard: Overview of revenue, orders, and new users.
+- Statistic: Overview of revenue, orders, and new users.
 
 - Full CRUD Management:
 
