@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import axios from 'axios'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { fetchLoginAPI } from '~/apis/admin/auth.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
@@ -38,11 +40,17 @@ export const useLoginAdmin = () => {
           payload: { message: response.message, severity: 'error' }
         })
       }
-    } catch (error) {
-      dispatchAlert({
-        type: 'SHOW_ALERT',
-        payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
-      })
+    } catch (error: any) {
+      if (error.status === 429) {
+        dispatchAlert({
+          type: 'SHOW_ALERT',
+          payload: { message: error.response.data.message, severity: 'error' }
+        })
+      }
+      // dispatchAlert({
+      //   type: 'SHOW_ALERT',
+      //   payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
+      // })
     } finally {
       setIsLoading(false)
     }
