@@ -1,9 +1,10 @@
 import { Router } from 'express'
 const router: Router = Router()
 import * as controller from '~/controllers/admin/auth.controller'
+import { authLimiter } from '~/middlewares/admin/rateLimit.middleware'
 import * as validate from '~/validates/admin/auth.validate'
 
-router.post('/login', validate.loginPost, controller.loginPost)
+router.post('/login', authLimiter,  validate.loginPost, controller.loginPost)
 router.get('/logout', controller.logout)
 router.post('logout-all', controller.logoutALL)
 router.post('/refresh-token', controller.refreshToken)
