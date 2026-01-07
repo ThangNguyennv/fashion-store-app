@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const settingsGeneralSchema = new mongoose.Schema(
+const settingGeneralSchema = new mongoose.Schema(
   {
     websiteName: String,
     logo: String,
@@ -16,7 +16,7 @@ const settingsGeneralSchema = new mongoose.Schema(
 
 const SettingsGeneral = mongoose.model(
   'SettingsGeneral',
-  settingsGeneralSchema,
+  settingGeneralSchema,
   'settings-general'
 )
 

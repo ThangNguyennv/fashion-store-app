@@ -1,82 +1,19 @@
 import { Request, Response } from 'express'
-import ArticleCategory from '~/models/article-category.model'
+import ArticleCategory from '~/models/articleCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
-import searchHelpers from '~/helpers/search'
-import { buildTree, TreeItem } from '~/helpers/createTree'
-import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
-import paginationHelpers from '~/helpers/pagination'
-import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
-import Account from '~/models/account.model'
-import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
 
+import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
+import * as articleCategoryService from '~/services/articleCategory.service'
 // [GET] /admin/articles-category
 export const index = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: false }
-    if (req.query.status) {
-      find.status = req.query.status.toString()
-    }
-
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex || objectSearch.slug) {
-      find.$or = [
-        { title: objectSearch.regex },
-        { slug: objectSearch.slug }
-      ]
-    }
-    // End search
-
-    // Sort
-    let sort: Record<string, 1 | -1> = { }
-    if (req.query.sortKey) {
-      const key = req.query.sortKey.toString()
-      const dir = req.query.sortValue === 'asc' ? 1 : -1
-      sort[key] = dir
-    }
-    // luôn sort phụ theo createdAt
-    if (!sort.createdAt) {
-      sort.createdAt = -1
-    }
-    // End Sort
-
-    // Pagination
-    const parentFind = { ...find, parent_id: '' }
-    const countParents = await ArticleCategory.countDocuments(parentFind)
-    const objectPagination = paginationHelpers(
-      {
-        currentPage: 1,
-        limitItems: 3
-      },
-      req.query,
-      countParents
-    )
-    // End Pagination
-    
-    //  Query song song bằng Promise.all (giảm round-trip)
-    const [parentCategories, accounts, allCategories] = await Promise.all([
-      ArticleCategory.find(parentFind)
-        .sort(sort)
-        .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip) // chỉ parent
-        .lean(),
-      Account
-        .find({ deleted: false }) // account info
-        .lean(),
-      ArticleCategory
-        .find({ deleted: false })
-        .sort(sort)
-        .lean()
-    ])
-
-    // Tạo cây phân cấp
-    const newArticleCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
-    const newAllArticleCategories = buildTree(allCategories as unknown as TreeItem[])
-
-    // Gắn account info cho tree
-    const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-    addLogInfoToTree(newArticleCategories as LogNode[], accountMap)
-    addLogInfoToTree(newAllArticleCategories as LogNode[], accountMap)
+    const { 
+      newArticleCategories,
+      newAllArticleCategories,
+      accounts,
+      objectSearch,
+      objectPagination 
+    } = await articleCategoryService.getArticleCategories(req.query)
 
     res.json({
       code: 200,
@@ -124,25 +61,20 @@ export const index = async (req: Request, res: Response) => {
 //   }
 // }
 
-export interface UpdatedBy {
-  account_id: string,
-  updatedAt: Date
-}
+
 
 export const changeStatusWithChildren = async (req: Request, res: Response) => {
    try {
-    const { status, id } = req.params;
-    const updatedBy: UpdatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-
-    await updateStatusRecursiveForOneItem(ArticleCategory, status, id, updatedBy)
+    await articleCategoryService.changeStatusWithChildren(
+      req.params.status, 
+      req.params.id, 
+      req['accountAdmin'].id
+    )
 
     return res.json({ 
       code: 200, 
       message: "Cập nhật thành công trạng thái danh mục bài viết!" 
-    });
+    })
   } catch (error) {
     res.json({
       code: 400,
@@ -206,20 +138,10 @@ export const changeMulti = async (req: Request, res: Response) => {
 }
 
 // [DELETE] /admin/articles-category/delete/:id
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteArticleCategory = async (req: Request, res: Response) => {
   try {
-    const id: string = req.params.id
+    await articleCategoryService.deleteArticleCategory(req.params.id, req['accountAdmin'].id)
 
-    await ArticleCategory.updateOne(
-      { _id: id },
-      {
-        deleted: true,
-        deletedBy: {
-          account_id: req['accountAdmin'].id,
-          deletedAt: new Date()
-        }
-      }
-    )
     res.json({
       code: 204,
       message: 'Xóa thành công danh mục bài viết!'
@@ -234,14 +156,9 @@ export const deleteItem = async (req: Request, res: Response) => {
 }
 
 // [POST] /admin/articles-category/create
-export const createPost = async (req: Request, res: Response) => {
+export const createArticleCategory = async (req: Request, res: Response) => {
   try {
-    req.body.createdBy = {
-      account_id: req['accountAdmin'].id
-    }
-
-    const records = new ArticleCategory(req.body)
-    await records.save()
+    const records = await articleCategoryService.createArticleCategory(req.body, req['accountAdmin'].id)
 
     res.json({
       code: 201,
@@ -258,21 +175,10 @@ export const createPost = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/articles-category/edit/:id
-export const editPatch = async (req: Request, res: Response) => {
+export const editArticleCategory = async (req: Request, res: Response) => {
   try {
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    await ArticleCategory.updateOne(
-      { _id: req.params.id },
-      {
-        ...req.body,
-        $push: {
-          updatedBy: updatedBy
-        }
-      }
-    )
+    await articleCategoryService.editArticleCategory(req.body, req.params.id, req['accountAdmin'].id)
+
     res.json({
       code: 200,
       message: 'Cập nhật thành công danh mục bài viết!'
@@ -287,14 +193,10 @@ export const editPatch = async (req: Request, res: Response) => {
 }
 
 // [GET] /admin/articles-category/detail/:id
-export const detail = async (req: Request, res: Response) => {
+export const detailArticleCategory = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false,
-      _id: req.params.id
-    }
+    const articleCategory = await articleCategoryService.detailArticleCategory(req.params.id)
 
-    const articleCategory = await ArticleCategory.findOne(find)
     res.json({
       code: 200,
       message: 'Lấy Thành công chi tiết danh mục bài viết!',

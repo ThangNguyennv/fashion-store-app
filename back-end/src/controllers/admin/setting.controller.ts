@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import SettingsGeneral from '~/models/settings-general.model'
+import SettingsGeneral from '~/models/settingGeneral.model'
 
 // [GET] /admin/settings/general
 export const index = async (req: Request, res: Response) => {

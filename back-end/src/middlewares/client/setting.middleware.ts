@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import SettingsGeneral from '~/models/settings-general.model'
+import SettingsGeneral from '~/models/settingGeneral.model'
 export const settingsGeneral = async (
   req: Request,
   res: Response,

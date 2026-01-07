@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import Product from '~/models/product.model'
-import ProductCategory from '~/models/product-category.model'
+import ProductCategory from '~/models/productCategory.model'
 import * as productsHelper from '~/helpers/product'
 import { OneProduct } from '~/helpers/product'
 import paginationHelpers from '~/helpers/pagination'

@@ -1,4 +1,4 @@
-import { UpdatedBy } from "~/controllers/admin/product-category.controller"
+import { UpdatedBy } from "~/controllers/admin/productCategory.controller"
 
 export const updateStatusRecursiveForOneItem = async (model: any, status: string, id: string, currentUser: UpdatedBy): Promise<void> => {
   const stack = [id]

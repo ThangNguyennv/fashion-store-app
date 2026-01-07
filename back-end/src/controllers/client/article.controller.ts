@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import Article from '~/models/article.model'
-import ArticleCategory from '~/models/article-category.model'
+import ArticleCategory from '~/models/articleCategory.model'
 import paginationHelpers from '~/helpers/pagination'
 
 // [GET] /articles

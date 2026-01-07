@@ -26,6 +26,7 @@ export const index = async (req: Request, res: Response) => {
 export const createAccount = async (req: Request, res: Response) => {
   try {
     const account = await accountService.createAccount(req.body)
+    
     res.json({
       code: 201,
       message: 'Thêm tài khoản thành công!',

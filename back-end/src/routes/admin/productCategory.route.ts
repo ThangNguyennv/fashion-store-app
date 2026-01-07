@@ -4,8 +4,8 @@ const router: Router = Router()
 import multer from 'multer'
 import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middleware'
 // Upload ảnh
-import * as controller from '~/controllers/admin/product-category.controller'
-import * as validate from '~/validations/admin/products-category.validation'
+import * as controller from '~/controllers/admin/productCategory.controller'
+import * as validate from '~/validations/admin/productCategory.validation'
 
 router.get('/',  controller.index)
 // router.patch('/change-status/:status/:id', controller.changeStatus)

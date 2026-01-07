@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
-import ProductCategory from '~/models/product-category.model'
-import ArticleCategory from '~/models/article-category.model'
+import ProductCategory from '~/models/productCategory.model'
+import ArticleCategory from '~/models/articleCategory.model'
 import { buildTree, TreeItem } from '~/helpers/createTree'
 
 export const categoryProduct = async (

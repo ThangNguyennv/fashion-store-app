@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import ProductCategory from '~/models/product-category.model'
+import ProductCategory from '~/models/productCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
 import searchHelpers from '~/helpers/search'
 import { buildTree, TreeItem } from '~/helpers/createTree'

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import Joi from 'joi'
 
-export const createPost = (
+export const createArticleCategory = (
   req: Request,
   res: Response,
   next: NextFunction
