@@ -12,20 +12,20 @@ router.post(
   '/create',
   multer().single('thumbnail'), // Nhận file logo với field 'thumbnail'
   uploadWithOneImageToCloud,
-  validate.createPost,
-  controller.createPost
+  validate.createBrand,
+  controller.createBrand
 )
 
-router.get('/detail/:id', controller.detail)
+router.get('/detail/:id', controller.detailBrand)
 
 router.patch(
   '/edit/:id',
   multer().single('thumbnail'), // Nhận file logo mới nếu có
   uploadWithOneImageToCloud,
-  validate.createPost,
-  controller.editPatch
+  validate.editBrand,
+  controller.editBrand
 )
 
-router.delete('/delete/:id', controller.deleteItem)
+router.delete('/delete/:id', controller.deleteBrand)
 
 export const brandRoutes: Router = router
