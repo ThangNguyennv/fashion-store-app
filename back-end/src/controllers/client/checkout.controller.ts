@@ -7,7 +7,7 @@ import { OneProduct } from '~/helpers/product'
 import { vnpayCreateOrder } from '~/helpers/vnpayPayment'
 import { zalopayCreateOrder } from '~/helpers/zalopayPayment'
 import { momoCreateOrder } from '~/helpers/momoPayment'
-import "~/cron/order.cron" // ⚡ load cron khi server start
+import "~/crons/order.cron"
 
 // [GET] /checkout
 export const index = async (req: Request, res: Response) => {

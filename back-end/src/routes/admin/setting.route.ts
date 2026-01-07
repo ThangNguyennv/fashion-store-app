@@ -3,7 +3,7 @@ const router: Router = Router()
 import multer from 'multer'
 import * as controller from '~/controllers/admin/setting.controller'
 import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middleware'
-import * as validate from '~/validates/admin/settingGeneral.validate'
+import * as validate from '~/validations/admin/settingGeneral.validation'
 
 router.get('/general', controller.index)
 router.patch(

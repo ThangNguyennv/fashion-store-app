@@ -4,7 +4,7 @@ const router: Router = Router()
 import multer from 'multer'
 import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middleware'
 // Upload ảnh
-import * as validate from '~/validates/admin/article.validate'
+import * as validate from '~/validations/admin/article.validation'
 import * as controller from '~/controllers/admin/article.controller'
 
 router.get('/', controller.index)

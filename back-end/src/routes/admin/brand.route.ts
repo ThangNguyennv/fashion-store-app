@@ -2,7 +2,7 @@ import { Router } from 'express'
 import multer from 'multer'
 import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middleware'
 import * as controller from '~/controllers/admin/brand.controller'
-import * as validate from '~/validates/admin/brand.validate'
+import * as validate from '~/validations/admin/brand.validation'
 
 const router: Router = Router()
 

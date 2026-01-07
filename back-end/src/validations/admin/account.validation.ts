@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import Joi from 'joi'
+import mongoose from 'mongoose'
 
-export const createPost = (
+export const createAccount = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -52,9 +53,16 @@ export const createPost = (
       }),
     role_id: Joi.string()
       .required()
+      .custom((value, helpers) => {
+        if (!mongoose.Types.ObjectId.isValid(value)) {
+          return helpers.error('any.invalid')
+        }
+        return value
+      })
       .messages({
         'string.empty': 'Vui lòng chọn phân quyền!',
-        'any.required': 'Phân quyền là bắt buộc!'
+        'any.required': 'Phân quyền là bắt buộc!',
+        'any.invalid': 'Phân quyền không hợp lệ!'
       }),
 
     status: Joi.string()
@@ -93,7 +101,7 @@ export const createPost = (
 }
 
 
-export const editPatch = (
+export const editAccount = (
   req: Request,
   res: Response,
   next: NextFunction

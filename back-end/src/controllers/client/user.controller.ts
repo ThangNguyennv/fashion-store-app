@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import User from '~/models/user.model'
 import Cart from '~/models/cart.model'
-import * as sendMailHelper from '~/helpers/sendMail'
+import * as sendMailHelper from '~/providers/mail.provider'
 import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'

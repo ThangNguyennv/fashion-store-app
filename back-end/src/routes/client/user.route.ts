@@ -7,7 +7,7 @@ import multer from 'multer'
 import { uploadWithOneImageToCloud } from '~/middlewares/client/uploadCloud.middleware'
 // Hết Upload ảnh
 import * as controller from '~/controllers/client/user.controller'
-import * as validate from '~/validates/client/user.validate'
+import * as validate from '~/validations/client/user.validation'
 import * as authMiddleware from '~/middlewares/client/auth.middleware'
 import { setAuthCookies } from '~/controllers/client/user.controller'
 

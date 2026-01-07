@@ -5,7 +5,7 @@ import { momoCallback } from '~/helpers/momoPayment'
 import { vnpayReturn } from '~/helpers/vnpayPayment'
 import { vnpayIpn } from '~/helpers/vnpayPayment'
 import { zalopayCallback } from '~/helpers/zalopayPayment'
-import * as validate from '~/validates/client/checkout.validate'
+import * as validate from '~/validations/client/checkout.validation'
 import * as authMiddleware from '~/middlewares/client/auth.middleware'
 
 router.get('/', authMiddleware.requireAuth, controller.index)

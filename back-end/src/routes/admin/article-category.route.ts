@@ -6,7 +6,7 @@ import * as controller from '~/controllers/admin/article-category.controller'
 import multer from 'multer'
 import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middleware'
 // Upload ảnh
-import * as validate from '~/validates/admin/article-category.validate'
+import * as validate from '~/validations/admin/article-category.validation'
 
 router.get('/', controller.index)
 // router.patch('/change-status/:status/:id', controller.changeStatus)

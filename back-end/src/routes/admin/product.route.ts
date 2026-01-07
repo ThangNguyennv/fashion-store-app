@@ -5,7 +5,7 @@ import multer from 'multer'
 import { uploadCloud } from '~/middlewares/admin/uploadCloud.middleware'
 // Upload ảnh
 import * as controller from '~/controllers/admin/product.controller'
-import * as validate from '~/validates/admin/product.validate'
+import * as validate from '~/validations/admin/product.validation'
 import { parseProductData } from '~/middlewares/admin/parseProductData.middleware'; 
 
 router.get('/', controller.index)
