@@ -5,7 +5,6 @@ import useDetail from '~/hooks/Admin/account/useDetail'
 const DetailAccount = () => {
   const {
     accountInfo,
-    roles,
     role
   } = useDetail()
 
@@ -24,11 +23,7 @@ const DetailAccount = () => {
                 <b>Họ và tên: </b>
                 {accountInfo.fullName}
               </div>
-              {roles && (
-                roles.map((role, index) => (
-                  role._id === accountInfo.role_id ? <div key={index}><b>Vai trò: </b> {role.title}</div> : ''
-                ))
-              )}
+              <b>Vai trò: {accountInfo.role_id.title}</b>
               <div>
                 <b>Email: </b>
                 {accountInfo.email}

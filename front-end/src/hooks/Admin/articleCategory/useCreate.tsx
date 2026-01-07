@@ -2,39 +2,11 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fetchCreateArticleCategoryAPI } from '~/apis/admin/articleCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleCategoryContext } from '~/contexts/admin/ArticleCategoryContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-
-const createArticleCategorySchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, 'Tiêu đề là bắt buộc')
-    .max(100, 'Tiêu đề không được quá 100 ký tự')
-    .transform((val) => val.replace(/\s+/g, ' ')),
-
-  parent_id: z.string()
-    .optional(),
-
-  descriptionShort: z.string()
-    .trim()
-    .optional(),
-
-  descriptionDetail: z.string()
-    .trim()
-    .optional(),
-
-  status: z.enum(['ACTIVE', 'INACTIVE'], {
-    message: 'Trạng thái không hợp lệ!'
-  }),
-
-  thumbnail: z.any()
-    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
-})
-
-type CreateArticleCategoryFormData = z.infer<typeof createArticleCategorySchema>
+import { createArticleCategorySchema, type CreateArticleCategoryFormData } from '~/validations/admin/article-category.validate'
 
 export const useCreate = () => {
   const {

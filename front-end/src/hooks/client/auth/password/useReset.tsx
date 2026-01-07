@@ -4,27 +4,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fetchResetPasswordAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-
-const resetSchema = z.object({
-  password: z.string()
-    .trim()
-    .min(1, 'Vui lòng nhập mật khẩu!')
-    .min(8, 'Mật khẩu phải chứa ít nhất 8 ký tự!')
-    .regex(/[A-Z]/, 'Mật khẩu phải có ít nhất 1 chữ hoa!')
-    .regex(/[a-z]/, 'Mật khẩu phải có ít nhất 1 chữ thường!')
-    .regex(/[0-9]/, 'Mật khẩu phải có ít nhất 1 số!')
-    .regex(/[@$!%*?&]/, 'Mật khẩu phải có ít nhất 1 kí tự đặc biệt!'),
-  confirmPassword: z.string()
-    .min(1, 'Vui lòng xác nhận mật khẩu!')
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp!',
-  path: ['confirmPassword']
-})
-
-type ResetFormData = z.infer<typeof resetSchema>
+import { resetSchema, type ResetFormData } from '~/validations/client/auth.validate'
 
 const useReset = () => {
   const navigate = useNavigate()

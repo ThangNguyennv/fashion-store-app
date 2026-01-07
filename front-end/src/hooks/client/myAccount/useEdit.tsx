@@ -4,38 +4,7 @@ import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/client/AuthContext'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-// 1. Cập nhật Schema
-const editProfileSchema = z.object({
-  fullName: z.string()
-    .trim()
-    .min(1, 'Họ và tên không được để trống!')
-    .max(50, 'Họ tên không được vượt quá 50 ký tự!'),
-
-  email: z.string()
-    .trim()
-    .toLowerCase()
-    .min(1, 'Email không được để trống!')
-    .pipe(z.email('Email không hợp lệ')),
-
-  phone: z.string()
-    .trim()
-    .refine((val) => {
-      if (val === '') return true
-      return /^(0[35789]\d{8}|\+84[35789]\d{8})$/.test(val)
-    }, {
-      message: 'Số điện thoại không hợp lệ (phải bắt đầu bằng 03,05,07,08,09 hoặc +84)!'
-    }),
-
-  address: z.string()
-    .trim()
-    .optional(),
-
-  avatar: z.any().optional()
-})
-
-type EditProfileFormData = z.infer<typeof editProfileSchema>
+import { editProfileSchema, type EditProfileFormData } from '~/validations/client/my-account.validate'
 
 const useEdit = () => {
   const { accountUser, setAccountUser } = useAuth()

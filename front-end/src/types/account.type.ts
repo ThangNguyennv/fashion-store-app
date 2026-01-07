@@ -8,7 +8,7 @@ export interface AccountInfoInterface {
   password: string,
   phone: string,
   status: 'ACTIVE' | 'INACTIVE',
-  role_id: string
+  role_id: RoleInfoInterface
 }
 
 export interface MyAccountAPIResponse {
@@ -16,12 +16,12 @@ export interface MyAccountAPIResponse {
   role: RoleInfoInterface
 }
 
-export interface AccountsDetailInterface {
+export interface AccountsAPIResponse {
   accounts: AccountInfoInterface[],
   roles: RoleInfoInterface[]
 }
 
-export interface AccountDetailInterface {
+export interface AccountAPIResponse {
   account: AccountInfoInterface,
   roles: RoleInfoInterface[]
 }

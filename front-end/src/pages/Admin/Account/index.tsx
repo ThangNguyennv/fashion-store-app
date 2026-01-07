@@ -12,7 +12,6 @@ import useAccount from '~/hooks/Admin/account/useAccount'
 const Account = () => {
   const {
     accounts,
-    roles,
     open,
     loading,
     role,
@@ -160,9 +159,7 @@ const Account = () => {
                       </TableCell>
                       <TableCell align='center'>{account.fullName}</TableCell>
                       <TableCell align='center'>
-                        {roles.map((role) => (
-                          account.role_id === role._id ? role.title : ''
-                        ))}
+                        {account.role_id.title}
                       </TableCell>
                       <TableCell align='center'>{account.email}</TableCell>
                       <TableCell align='center'>{account.phone}</TableCell>

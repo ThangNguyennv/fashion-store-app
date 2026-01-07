@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react'
 import { fetchAccountsAPI, fetchChangeStatusAPI, fetchDeleteAccountAPI } from '~/apis/admin/account.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import type { AccountsDetailInterface, AccountInfoInterface } from '~/types/account.type'
-import type { RoleInfoInterface } from '~/types/role.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
 const useAccount = () => {
   const [accounts, setAccounts] = useState<AccountInfoInterface[]>([])
-  const [roles, setRoles] = useState<RoleInfoInterface[]>([])
   const { dispatchAlert } = useAlertContext()
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -20,7 +18,6 @@ const useAccount = () => {
         setLoading(true)
         const res: AccountsDetailInterface = await fetchAccountsAPI()
         setAccounts(res.accounts)
-        setRoles(res.roles)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Fetch roles error:', error)
@@ -43,9 +40,11 @@ const useAccount = () => {
         type: 'SHOW_ALERT',
         payload: { message: response.message, severity: 'success' }
       })
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
+    } else {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: response.message, severity: 'error' }
+      })
     }
   }
 
@@ -69,14 +68,15 @@ const useAccount = () => {
         payload: { message: response.message, severity: 'success' }
       })
       setOpen(false)
-    } else if (response.code === 400) {
-      alert('error: ' + response.error)
-      return
+    } else {
+      dispatchAlert({
+        type: 'SHOW_ALERT',
+        payload: { message: response.message, severity: 'error' }
+      })
     }
   }
   return {
     accounts,
-    roles,
     open,
     loading,
     role,

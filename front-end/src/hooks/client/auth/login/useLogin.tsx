@@ -5,22 +5,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fetchLoginAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/client/AuthContext'
-
-const loginSchema = z.object({
-  email: z.string()
-    .trim()
-    .lowercase()
-    .min(1, 'Vui lòng nhập email của bạn!')
-    .pipe(z.email('Email không hợp lệ')),
-  password: z.string()
-    .min(1, 'Vui lòng nhập mật khẩu!')
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import { loginSchema, type LoginFormData } from '~/validations/client/auth.validate'
 
 const useLoginClient = () => {
   const { setAccountUser } = useAuth()

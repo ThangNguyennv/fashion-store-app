@@ -6,30 +6,7 @@ import type { UserAPIResponse, UserInfoInterface } from '~/types/user.type'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-const changePasswordSchema = z.object({
-  currentPassword: z.string()
-    .trim()
-    .min(1, 'Vui lòng nhập mật khẩu hiện tại!'),
-
-  password: z.string()
-    .trim()
-    .min(1, 'Vui lòng nhập mật khẩu!')
-    .min(8, 'Mật khẩu phải chứa ít nhất 8 ký tự!')
-    .regex(/[A-Z]/, 'Mật khẩu phải có ít nhất 1 chữ hoa!')
-    .regex(/[a-z]/, 'Mật khẩu phải có ít nhất 1 chữ thường!')
-    .regex(/[0-9]/, 'Mật khẩu phải có ít nhất 1 số!')
-    .regex(/[@$!%*?&]/, 'Mật khẩu phải có ít nhất 1 kí tự đặc biệt!'),
-
-  confirmPassword: z.string()
-    .min(1, 'Vui lòng xác nhận mật khẩu!')
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp!',
-  path: ['confirmPassword']
-})
-
-type changePasswordFormData = z.infer<typeof changePasswordSchema>
+import { changePasswordSchema, type changePasswordFormData } from '~/validations/client/my-account.validate'
 
 const useChangePassword = () => {
   const [myAccount, setMyAccount] = useState<UserInfoInterface | null>(null)

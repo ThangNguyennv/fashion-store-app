@@ -2,19 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fetchForgotPasswordAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-
-const forgotPasswordSchema = z.object({
-  email: z.string()
-    .trim()
-    .lowercase()
-    .min(1, 'Vui lòng nhập email của bạn!')
-    .pipe(z.email('Email không đúng định dạng!'))
-})
-
-type ForgotFormData = z.infer<typeof forgotPasswordSchema>
+import { forgotPasswordSchema, type ForgotFormData } from '~/validations/client/auth.validate'
 
 const useForgot = () => {
   // const navigate = useNavigate()

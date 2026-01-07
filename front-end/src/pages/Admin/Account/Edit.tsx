@@ -140,9 +140,12 @@ const EditAccount = () => {
           className="py-[8px] px-[12px] border border-gray-300 rounded-[5px] focus:outline-none focus:border-[#525FE1] transition-colors"
         >
           <option value="">-- Chọn phân quyền --</option>
-          {roles.map(r => (
-            <option key={r._id} value={r._id}>{r.title}</option>
-          ))}
+          {roles && roles.length > 0 && (
+            roles.map(r => (
+              <option key={r._id} value={r._id}>{r.title}</option>
+            ))
+          )}
+
         </select>
         {errors.role_id && (
           <p className="text-red-500 text-[14px]">{errors.role_id.message}</p>

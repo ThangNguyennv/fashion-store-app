@@ -116,8 +116,8 @@ const CreateAccount = () => {
               className={`outline-none border rounded-[5px] border-[#192335] text-[16px] py-[3px] ${errors.role_id ? 'border-red-500' : ''}`}
             >
               <option value="">-- Chọn --</option>
-              {roles.map((role, key) => (
-                <option key={key} value={role._id}>
+              {roles.map((role) => (
+                <option key={role._id} value={role._id}>
                   {role.title}
                 </option>
               ))}
@@ -130,7 +130,7 @@ const CreateAccount = () => {
           {/* Trạng thái */}
           <div className="flex flex-col gap-2">
             <label className="text-[#192335]">
-          Trạng thái <span className="text-red-500">*</span>
+              Trạng thái <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center justify-start gap-[15px]">
               <div className="flex gap-[5px]">

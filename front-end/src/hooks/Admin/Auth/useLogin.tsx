@@ -1,24 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchLoginAPI } from '~/apis/admin/auth.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginFormData } from '~/validations/admin/auth.validate'
 
 export const useLoginAdmin = () => {
   const navigate = useNavigate()
   const { dispatchAlert } = useAlertContext()
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const { setMyAccount, setRole } = useAuth()
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    setIsLoading(true)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' }
+  })
+  const onSubmit = async (data: LoginFormData): Promise<void> => {
     try {
-      const form = event.currentTarget
-      const email = form.email.value
-      const password = form.password.value
-      const response = await fetchLoginAPI(email, password)
+      const response = await fetchLoginAPI(data.email, data.password)
 
       if (response.code === 200 && response.accountAdmin) {
         setMyAccount(response.accountAdmin)
@@ -47,15 +53,16 @@ export const useLoginAdmin = () => {
       //   type: 'SHOW_ALERT',
       //   payload: { message: 'Đã xảy ra lỗi, vui lòng thử lại.', severity: 'error' }
       // })
-    } finally {
-      setIsLoading(false)
     }
   }
   return {
     handleSubmit,
     showPassword,
     setShowPassword,
-    isLoading
+    register,
+    errors,
+    isSubmitting,
+    onSubmit
   }
 }
 

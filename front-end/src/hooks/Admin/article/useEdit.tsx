@@ -4,44 +4,12 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fetchDetailArticleAPI, fetchEditArticleAPI } from '~/apis/admin/article.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleCategoryContext } from '~/contexts/admin/ArticleCategoryContext'
 import type { ArticleDetailInterface } from '~/types/article.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
-
-const editArticleSchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, 'Tiêu đề là bắt buộc')
-    .max(200, 'Tiêu đề không được quá 200 ký tự')
-    .transform((val) => val.replace(/\s+/g, ' ')),
-
-  article_category_id: z.string()
-    .min(1, 'Vui lòng chọn danh mục'),
-
-  featured: z.enum(['1', '0'], {
-    message: 'Giá trị nổi bật không hợp lệ!'
-  }),
-
-  descriptionShort: z.string()
-    .trim()
-    .optional(),
-
-  descriptionDetail: z.string()
-    .trim()
-    .optional(),
-
-  status: z.enum(['ACTIVE', 'INACTIVE'], {
-    message: 'Trạng thái không hợp lệ!'
-  }),
-
-  thumbnail: z.any()
-    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
-})
-
-type EditArticleFormData = z.infer<typeof editArticleSchema>
+import { editArticleSchema, type EditArticleFormData } from '~/validations/admin/article.validate'
 
 export const useEdit = () => {
   const params = useParams()

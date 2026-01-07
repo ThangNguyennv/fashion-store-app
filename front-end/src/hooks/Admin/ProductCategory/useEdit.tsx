@@ -9,30 +9,7 @@ import type { ProductCategoryDetailInterface } from '~/types/productCategory.typ
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-const editProductCategorySchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, 'Tiêu đề là bắt buộc')
-    .max(100, 'Tiêu đề không được quá 100 ký tự')
-    .transform((val) => val.replace(/\s+/g, ' ')),
-
-  parent_id: z.string().optional(),
-
-  description: z.string()
-    .trim()
-    .optional(),
-
-  status: z.enum(['ACTIVE', 'INACTIVE'], {
-    message: 'Trạng thái không hợp lệ!'
-  }),
-
-  thumbnail: z.any()
-    .refine((val) => val !== null && val !== '', 'Vui lòng chọn ảnh đại diện')
-})
-
-type EditProductCategoryFormData = z.infer<typeof editProductCategorySchema>
+import { editProductCategorySchema, type EditProductCategoryFormData } from '~/validations/admin/product-category.validate'
 
 export const useEdit = () => {
   const params = useParams()

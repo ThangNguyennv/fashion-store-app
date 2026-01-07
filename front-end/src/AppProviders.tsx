@@ -24,63 +24,6 @@ function ThemeProviderWrapper({ children }: { children: React.ReactNode }) {
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>
 }
 
-// export function AuthAdminProviderWithKey({
-//   children
-// }: {
-//   children: React.ReactNode
-// }) {
-//   const [authVersion, setAuthVersion] = React.useState(0)
-
-//   // expose global trigger (hoặc context)
-//   ;(window as any).bumpAdminAuth = () =>
-//     setAuthVersion(v => v + 1)
-
-//   return (
-//     <AuthAdminProvider key={authVersion}>
-//       {children}
-//     </AuthAdminProvider>
-//   )
-// }
-
-// export function AuthClientProviderWithKey({
-//   children
-// }: {
-//   children: React.ReactNode
-// }) {
-//   const [authVersion, setAuthVersion] = React.useState(0)
-
-//   // expose global trigger (hoặc context)
-//   ;(window as any).bumpClientAuth = () =>
-//     setAuthVersion(v => v + 1)
-
-//   return (
-//     <AuthClientProvider key={authVersion}>
-//       {children}
-//     </AuthClientProvider>
-//   )
-// }
-// // Gom tất cả provider thành 1 (Nhớ viết từ trên xuống để khi chạy nó sẽ chạy từ children -> từ dưới lên trên)
-// export const AppProviders = composeProviders(
-//   ThemeProviderWrapper,
-//   AlertProvider,
-//   AuthAdminProviderWithKey,
-//   AuthClientProviderWithKey,
-//   HomeClientProvider,
-//   SettingGeneralProvider,
-//   ProductCategoryProvider,
-//   ProductCategoryTrashProvider,
-//   ProductProvider,
-//   ProductTrashProvider,
-//   OrderProvider,
-//   OrderTrashProvider,
-//   OrderClientProvider,
-//   CartProvider,
-//   ArticleClientProvider,
-//   ProductClientProvider,
-//   ArticleProvider,
-//   ArticleCategoryProvider
-// )
-
 // 1. Nhóm Global: Các Provider dùng chung cho cả app (Theme, Alert)
 export const GlobalProviders = composeProviders(
   ThemeProviderWrapper,

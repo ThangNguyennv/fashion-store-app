@@ -1,8 +1,8 @@
-import type { AccountDetailInterface, AccountsDetailInterface } from '~/types/account.type'
+import type { AccountAPIResponse, AccountsAPIResponse } from '~/types/account.type'
 import { API_ROOT } from '~/utils/constants'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 
-export const fetchAccountsAPI = async (): Promise<AccountsDetailInterface> => {
+export const fetchAccountsAPI = async (): Promise<AccountsAPIResponse> => {
   const resposne = await authorizedAxiosInstance.get(
     `${API_ROOT}/admin/accounts`
   )
@@ -25,7 +25,7 @@ export const fetchCreateAccountAPI = async (formData: FormData) => {
   return response.data
 }
 
-export const fetchDetailAccountAPI = async (id: string): Promise<AccountDetailInterface> => {
+export const fetchDetailAccountAPI = async (id: string): Promise<AccountAPIResponse> => {
   const response = await authorizedAxiosInstance.get(
     `${API_ROOT}/admin/accounts/detail/${id}`
   )

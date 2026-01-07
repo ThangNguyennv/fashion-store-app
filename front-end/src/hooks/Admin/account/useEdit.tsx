@@ -4,81 +4,12 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailAccountAPI, fetchEditAccountAPI } from '~/apis/admin/account.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountDetailInterface } from '~/types/account.type'
+import type { AccountAPIResponse } from '~/types/account.type'
 import type { RoleInfoInterface } from '~/types/role.type'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
-const editAccountSchema = z.object({
-  fullName: z.string()
-    .trim()
-    .min(1, 'Họ và tên là bắt buộc')
-    .min(5, 'Họ và tên phải có ít nhất 5 ký tự')
-    .max(50, 'Họ và tên không được quá 50 ký tự')
-    .transform((val) => val.replace(/\s+/g, ' ')), // Bỏ các khoảng trống dư thừa ở những đoạn giữa
-
-  email: z.string()
-    .trim()
-    .min(1, 'Email là bắt buộc')
-    .pipe(z.email('Email không hợp lệ')),
-
-  phone: z.string()
-    .trim()
-    .min(1, 'Số điện thoại là bắt buộc')
-    .refine(
-      val => /^(0[35789]\d{8}|\+84[35789]\d{8})$/.test(val),
-      { message: 'Số điện thoại không hợp lệ (10 số, bắt đầu bằng 03/05/07/08/09 hoặc +84)' }
-    ),
-
-  password: z.string()
-    .trim()
-    .optional()
-    .superRefine((val, ctx) => {
-      if (!val || val === '') return
-
-      if (val.length < 8) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Mật khẩu phải có ít nhất 8 kí tự!'
-        })
-      }
-      if (!/[A-Z]/.test(val)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Mật khẩu phải có ít nhất 1 chữ in hoa!'
-        })
-      }
-      if (!/[a-z]/.test(val)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Mật khẩu phải có ít nhất 1 chữ in thường!'
-        })
-      }
-      if (!/[0-9]/.test(val)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Mật khẩu phải có ít nhất 1 số!'
-        })
-      }
-
-      if (!/[@$!%*?&]/.test(val)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt!'
-        })
-      }
-    }),
-
-  role_id: z.string().min(1, 'Vui lòng chọn phân quyền'),
-
-  status: z.enum(['ACTIVE', 'INACTIVE']),
-
-  avatar: z.any().optional()
-})
-
-type EditAccountFormData = z.infer<typeof editAccountSchema>
+import { editAccountSchema, type EditAccountFormData } from '~/validations/admin/account.validate'
 
 const useEdit = () => {
   const [roles, setRoles] = useState<RoleInfoInterface[]>([])
@@ -112,7 +43,7 @@ const useEdit = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        const response: AccountDetailInterface = await fetchDetailAccountAPI(id)
+        const response: AccountAPIResponse = await fetchDetailAccountAPI(id)
         const acc = response.account
         setRoles(response.roles)
 
@@ -120,7 +51,7 @@ const useEdit = () => {
           fullName: acc.fullName,
           email: acc.email,
           phone: acc.phone || '',
-          role_id: acc.role_id,
+          role_id: acc.role_id._id,
           status: acc.status,
           password: ''
         })

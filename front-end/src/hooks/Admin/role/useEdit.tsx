@@ -7,23 +7,7 @@ import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-const editRoleSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, 'Tiêu đề không được để trống!')
-    .max(100, 'Tiêu đề không được quá 100 ký tự'),
-  titleId: z
-    .string()
-    .trim()
-    .min(1, 'Mã định danh không được để trống!')
-    .max(50, 'Mã định danh không được quá 50 ký tự'),
-  description: z.string().optional()
-})
-
-export type EditRoleFormData = z.infer<typeof editRoleSchema>
+import { editRoleSchema, type EditRoleFormData } from '~/validations/admin/role.validate'
 
 const useEdit = () => {
   const params = useParams()

@@ -99,3 +99,127 @@ export const sortOptions = [
   { name: 'Tên: A-Z', key: 'title', value: 'asc' },
   { name: 'Tên: Z-A', key: 'title', value: 'desc' }
 ]
+
+export const permissionSections = [
+  {
+    title: 'Thống kê',
+    permissions: [
+      { key: 'statistics_view', label: 'Xem' }
+    ]
+  },
+  {
+    title: 'Danh sách đơn hàng',
+    permissions: [
+      { key: 'orders_view', label: 'Xem' },
+      { key: 'orders_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Thùng rác của đơn hàng',
+    permissions: [
+      { key: 'orders-trash_view', label: 'Xem' },
+      { key: 'orders-trash_delete', label: 'Xóa' },
+      { key: 'orders-trash_recover', label: 'Khôi phục' }
+    ]
+  },
+  {
+    title: 'Danh mục sản phẩm',
+    permissions: [
+      { key: 'products-category_view', label: 'Xem' },
+      { key: 'products-category_create', label: 'Thêm mới' },
+      { key: 'products-category_edit', label: 'Chỉnh sửa' },
+      { key: 'products-category_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Thùng rác của danh mục sản phẩm',
+    permissions: [
+      { key: 'products-category-trash_view', label: 'Xem' },
+      { key: 'products-category-trash_delete', label: 'Xóa' },
+      { key: 'products-category-trash_recover', label: 'Khôi phục' }
+    ]
+  },
+  {
+    title: 'Danh sách sản phẩm',
+    permissions: [
+      { key: 'products_view', label: 'Xem' },
+      { key: 'products_create', label: 'Thêm mới' },
+      { key: 'products_edit', label: 'Chỉnh sửa' },
+      { key: 'products_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Thùng rác của sản phẩm',
+    permissions: [
+      { key: 'products-trash_view', label: 'Xem' },
+      { key: 'products-trash_delete', label: 'Xóa' },
+      { key: 'products-trash_recover', label: 'Khôi phục' }
+    ]
+  },
+  {
+    title: 'Danh mục bài viết',
+    permissions: [
+      { key: 'articles-category_view', label: 'Xem' },
+      { key: 'articles-category_create', label: 'Thêm mới' },
+      { key: 'articles-category_edit', label: 'Chỉnh sửa' },
+      { key: 'articles-category_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Danh sách bài viết',
+    permissions: [
+      { key: 'articles_view', label: 'Xem' },
+      { key: 'articles_create', label: 'Thêm mới' },
+      { key: 'articles_edit', label: 'Chỉnh sửa' },
+      { key: 'articles_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Danh sách thương hiệu',
+    permissions: [
+      { key: 'brands_view', label: 'Xem' },
+      { key: 'brands_create', label: 'Thêm mới' },
+      { key: 'brands_edit', label: 'Chỉnh sửa' },
+      { key: 'brands_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Nhóm quyền',
+    permissions: [
+      { key: 'roles_view', label: 'Xem' },
+      { key: 'roles_create', label: 'Thêm mới' },
+      { key: 'roles_edit', label: 'Chỉnh sửa' },
+      { key: 'roles_delete', label: 'Xóa' },
+      { key: 'roles_permissions', label: 'Phân quyền' }
+    ]
+  },
+  {
+    title: 'Tài khoản admin',
+    permissions: [
+      { key: 'accounts_view', label: 'Xem' },
+      { key: 'accounts_create', label: 'Thêm mới' },
+      { key: 'accounts_edit', label: 'Chỉnh sửa' },
+      { key: 'accounts_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Tài khoản người dùng',
+    permissions: [
+      { key: 'users_view', label: 'Xem' },
+      { key: 'users_edit', label: 'Chỉnh sửa' },
+      { key: 'users_delete', label: 'Xóa' }
+    ]
+  },
+  {
+    title: 'Cài đặt chung',
+    permissions: [
+      { key: 'settings-general_view', label: 'Xem' }
+    ]
+  },
+  {
+    title: 'Cài đặt nâng cao',
+    permissions: [
+      { key: 'settings-advance_view', label: 'Xem' }
+    ]
+  }
+]
