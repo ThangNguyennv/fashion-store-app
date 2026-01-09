@@ -1,4 +1,3 @@
-import { Request, Response } from 'express'
 import Brand from '~/models/brand.model'
 import paginationHelpers from '~/helpers/pagination'
 import searchHelpers from '~/helpers/search'
@@ -55,7 +54,7 @@ export const editBrand = async (data: any, id: string, account_id: string) => {
       updatedAt: new Date()
     }
 
-    return  await Brand.updateOne(
+    return Brand.updateOne(
       { _id: id },
       { 
         ...data,
@@ -69,7 +68,7 @@ export const deleteBrand = async (id: string, account_id: string) => {
       account_id: account_id,
       deletedAt: new Date()
     }
-    return await Brand.updateOne(
+    return Brand.updateOne(
       { _id: id },
       { deleted: true, deletedBy: deletedBy }
     )

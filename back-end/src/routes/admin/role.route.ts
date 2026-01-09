@@ -4,14 +4,14 @@ import * as controller from '~/controllers/admin/role.controller'
 import * as validate from '~/validations/admin/role.validation'
 
 router.get('/', controller.index)
-router.post('/create', validate.createPost, controller.createPost)
+router.post('/create', validate.createRole, controller.createRole)
 router.patch('/permissions', controller.permissionsPatch)
 router.patch(
   '/edit/:id',
-  validate.editPost, // middleware
-  controller.editPatch
+  validate.editRole, // middleware
+  controller.editRole
 )
-router.delete('/delete/:id', controller.deleteItem)
-router.get('/detail/:id', controller.detail)
+router.delete('/delete/:id', controller.deleteRole)
+router.get('/detail/:id', controller.detailRole)
 
 export const roleRoutes: Router = router

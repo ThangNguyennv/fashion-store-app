@@ -1,31 +1,11 @@
 import { Request, Response } from 'express'
-
-import Role from '~/models/role.model'
-import Account from '~/models/account.model'
+import * as roleService from '~/services/admin/role.service'
 
 // [GET] /admin/roles
 export const index = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false
-    }
+    const { roles, accounts } = await roleService.getRoles()
 
-    const roles = await Role.find(find)
-    for (const record of roles) {
-      // Lấy ra thông tin người cập nhật
-      const updatedBy = record.updatedBy[record.updatedBy.length - 1] // Lấy phần tử cuối của mảng updatedBy
-      if (updatedBy) {
-        const userUpdated = await Account.findOne({
-          _id: updatedBy.account_id
-        })
-        updatedBy['accountFullName'] = userUpdated.fullName
-      }
-    }
-
-    const accounts = await Account.find({
-      deleted: false
-    })
-    
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -42,14 +22,14 @@ export const index = async (req: Request, res: Response) => {
 }
 
 // [POST] /admin/roles/create
-export const createPost = async (req: Request, res: Response) => {
+export const createRole = async (req: Request, res: Response) => {
   try {
-    const role = new Role(req.body)
-    await role.save()
+    const role = await roleService.createRole(req.body)
+
     res.json({
       code: 201,
       message: 'Tạo thành công nhóm quyền!',
-      data: req.body
+      data: role
     })
   } catch (error) {
     res.json({
@@ -61,21 +41,10 @@ export const createPost = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/roles/edit/:id
-export const editPatch = async (req: Request, res: Response) => {
+export const editRole = async (req: Request, res: Response) => {
   try {
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    await Role.updateOne(
-      { _id: req.params.id },
-      {
-        ...req.body,
-        $push: {
-          updatedBy: updatedBy
-        }
-      }
-    )
+    await roleService.editRole(req['accountAdmin'].id, req.params.id, req.body)
+
     res.json({
       code: 200,
       message: 'Cập nhật thành công nhóm quyền!'
@@ -90,19 +59,10 @@ export const editPatch = async (req: Request, res: Response) => {
 }
 
 // [DELETE] /admin/roles/delete/:id
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteRole = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await Role.updateOne(
-      { _id: id },
-      {
-        deleted: true,
-        deletedBy: {
-          account_id: req['accountAdmin'].id,
-          deletedAt: new Date()
-        }
-      }
-    )
+    await roleService.deleteRole(req.params.id, req['accountAdmin'].id)
+
     res.json({
       code: 204,
       message: 'Xóa thành công nhóm quyền!'
@@ -117,13 +77,10 @@ export const deleteItem = async (req: Request, res: Response) => {
 }
 
 // [GET] /admin/roles/detail/:id
-export const detail = async (req: Request, res: Response) => {
+export const detailRole = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false,
-      _id: req.params.id
-    }
-    const role = await Role.findOne(find)
+    const role = await roleService.detailRole(req.params.id)
+
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -141,17 +98,8 @@ export const detail = async (req: Request, res: Response) => {
 // [PATCH] /admin/roles/permissions
 export const permissionsPatch = async (req: Request, res: Response) => {
   try {
-    const permissionRequireList = req.body.permissions
-    for (const item of permissionRequireList) {
-      const existing = await Role.findById(item._id)
-      if (!existing) {
-        continue
-      }
-      await Role.updateOne(
-        { _id: item._id },
-        { permissions: item.permissions }
-      )
-    }
+    await roleService.permissionsPatch(req.body.permissions)
+    
     res.json({
       code: 200,
       message: 'Cập nhật phân quyền thành công!',

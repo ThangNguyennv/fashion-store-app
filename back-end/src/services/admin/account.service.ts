@@ -49,7 +49,7 @@ export const createAccount = async (data: CreateAccountInput) => {
 }
 
 export const changeStatusAccount = async (status: string, id: string) => {
-    return await Account.updateOne({ _id: id }, { status: status })
+    return Account.updateOne({ _id: id }, { status: status })
 }
 
 export const editAccount = async (data: CreateAccountInput, id: string) => {
@@ -72,7 +72,7 @@ export const editAccount = async (data: CreateAccountInput, id: string) => {
     } else {
         delete data.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
     }
-    return await Account.updateOne({ _id: id }, data)
+    return Account.updateOne({ _id: id }, data)
 }
 
 export const detailAccount = async (id: string) => {
@@ -89,7 +89,8 @@ export const detailAccount = async (id: string) => {
 }
 
 export const deleteAccount = async (id: string) => {
-    return await Account.updateOne(
+    // Trả về Promise trực tiếp
+    return Account.updateOne(
       { _id: id },
       { deleted: true, deletedAt: new Date() }
     )

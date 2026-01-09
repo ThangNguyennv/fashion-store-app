@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
 
-export const createPost = (
+export const createRole = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -55,7 +55,7 @@ export const createPost = (
   next()
 }
 
-export const editPost = (
+export const editRole = (
   req: Request,
   res: Response,
   next: NextFunction

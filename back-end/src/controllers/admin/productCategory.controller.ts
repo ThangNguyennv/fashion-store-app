@@ -1,12 +1,9 @@
 import { Request, Response } from 'express'
 import ProductCategory from '~/models/productCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
-import searchHelpers from '~/helpers/search'
 import { TreeItem } from '~/helpers/createTree'
 import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
-import Account from '~/models/account.model'
-import paginationHelpers from '~/helpers/pagination'
-import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
+import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusRecursive'
 import * as productCategoryService from '~/services/admin/productCategory.service'
 
 // [GET] /admin/products-category
@@ -347,8 +344,8 @@ export const permanentlyDeleteProductCategory = async (req: Request, res: Respon
   } catch (error) {
     
     res.json({
-      code: 400,
-      message: 'Lỗi khi xóa danh mục!',
+      code: error.statusCode || 400,
+      message: error.message || 'Lỗi',
       error: error
     })
   }
