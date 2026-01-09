@@ -14,21 +14,21 @@ router.post(
   '/create',
   multer().single('thumbnail'),
   uploadWithOneImageToCloud,
-  validate.createPost, // middleware
-  controller.createPost
+  validate.createProductCategory, // middleware
+  controller.createProductCategory
 )
-router.delete('/delete/:id', controller.deleteItem)
+router.delete('/delete/:id', controller.deleteProductCategory)
 router.patch(
   '/edit/:id',
   multer().single('thumbnail'),
   uploadWithOneImageToCloud,
-  validate.editPatch, // middleware
-  controller.editPatch
+  validate.editProductCategory, // middleware
+  controller.editProductCategory
 )
-router.get('/detail/:id', controller.detail)
+router.get('/detail/:id', controller.detailProductCategory)
 router.patch('/change-status-with-children/:status/:id', controller.changeStatusWithChildren)
 
-router.get('/trash', controller.ProductCategoryTrash)
+router.get('/trash', controller.productCategoryTrash)
 router.patch('/trash/form-change-multi-trash', controller.changeMultiTrash)
 router.delete('/trash/permanentlyDelete/:id', controller.permanentlyDeleteProductCategory)
 router.patch('/trash/recover/:id', controller.recoverProductCategory)

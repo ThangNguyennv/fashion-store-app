@@ -71,7 +71,7 @@ const editProductCategorySchema = Joi.object({
     })
 })
 
-export const createPost = (
+export const createProductCategory = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -139,7 +139,7 @@ export const createPost = (
   }
 }
 
-export const editPatch = (
+export const editProductCategory = (
   req: Request,
   res: Response,
   next: NextFunction

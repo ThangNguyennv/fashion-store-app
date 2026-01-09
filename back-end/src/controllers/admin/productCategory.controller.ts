@@ -2,85 +2,23 @@ import { Request, Response } from 'express'
 import ProductCategory from '~/models/productCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
 import searchHelpers from '~/helpers/search'
-import { buildTree, TreeItem } from '~/helpers/createTree'
+import { TreeItem } from '~/helpers/createTree'
 import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
-import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
 import Account from '~/models/account.model'
 import paginationHelpers from '~/helpers/pagination'
 import { deleteManyStatusFast, updateManyStatusFast, updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
+import * as productCategoryService from '~/services/admin/productCategory.service'
 
 // [GET] /admin/products-category
 export const index = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: false }
-
-    if (req.query.status) {
-      find.status = req.query.status.toString()
-    }
-
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex || objectSearch.slug) {
-      find.$or = [
-        { title: objectSearch.regex },
-        { slug: objectSearch.slug }
-      ]
-    }
-    // End search
-
-    // Sort
-    let sort: Record<string, 1 | -1> = { }
-    if (req.query.sortKey) {
-      const key = req.query.sortKey.toString()
-      const dir = req.query.sortValue === 'asc' ? 1 : -1
-      sort[key] = dir
-    }
-    // luôn sort phụ theo createdAt
-    if (!sort.createdAt) {
-      sort.createdAt = -1
-    }
-    // End Sort
-
-    // Pagination
-    const parentFind = { ...find, parent_id: '' }
-    const countParents = await ProductCategory.countDocuments(parentFind)
-    const objectPagination = paginationHelpers(
-      { 
-        currentPage: 1, 
-        limitItems: 2 
-      },
-      req.query,
-      countParents
-    )
-    // End Pagination
-
-    //  Query song song bằng Promise.all (giảm round-trip)
-    const [parentCategories, accounts, allCategories] = await Promise.all([
-      ProductCategory
-        .find(parentFind)
-        .sort(sort)
-        .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip) // chỉ parent
-        .lean(),
-      Account
-        .find({ deleted: false }) // account info
-        .lean(),
-      ProductCategory
-        .find({ deleted: false })
-        .sort(sort) 
-        .lean()
-    ])
-    
-    // Add children vào cha (Đã phân trang giới hạn 2 item)
-    const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
-  
-    // Add children vào cha (Không có phân trang, lấy tất cả item)
-    const newAllProductCategories = buildTree(allCategories as unknown as TreeItem[])
-
-    // Gắn account info cho tree
-    const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-    addLogInfoToTree(newProductCategories as LogNode[], accountMap)
-    addLogInfoToTree(newAllProductCategories as LogNode[], accountMap)
+    const {
+      newProductCategories,
+      newAllProductCategories,
+      accounts,
+      objectSearch,
+      objectPagination
+    } = await productCategoryService.getProductCategories(req.query)
 
     res.json({
       code: 200,
@@ -126,21 +64,16 @@ export const index = async (req: Request, res: Response) => {
 //   }
 // }
 
-export interface UpdatedBy {
-  account_id: string,
-  updatedAt: Date
-}
+
 
 // [PATCH] /admin/change-status-with-children/:status/:id
 export const changeStatusWithChildren = async (req: Request, res: Response) => {
    try {
-    const { status, id } = req.params
-    const updatedBy: UpdatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-
-    await updateStatusRecursiveForOneItem(ProductCategory, status, id, updatedBy)
+    await productCategoryService.changeStatusWithChildren(
+      req['accountAdmin'].id, 
+      req.params.status, 
+      req.params.id
+    )
 
     return res.json({ 
       code: 200, 
@@ -210,19 +143,10 @@ export const changeMulti = async (req: Request, res: Response) => {
 }
 
 // [DELETE] /admin/products-category/delete/:id
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteProductCategory = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await ProductCategory.updateOne(
-      { _id: id },
-      {
-        deleted: true,
-        deletedBy: {
-          account_id: req['accountAdmin'].id,
-          deletedAt: new Date()
-        }
-      }
-    )
+    await productCategoryService.deleteProductCategory(req.params.id, req['accountAdmin'].id)
+
     res.json({
       code: 204,
       message: 'Xóa thành công danh mục sản phẩm!'
@@ -237,13 +161,10 @@ export const deleteItem = async (req: Request, res: Response) => {
 }
 
 // [POST] /admin/products-category/create
-export const createPost = async (req: Request, res: Response) => {
+export const createProductCategory = async (req: Request, res: Response) => {
   try {
-    req.body.createdBy = {
-      account_id: req['accountAdmin'].id
-    }
-    const records = new ProductCategory(req.body)
-    await records.save()
+    const records = await productCategoryService.createProductCategory(req.body, req['accountAdmin'].id)
+
     res.json({
       code: 201,
       message: 'Thêm thành công danh mục sản phẩm!',
@@ -259,21 +180,14 @@ export const createPost = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/products-category/edit/:id
-export const editPatch = async (req: Request, res: Response) => {
+export const editProductCategory = async (req: Request, res: Response) => {
   try {
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    await ProductCategory.updateOne(
-      { _id: req.params.id },
-      {
-        ...req.body,
-        $push: {
-          updatedBy: updatedBy
-        }
-      }
+    await productCategoryService.editProductCategory(
+      req.body, 
+      req.params.id, 
+      req['accountAdmin'].id
     )
+
     res.json({
       code: 200,
       message: 'Cập nhật thành công danh mục sản phẩm!'
@@ -288,13 +202,10 @@ export const editPatch = async (req: Request, res: Response) => {
 }
 
 // [GET] /admin/products-category/detail/:id
-export const detail = async (req: Request, res: Response) => {
+export const detailProductCategory = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false,
-      _id: req.params.id
-    }
-    const productCategory = await ProductCategory.findOne(find)
+    const productCategory = await productCategoryService.detailProductCategory(req.params.id)
+
     res.json({
       code: 200,
       message: 'Lấy Thành công chi tiết danh mục sản phẩm!',
@@ -310,70 +221,14 @@ export const detail = async (req: Request, res: Response) => {
 }
 
 // [GET] /admin/products-category/trash
-export const ProductCategoryTrash = async (req: Request, res: Response) => {
+export const productCategoryTrash = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: true }
-
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex || objectSearch.slug) {
-      find.$or = [
-        { title: objectSearch.regex },
-        { slug: objectSearch.slug }
-      ]
-    }
-    // End search
-
-    // Sort
-    let sort: Record<string, 1 | -1> = { }
-    if (req.query.sortKey) {
-      const key = req.query.sortKey.toString()
-      const dir = req.query.sortValue === 'asc' ? 1 : -1
-      sort[key] = dir
-    }
-    // luôn sort phụ theo createdAt
-    if (!sort.createdAt) {
-      sort.createdAt = -1
-    }
-    // End Sort
-
-    // Pagination
-    // const parentFind = { ...find, parent_id: '' }
-
-    const countParents = await ProductCategory.countDocuments(find)
-    const objectPagination = paginationHelpers(
-      { 
-        currentPage: 1, 
-        limitItems: 2 
-      },
-      req.query,
-      countParents
-    )
-    // End Pagination
-
-    //  Query song song bằng Promise.all (giảm round-trip)
-    const [parentCategories, accounts] = await Promise.all([
-      ProductCategory
-        .find(find)
-        .sort(sort)
-        .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip) // chỉ parent
-        .lean(),
-      Account
-        .find({ deleted: false }) // account info
-        .lean()
-    ])
-    
-    // // Add children vào cha (Đã phân trang giới hạn 2 item)
-    // const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
-  
-    // // Add children vào cha (Không có phân trang, lấy tất cả item)
-    // const newAllProductCategories = buildTree(allCategories as unknown as TreeItem[])
-
-    // // Gắn account info cho tree
-    // const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-    // addLogInfoToTree(newProductCategories as LogNode[], accountMap)
-    // addLogInfoToTree(newAllProductCategories as LogNode[], accountMap)
+    const {
+      parentCategories,
+      accounts,
+      objectSearch,
+      objectPagination
+    } = await productCategoryService.productCategoryTrash(req.query)
 
     res.json({
       code: 200,
@@ -483,53 +338,8 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
 // [DELETE] /admin/products-category/trash/permanentlyDelete/:id
 export const permanentlyDeleteProductCategory = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    
-    // Lấy danh mục gốc cần xóa
-    const rootCategory = await ProductCategory.findOne({ _id: id })
-    
-    if (!rootCategory) {
-      return res.json({
-        code: 404,
-        message: 'Không tìm thấy danh mục!'
-      })
-    }
-    
-    // Lấy tất cả danh mục để tìm con
-    const allCategories = await ProductCategory.find({})
-    
-    // Tạo cây từ danh mục gốc
-    const tree = buildTreeForPagedItems(
-      [rootCategory as any as TreeItem], 
-      allCategories as any as TreeItem[]
-    )
-    
-    // Hàm đệ quy lấy tất cả ID từ cây
-    const getAllIdsFromTree = (items: TreeItem[]): string[] => {
-      let ids: string[] = []
-      
-      items.forEach(item => {
-        const itemId = item._id?.toString() || item.id?.toString()
-        if (itemId) {
-          ids.push(itemId)
-        }
-        
-        if (item.children && item.children.length > 0) {
-          ids = ids.concat(getAllIdsFromTree(item.children))
-        }
-      })
-      
-      return ids
-    }
-    
-    // Lấy tất cả ID cần xóa
-    const allIdsToDelete = getAllIdsFromTree(tree)
-    
-    // Xóa tất cả danh mục
-    await ProductCategory.deleteMany({
-      _id: { $in: allIdsToDelete }
-    })
-    
+    const allIdsToDelete = await productCategoryService.permanentlyDeleteProductCategory(req.params.id)
+
     res.json({
       code: 204,
       message: `Đã xóa vĩnh viễn ${allIdsToDelete.length} danh mục (bao gồm danh mục con)!`
@@ -547,12 +357,8 @@ export const permanentlyDeleteProductCategory = async (req: Request, res: Respon
 // [PATCH] /admin/products-category/trash/recover/:id
 export const recoverProductCategory = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
+    await productCategoryService.recoverProductCategory(req.params.id)
     
-    await ProductCategory.updateOne(
-      { _id: id },
-      { deleted: false, recoveredAt: new Date() }
-    )
     res.json({
       code: 200,
       message: 'Đã khôi phục thành công danh mục sản phẩm!'
