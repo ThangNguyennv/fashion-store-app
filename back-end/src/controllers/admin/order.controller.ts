@@ -3,64 +3,18 @@ import filterOrderHelpers from '~/helpers/filterOrder'
 import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'
-import Account from '~/models/account.model'
 import ExcelJS from 'exceljs'
+import * as orderService from '~/services/admin/order.service'
 
 // [GET] /admin/orders
 export const index = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: false }
-
-    if (req.query.status) {
-      find.status = req.query.status.toString()
-    }
-    
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex) {
-      find["userInfo.phone"] = objectSearch.regex
-    }
-    // End search
-
-    // Pagination
-    const countOrders = await Order.countDocuments(find)
-    const objectPagination = paginationHelpers(
-      {
-        currentPage: 1,
-        limitItems: 15
-      },
-      req.query,
-      countOrders
-    )
-    // End Pagination
-
-    // Sort
-    let sort: Record<string, 1 | -1> = { }
-    if (req.query.sortKey) {
-      const key = req.query.sortKey.toString()
-      const dir = req.query.sortValue === 'asc' ? 1 : -1
-      sort[key] = dir
-    }
-    // luôn sort phụ theo createdAt
-    if (!sort.createdAt) {
-      sort.createdAt = -1
-    }
-    // End Sort
-
-    const [orders, allOrders] = await Promise.all([
-      Order
-        .find(find)
-        .sort(sort)
-        .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip)
-        .lean()  
-        .populate('createdBy.account_id', 'fullName email') // Lấy thông tin người tạo
-        .populate('updatedBy.account_id', 'fullName email')
-        .lean(),
-      Order
-       .find({deleted: false})
-       .lean()
-    ])
+    const {
+        orders,
+        allOrders,
+        objectSearch,
+        objectPagination
+    } = await orderService.getOrders(req.query)
 
     res.json({
       code: 200,
@@ -81,26 +35,13 @@ export const index = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/orders/change-status/:status/:id
-export const changeStatus = async (req: Request, res: Response) => {
+export const changeStatusOrder = async (req: Request, res: Response) => {
   try {
-    const status = req.params.status
-    const id = req.params.id
-
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    const updater = await Order
-      .findByIdAndUpdate(
-        { _id: id },
-        {
-          status: status,
-          $push: { updatedBy: updatedBy }
-        },
-        { new: true } // Trả về document sau update
-      )
-      .populate('updatedBy.account_id', 'fullName email')
-      .lean() 
+    const updater = await orderService.changeStatusOrder(
+      req.params.status, 
+      req.params.id, 
+      req['accountAdmin'].id
+    )
 
     res.json({
       code: 200,
@@ -201,19 +142,10 @@ export const changeMulti = async (req: Request, res: Response) => {
 }
 
 // [DELETE] /admin/orders/delete/:id
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteOrder = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await Order.updateOne(
-      { _id: id },
-      {
-        deleted: true,
-        deletedBy: {
-          account_id: req['accountAdmin'].id,
-          deletedAt: new Date()
-        }
-      }
-    )
+    await orderService.deleteOrder(req.params.id, req['accountAdmin'].id)
+
     res.json({
       code: 204,
       message: 'Đã xóa thành công đơn hàng!'
@@ -230,23 +162,16 @@ export const deleteItem = async (req: Request, res: Response) => {
 
 
 // [GET] /admin/orders/detail/:id
-export const detail = async (req: Request, res: Response) => {
+export const detailOrder = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false,
-      _id: req.params.id
-    }
+    const order = await orderService.detailOrder(req.params.id)
 
-    const order = await Order.findOne(find)
-
-    if (order) {
-      res.json({
-        code: 200,
-        message: 'Chi tiết đơn hàng!',
-        order: order
-      })
-    }
-
+    res.json({
+      code: 200,
+      message: 'Chi tiết đơn hàng!',
+      order: order
+    })
+    
   } catch (error) {
     res.json({
       code: 400,
@@ -259,16 +184,8 @@ export const detail = async (req: Request, res: Response) => {
 // [PATCH] /admin/orders/edit-estimatedDeliveryDay
 export const estimatedDeliveryDay = async (req: Request, res: Response) => {
   try {
-    const estimatedDeliveryDay = req.body.estimatedDeliveryDay
-    const orderId = req.body.id
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    await Order.updateOne(
-      { _id: orderId },
-      { estimatedDeliveryDay: estimatedDeliveryDay, $push: { updatedBy: updatedBy }}
-    )
+    await orderService.estimatedDeliveryDay(req.body, req['accountAdmin'].id)
+
     res.json({
       code: 200,
       message: `Cập nhật thành công thời gian giao hàng!`
@@ -285,16 +202,8 @@ export const estimatedDeliveryDay = async (req: Request, res: Response) => {
 // [PATCH] /admin/orders/edit-estimatedConfirmedDay
 export const estimatedConfirmedDay = async (req: Request, res: Response) => {
   try {
-    const estimatedConfirmedDay = req.body.estimatedConfirmedDay
-    const orderId = req.body.id
-    const updatedBy = {
-      account_id: req['accountAdmin'].id,
-      updatedAt: new Date()
-    }
-    await Order.updateOne(
-      { _id: orderId },
-      { estimatedConfirmedDay: estimatedConfirmedDay, $push: { updatedBy: updatedBy }}
-    )
+    await orderService.estimatedConfirmedDay(req.body, req['accountAdmin'].id)
+
     res.json({
       code: 200,
       message: `Cập nhật thành công thời gian nhận hàng!`
@@ -311,66 +220,7 @@ export const estimatedConfirmedDay = async (req: Request, res: Response) => {
 // [GET] /admin/orders/export
 export const exportOrder = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: false }
-    const status = req.query.status as string
-
-    if (status) {
-      find.status = status
-    }
-
-    // Lấy TẤT CẢ đơn hàng (không phân trang) khớp với bộ lọc
-    const orders = await Order.find(find).sort({ createdAt: -1 })
-
-    // Tạo file Excel
-    const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet(`Đơn hàng ${status || 'Tất cả'}`)
-
-    // Định nghĩa các cột
-    worksheet.columns = [
-      { header: 'Mã Đơn Hàng', key: 'orderId', width: 30 },
-      { header: 'Ngày Đặt', key: 'createdAt', width: 20, style: { numFmt: 'dd/mm/yyyy hh:mm:ss' } },
-      { header: 'Tên Khách Hàng', key: 'customerName', width: 30 },
-      { header: 'Số Điện Thoại', key: 'phone', width: 20 },
-      { header: 'Địa Chỉ', key: 'address', width: 50 },
-      { header: 'Trạng Thái Đơn', key: 'orderStatus', width: 20 },
-      { header: 'Sản Phẩm', key: 'productTitle', width: 40 },
-      { header: 'Phân Loại (Màu)', key: 'color', width: 15 },
-      { header: 'Phân Loại (Size)', key: 'size', width: 15 },
-      { header: 'Số Lượng', key: 'quantity', width: 10 },
-      { header: 'Đơn Giá (Đã giảm)', key: 'price', width: 20, style: { numFmt: '#,##0"đ"' } },
-      { header: 'Thành Tiền', key: 'total', width: 20, style: { numFmt: '#,##0"đ"' } },
-      { header: 'PT Thanh Toán', key: 'paymentMethod', width: 15 },
-      { header: 'TT Thanh Toán', key: 'paymentStatus', width: 15 },
-      { header: 'Ghi Chú', key: 'note', width: 30 }
-    ]
-
-    // Làm cho hàng tiêu đề in đậm
-    worksheet.getRow(1).font = { bold: true }
-
-    // Thêm dữ liệu vào file
-    for (const order of orders) {
-      for (const product of order.products) {
-        const priceNew = Math.floor(product.price * (100 - product.discountPercentage) / 100)
-        
-        worksheet.addRow({
-          orderId: order._id.toString(),
-          createdAt: order.createdAt,
-          customerName: order.userInfo.fullName,
-          phone: order.userInfo.phone,
-          address: order.userInfo.address,
-          orderStatus: order.status,
-          productTitle: product.title,
-          color: product.color, 
-          size: product.size,  
-          quantity: product.quantity,
-          price: priceNew,
-          total: priceNew * product.quantity,
-          paymentMethod: order.paymentInfo.method,
-          paymentStatus: order.paymentInfo.status,
-          note: order.note
-        })
-      }
-    }
+    const { workbook, status } = await orderService.exportOrder(req.query)
 
     // Gửi file về cho client
     res.setHeader(
@@ -399,50 +249,11 @@ export const exportOrder = async (req: Request, res: Response) => {
 // [GET] /admin/orders/trash
 export const orderTrash = async (req: Request, res: Response) => {
   try {
-    const find: any = {
-      deleted: true
-    }
-
-    // Search
-    const objectSearch = searchHelpers(req.query)
-    if (objectSearch.regex) {
-      find["userInfo.phone"] = objectSearch.regex
-    }
-    // End search
-
-    // Pagination
-    const countOrders = await Order.countDocuments(find)
-
-    const objectPagination = paginationHelpers(
-      {
-        currentPage: 1,
-        limitItems: 10
-      },
-      req.query,
-      countOrders
-    )
-    // End Pagination
-
-    // Sort
-    let sort: Record<string, 1 | -1> = { }
-    if (req.query.sortKey) {
-      const key = req.query.sortKey.toString()
-      const dir = req.query.sortValue === 'asc' ? 1 : -1
-      sort[key] = dir
-    }
-    // luôn sort phụ theo createdAt
-    if (!sort.createdAt) {
-      sort.createdAt = -1
-    }
-    // End Sort
-
-    const orders = await Order
-      .find(find)
-      .sort(sort)
-      .limit(objectPagination.limitItems)
-      .skip(objectPagination.skip)
-      .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
-      .lean()
+    const { 
+      orders,
+      objectSearch,
+      objectPagination
+    } = await orderService.orderTrash(req.query)
 
     res.json({
       code: 200,
@@ -507,10 +318,8 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
 // [DELETE] /admin/orders/trash/permanentlyDelete/:id
 export const permanentlyDeleteOrder = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await Order.deleteOne(
-      { _id: id }
-    )
+    await orderService.permanentlyDeleteOrder(req.params.id)
+
     res.json({
       code: 204,
       message: 'Đã xóa vĩnh viễn thành công đơn hàng!'
@@ -527,11 +336,8 @@ export const permanentlyDeleteOrder = async (req: Request, res: Response) => {
 // [PATCH] /admin/orders/trash/recover/:id
 export const recoverOrder = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await Order.updateOne(
-      { _id: id },
-      { deleted: false, recoveredAt: new Date() }
-    )
+    await orderService.recoverOrder(req.params.id)
+    
     res.json({
       code: 200,
       message: 'Đã khôi phục thành công đơn hàng!'
