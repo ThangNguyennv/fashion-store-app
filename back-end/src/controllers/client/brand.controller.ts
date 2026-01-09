@@ -1,17 +1,12 @@
 import { Request, Response } from 'express'
-import paginationHelpers from '~/helpers/pagination'
 import Brand from '~/models/brand.model'
+import * as brandService from '~/services/client/brand.service'
 
 // [GET] /brands
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
-    const find: any = { deleted: false }
- 
-    const brands = await Brand
-      .find(find)
-      .sort({ createdAt: -1 })
-      .lean()
-
+    const brands = await brandService.getAllBrands()
+    
     res.json({
       code: 200,
       message: 'Lấy danh sách thương hiệu thành công!',

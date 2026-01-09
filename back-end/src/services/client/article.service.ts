@@ -74,6 +74,20 @@ export const category = async (slugCategory: string) => {
     }
 }
 
-export const detailArticle = async () => {
-    
+export const detailArticle = async (slugArticle: string) => {
+    const find = {
+      deleted: false,
+      slug: slugArticle,
+      status: 'ACTIVE'
+    }
+    const article = await Article.findOne(find)
+    if (article.article_category_id) {
+      const category = await ArticleCategory.findOne({
+        _id: article.article_category_id,
+        deleted: false,
+        status: 'ACTIVE'
+      })
+      article['category'] = category
+    }
+    return article
 }

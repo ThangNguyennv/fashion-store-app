@@ -1,7 +1,4 @@
 import { Request, Response } from 'express'
-import Article from '~/models/article.model'
-import ArticleCategory from '~/models/articleCategory.model'
-import paginationHelpers from '~/helpers/pagination'
 import * as articleService from '~/services/client/article.service'
 
 // [GET] /articles
@@ -53,7 +50,7 @@ export const category = async (req: Request, res: Response) => {
 export const detailArticle = async (req: Request, res: Response) => {
   try {
     const article = await articleService.detailArticle(req.params.slugArticle)
-    
+
     res.json({
       code: 200,
       message: 'Thành công!',
