@@ -1,9 +1,9 @@
 import { Server, Socket } from 'socket.io'
-import jwt from 'jsonwebtoken'
 import * as cookie from 'cookie'
+import { JWTProvider } from '~/providers/jwt.provider'
 
 export const chatSocket = (io: Server) => {
-  io.use((socket: Socket, next) => {
+  io.use(async (socket: Socket, next) => {
     try {
       const cookies = socket.handshake.headers.cookie
       if (!cookies) {
@@ -11,12 +11,19 @@ export const chatSocket = (io: Server) => {
       }
 
       const parsedCookies = cookie.parse(cookies)
-      const tokenUser = parsedCookies.tokenUser
-      const tokenAdmin = parsedCookies.token
+      const tokenAdmin = parsedCookies.accessToken
+      const tokenUser = parsedCookies.accessTokenUser
 
       if (tokenAdmin) {
+        console.log("hello admin")
         // Xác thực Admin (Account)
-        const decoded = jwt.verify(tokenAdmin, process.env.JWT_SECRET_ADMIN as string) as { accountId: string, role_id: string }
+        const decoded = await JWTProvider.verifyToken(
+          tokenAdmin, 
+          process.env.JWT_ACCESS_TOKEN_SECRET_ADMIN
+        ) as {
+          accountId: string, 
+          role_id: string
+        }
         if (!decoded.accountId) {
           return next(new Error('Authentication error: Invalid admin token.'))
         }
@@ -25,8 +32,14 @@ export const chatSocket = (io: Server) => {
         socket.data.role = 'admin'
         return next()
       } else if (tokenUser) {
+        console.log("hello user")
         // Xác thực Client (User)
-        const decoded = jwt.verify(tokenUser, process.env.JWT_SECRET as string) as { userId: string }
+        const decoded = await JWTProvider.verifyToken(
+          tokenUser,
+          process.env.JWT_ACCESS_TOKEN_SECRET_CLIENT
+        ) as {
+          userId: string
+        }
         if (!decoded.userId) {
           return next(new Error('Authentication error: Invalid user token.'))
         }

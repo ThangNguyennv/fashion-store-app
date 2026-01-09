@@ -14,7 +14,7 @@ import { articleCategoryRoutes } from './articleCategory.route'
 import { orderRoutes } from './order.route'
 import { settingRoutes } from './setting.route'
 import { brandRoutes } from './brand.route'
-import { chatAdminRoutes } from './chat.admin.route'
+import { chatAdminRoutes } from './chat.route'
 import { noCache } from '~/middlewares/admin/noCache.middleware'
 import { requirePermission } from '~/middlewares/admin/role.middleware'
 

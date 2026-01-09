@@ -37,7 +37,7 @@ const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins, // Cho phép client React kết nối
-    credentials: true
+    credentials: true // Cho phép gửi cookie từ FE
   }
 })
 
