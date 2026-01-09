@@ -1,7 +1,4 @@
 import { Request, Response } from 'express'
-import Product from '~/models/product.model'
-import User from '~/models/user.model'
-import Order from '~/models/order.model'
 import * as statisticService from '~/services/admin/statistic.service'
 
 // [GET] /admin/statistics

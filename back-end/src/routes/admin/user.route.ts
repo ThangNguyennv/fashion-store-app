@@ -8,15 +8,15 @@ import { uploadWithOneImageToCloud } from '~/middlewares/admin/uploadCloud.middl
 import * as validate from '~/validations/admin/user.validation'
 
 router.get('/', controller.index)
-router.patch('/change-status/:status/:id', controller.changeStatus)
+router.patch('/change-status/:status/:id', controller.changeStatusUser)
 router.patch(
   '/edit/:id',
   multer().single('avatar'),
   uploadWithOneImageToCloud,
-  validate.editPatch, // middleware
-  controller.editPatch
+  validate.editUser, // middleware
+  controller.editUser
 )
-router.get('/detail/:id', controller.detail)
-router.delete('/delete/:id', controller.deleteItem)
+router.get('/detail/:id', controller.detailUser)
+router.delete('/delete/:id', controller.deleteUser)
 
 export const userRoutes: Router = router

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import SettingsGeneral from '~/models/settingGeneral.model'
 import * as settingGeneralService from '~/services/admin/setting.service'
 
 // [GET] /admin/settings/general

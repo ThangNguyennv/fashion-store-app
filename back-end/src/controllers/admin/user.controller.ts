@@ -1,14 +1,11 @@
 import { Request, Response } from 'express'
-import User from '~/models/user.model'
-import bcrypt from 'bcrypt'
+import * as userService from '~/services/admin/user.service'
 
 // [GET] /admin/users
 export const index = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false
-    }
-    const users = await User.find(find)
+    const users = await userService.getUsers()
+
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -24,11 +21,10 @@ export const index = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/users/change-status/:status/:id
-export const changeStatus = async (req: Request, res: Response) => {
+export const changeStatusUser = async (req: Request, res: Response) => {
   try {
-    const status = req.params.status
-    const id = req.params.id
-    await User.updateOne({ _id: id }, { status: status })
+    await userService.changeStatusUser(req.params.status, req.params.id)
+
     res.json({
       code: 200,
       message: 'Cập nhật trạng thái thành công!'
@@ -43,50 +39,28 @@ export const changeStatus = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/users/edit/:id
-export const editPatch = async (req: Request, res: Response) => {
+export const editUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body
-    const isEmailExist = await User.findOne({
-      _id: { $ne: req.params.id }, // $ne ($notequal) -> Tránh trường hợp khi tìm bị lặp và không cập nhật lại lên đc.
-      email: email,
-      deleted: false
-    })
-    if (isEmailExist) {
-      res.json({
-        code: 409,
-        message: `Email ${email} đã tồn tại, vui lòng chọn email khác!`
-      })
-      return
-    } 
-    if (password) {
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-      req.body.password = hashedPassword
-    } else {
-      delete req.body.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
-    }
-    await User.updateOne({ _id: req.params.id }, req.body)
+    await userService.editUser(req.body, req.params.id)
+
     res.json({
       code: 200,
       message: 'Cập nhật thành công người dùng!'
     })
   } catch (error) {
     res.json({
-      code: 400,
-      message: 'Lỗi!',
+      code: error.statusCode || 400,
+      message: error.message || 'Lỗi',
       error: error
     })
   }
 }
 
 // [GET] /admin/users/detail/:id
-export const detail = async (req: Request, res: Response) => {
+export const detailUser = async (req: Request, res: Response) => {
   try {
-    const find = {
-      deleted: false,
-      _id: req.params.id
-    }
-    const accountUser = await User.findOne(find)
+    const accountUser = await userService.detailUser(req.params.id)
+
     res.json({
       code: 200,
       message: 'Chi tiết người dùng!',
@@ -102,10 +76,10 @@ export const detail = async (req: Request, res: Response) => {
 }
 
 // [DELETE] /admin/users/delete/:id
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id
-    await User.updateOne({ _id: id }, { deleted: true, deletedAt: new Date() })
+    await userService.deleteUser(req.params.id)
+
     res.json({
       code: 204,
       message: 'Xóa thành công người dùng!'
