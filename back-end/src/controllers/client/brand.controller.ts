@@ -1,12 +1,11 @@
 import { Request, Response } from 'express'
-import Brand from '~/models/brand.model'
 import * as brandService from '~/services/client/brand.service'
 
 // [GET] /brands
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
     const brands = await brandService.getAllBrands()
-    
+
     res.json({
       code: 200,
       message: 'Lấy danh sách thương hiệu thành công!',

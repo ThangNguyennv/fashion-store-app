@@ -3,38 +3,12 @@ import Cart from '~/models/cart.model'
 import * as productsHelper from '~/helpers/product'
 import { OneProduct } from '~/helpers/product'
 import mongoose from 'mongoose'
+import * as cartService from '~/services/client/cart.service'
 
 // [GET] /cart
 export const index = async (req: Request, res: Response) => {
   try {
-    const cartId = req["cartId"]
-    const cart = await Cart
-      .findOne({ _id: cartId })
-      .populate({
-        path: 'products.product_id', // Đường dẫn đến trường cần làm đầy
-        model: 'Product', // Tên model tham chiếu
-        select: 'title thumbnail slug price discountPercentage colors sizes stock' // Chỉ lấy các trường cần thiết
-      })
-    
-    // Nếu không có giỏ hàng, trả về an toàn
-    if (!cart) {
-      return res.json({ code: 200, message: 'Giỏ hàng trống!', cartDetail: null })
-    }
-    // Tính toán tổng tiền sau khi đã có đầy đủ thông tin
-    let totalsPrice = 0
-    if (cart.products.length > 0) {
-      for (const item of cart.products) {
-        // Sau khi populate, item.product_id sẽ là một object chứa thông tin sản phẩm
-        const productInfo = item.product_id as any
-        if (productInfo) {
-          const priceNew = productsHelper.priceNewProduct(productInfo as OneProduct)
-          item['productInfo'] = productInfo // Gán productInfo vào một trường ảo
-          item['totalPrice'] = priceNew * item.quantity
-          totalsPrice += item['totalPrice']
-        }
-      }
-    }
-    cart.totalsPrice = totalsPrice
+    const cart = await cartService.getCart(req["cartId"])
 
     res.json({
       code: 200,
@@ -43,50 +17,17 @@ export const index = async (req: Request, res: Response) => {
     })
   } catch (error) {
     res.json({
-      code: 400,
-      message: 'Lỗi!',
+      code: error.statusCode || 400,
+      message: error.message || 'Lỗi',
       error: error
     })
   }
 }
 
 // [POST] /cart/add/:productId
-export const addPost = async (req: Request, res: Response) => {
+export const addToCart = async (req: Request, res: Response) => {
   try {
-    const productId = req.params.productId
-    const { quantity, color, size } = req.body 
-    const cartId = req["cartId"]
-    const result = await Cart.updateOne(
-      {
-        _id: cartId,
-        products: {
-          $elemMatch: {
-            product_id: productId,
-            color: color,
-            size: size
-          }
-        }
-      },
-      {
-        // Dùng $inc để tăng số lượng một cách an toàn
-        $inc: { 'products.$.quantity': quantity } 
-      }
-    )
-
-    if (result.modifiedCount === 0) { // Dùng khi không có sản phẩm nào được cập nhật
-      const productInfo = {
-        product_id: productId,
-        quantity: quantity,
-        color: color,
-        size: size
-      }
-      
-      // Thêm sản phẩm mới vào giỏ hàng
-      await Cart.updateOne(
-        { _id: cartId },
-        { $push: { products: productInfo } }
-      )
-    }
+    await cartService.addToCart(req.params.productId, req.body, req["cartId"])
 
     res.json({
       code: 201,
@@ -104,46 +45,22 @@ export const addPost = async (req: Request, res: Response) => {
 // [PATCH] /cart/update-quantity
 export const updateQuantity = async (req: Request, res: Response) => {
   try {
-    const cartId = req['cartId']
-    const { productId, color, size, quantity } = req.body;
+    await cartService.updateQuantity(req['cartId'], req.body)
 
-    await Cart.updateOne(
-      { 
-        _id: cartId,
-        'products.product_id': new mongoose.Types.ObjectId(productId),
-        'products.color': color,
-        'products.size': size
-      },
-      { $set: { 'products.$.quantity': quantity } }
-    );
-    res.json({ code: 200, message: 'Cập nhật số lượng thành công!' });
+    res.json({ code: 200, message: 'Cập nhật số lượng thành công!' })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error });
+    res.json({ code: 400, message: 'Lỗi!', error })
   }
 }
 
 // [DELETE] /cart/delete-item
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteInCart = async (req: Request, res: Response) => {
   try {
-    const cartId = req['cartId']
-    const { productId, color, size } = req.body
-    const productObjectId = new mongoose.Types.ObjectId(productId);
-    await Cart.updateOne(
-      { _id: cartId },
-      {
-        $pull: { 
-          products: { 
-            product_id: productObjectId,
-            color: color,
-            size: size
-          } 
-        }
-      }
-    )
-    res.json({ code: 204, message: 'Xóa thành công sản phẩm khỏi giỏ hàng!' });
+    await cartService.deleteInCart(req['cartId'], req.body)
+
+    res.json({ code: 204, message: 'Xóa thành công sản phẩm khỏi giỏ hàng!' })
   } catch (error) {
-    console.error("LỖI KHI XÓA ITEM:", error);
-    res.json({ code: 400, message: 'Lỗi!', error });
+    res.json({ code: 400, message: 'Lỗi!', error })
   }
 }
 
@@ -216,32 +133,13 @@ export const changeMulti = async (req: Request, res: Response) => {
 // [PATCH] /cart/update-variant
 export const updateVariant = async (req: Request, res: Response) => {
   try {
-    const cartId = req["cartId"]
-    const { productId, oldColor, oldSize, newColor, newSize } = req.body
-
-    // Tìm sản phẩm trong giỏ hàng với các thuộc tính cũ
-    const result = await Cart.updateOne(
-      {
-        _id: cartId,
-        'products.product_id': productId,
-        'products.color': oldColor,
-        'products.size': oldSize
-      },
-      {
-        // Cập nhật lại color và size cho sản phẩm đó
-        $set: {
-          'products.$.color': newColor,
-          'products.$.size': newSize
-        }
-      }
-    )
+    const result = await cartService.updateVariant(req.body, req["cartId"])
 
     if (result.modifiedCount === 0) {
       return res.json({ code: 404, message: 'Không tìm thấy sản phẩm trong giỏ hàng.' })
     }
 
     res.json({ code: 200, message: 'Cập nhật phân loại thành công!' })
-
   } catch (error) {
     res.json({ code: 400, message: 'Lỗi!', error })
   }
