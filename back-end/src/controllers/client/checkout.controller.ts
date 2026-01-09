@@ -1,9 +1,6 @@
 import { Request, Response } from 'express'
 import Cart from '~/models/cart.model'
 import Product from '~/models/product.model'
-import Order from '~/models/order.model'
-import * as productsHelper from '~/helpers/product'
-import { OneProduct } from '~/helpers/product'
 import { vnpayCreateOrder } from '~/helpers/vnpayPayment'
 import { zalopayCreateOrder } from '~/helpers/zalopayPayment'
 import { momoCreateOrder } from '~/helpers/momoPayment'
@@ -80,7 +77,7 @@ export const order = async (req: Request, res: Response) => {
 export const success = async (req: Request, res: Response) => {
   try {
     const order = await checkoutService.success(req.params.orderId)
-    
+
     res.json({ 
       code: 200,  
       message: 'Đặt hàng thành công',
