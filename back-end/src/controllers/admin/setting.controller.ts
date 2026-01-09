@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
 import SettingsGeneral from '~/models/settingGeneral.model'
+import * as settingGeneralService from '~/services/admin/setting.service'
 
 // [GET] /admin/settings/general
 export const index = async (req: Request, res: Response) => {
   try {
-    const settingGeneral = await SettingsGeneral.find({})
+    const settingGeneral = await settingGeneralService.getSettingGeneral()
+
     res.json({
       code: 200,
       message: 'Thành công!',
@@ -20,18 +22,10 @@ export const index = async (req: Request, res: Response) => {
 }
 
 // [PATCH] /admin/settings/general/edit
-export const generalPatch = async (req: Request, res: Response) => {
+export const editSettingGeneral = async (req: Request, res: Response) => {
   try {
-    const settingsGeneral = await SettingsGeneral.findOne({}) // Lấy một document bất kỳ trong collection (thường là document đầu tiên)
-    if (settingsGeneral) {
-      await SettingsGeneral.findByIdAndUpdate(
-        { _id: settingsGeneral._id }, 
-        req.body, 
-        { new: true }) // trả về document mới
-    } else {
-      const settingGeneral = new SettingsGeneral(req.body)
-      await settingGeneral.save()
-    } 
+    const settingsGeneral = await settingGeneralService.editSettingGeneral(req.body)
+    
     res.json({
       code: 200,
       message: 'Cập nhật thành công cài đặt chung!',

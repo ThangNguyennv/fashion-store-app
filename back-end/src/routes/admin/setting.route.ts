@@ -10,8 +10,8 @@ router.patch(
   '/general/edit',
   multer().single('logo'),
   uploadWithOneImageToCloud,
-  validate.editPatch, // middleware
-  controller.generalPatch
+  validate.editSettingGeneral, // middleware
+  controller.editSettingGeneral
 )
 
 export const settingRoutes: Router = router
