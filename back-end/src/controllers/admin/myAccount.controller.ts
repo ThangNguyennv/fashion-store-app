@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 import * as myAccountService from '~/services/admin/myAccount.service'
 
 // [GET] /admin/my-account
@@ -6,7 +7,7 @@ export const index = async (req: Request, res: Response) => {
   try {
     const { myAccount, role } = await myAccountService.getMyAccount(req['accountAdmin']._id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       myAccount: myAccount,
@@ -14,10 +15,9 @@ export const index = async (req: Request, res: Response) => {
     })
 
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -25,18 +25,23 @@ export const index = async (req: Request, res: Response) => {
 // [PATCH] /admin/my-account/edit
 export const editMyAccount = async (req: Request, res: Response) => {
   try {
-    await myAccountService.editMyAccount( req.body, req['accountAdmin'].id)
-
-    res.json({
+    const result = await myAccountService.editMyAccount( req.body, req['accountAdmin'].id)
+    if (!result.success) {
+      res.status(StatusCodes.CONFLICT).json({
+        code: result.code,
+        message: result.message
+      })
+      return
+    }
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công tài khoản!'
     })
     
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

@@ -6,22 +6,31 @@ import { zalopayCreateOrder } from '~/helpers/zalopayPayment'
 import { momoCreateOrder } from '~/helpers/momoPayment'
 import "~/crons/order.cron"
 import * as checkoutService from '~/services/client/checkout.service'
+import { StatusCodes } from 'http-status-codes'
 
 // [GET] /checkout
 export const index = async (req: Request, res: Response) => {
   try {
-    const cart = await checkoutService.getCheckout(req["cartId"])
+    const result = await checkoutService.getCheckout(req["cartId"])
+    if (!result.success) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        code: result.code,
+        message: result.message,
+        cart: result.cart
+      })
+      return
+    }
+    const { cart } = result
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Trả checkout thành công!',
       cartDetail: cart
     })
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -31,15 +40,25 @@ export const order = async (req: Request, res: Response) => {
   try {
     const cartId = req["cartId"]
     const userId = req["accountUser"].id
-    const { newOrder, paymentMethod } = await checkoutService.order(cartId, userId, req.body)
+    const result = await checkoutService.order(cartId, userId, req.body)
+    if (!result.success) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        code: result.code,
+        message: result.message,
+        cart: result.cart
+      })
+      return
+    }
+    const { newOrder, paymentMethod } = result
 
     if (paymentMethod === 'COD') {
       await Cart.updateOne({ _id: cartId }, { products: [] })
-      return res.json({ 
+      res.status(StatusCodes.OK).json({ 
         code: 201,  
         message: 'Đặt hàng thành công!', 
         order: newOrder
       })
+      return
     } else if (paymentMethod === 'VNPAY') {
       vnpayCreateOrder(newOrder.amount, newOrder.id, res)
     } else if (paymentMethod === 'ZALOPAY') {
@@ -50,7 +69,13 @@ export const order = async (req: Request, res: Response) => {
         discountPercentage: p.discountPercentage,
         quantity: p.quantity
       }))
-      zalopayCreateOrder(newOrder.amount, zaloProducts, newOrder.userInfo.phone, newOrder.id, res)
+      zalopayCreateOrder(
+        newOrder.amount, 
+        zaloProducts, 
+        newOrder.userInfo.phone, 
+        newOrder.id, 
+        res
+      )
     } else if (paymentMethod === 'MOMO') {
       momoCreateOrder(newOrder.id, newOrder.amount, res)
     }
@@ -59,15 +84,22 @@ export const order = async (req: Request, res: Response) => {
       await Product.updateOne(
         { _id: item.product_id },
         [
-          { $set: { stock: { $max: [0, { $subtract: ["$stock", item.quantity] }] } } }
+          { 
+            $set: 
+              { 
+                stock: 
+                  { 
+                    $max: [0, { $subtract: ["$stock", item.quantity] }] 
+                  } 
+              } 
+          }
         ]
       )
     }
   } catch (error) {
-    res.json({ 
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   } 
 }
@@ -78,16 +110,15 @@ export const success = async (req: Request, res: Response) => {
   try {
     const order = await checkoutService.success(req.params.orderId)
 
-    res.json({ 
+    res.status(StatusCodes.OK).json({ 
       code: 200,  
       message: 'Đặt hàng thành công',
       order: order
     })
   } catch (error) {
-    res.json({ 
-      code: 400,  
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

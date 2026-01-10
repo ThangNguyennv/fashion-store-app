@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import Joi from "joi"
 
-export const registerPost = (
+export const register = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -67,7 +67,7 @@ export const registerPost = (
   next()
 }
 
-export const loginPost = (req: Request, res: Response, next: NextFunction) => {
+export const login = (req: Request, res: Response, next: NextFunction) => {
   const schema = Joi.object({
     email: Joi.string()
       .trim()
@@ -215,7 +215,7 @@ export const resetPasswordPost = (
   next()
 }
 
-export const editPatch = (req: Request, res: Response, next: NextFunction) => {
+export const editUser = (req: Request, res: Response, next: NextFunction) => {
   const schema = Joi.object({
     fullName: Joi.string()
       .trim()
@@ -309,7 +309,7 @@ export const editPatch = (req: Request, res: Response, next: NextFunction) => {
   next()
 }
 
-export const changePasswordPatch = (
+export const changePasswordUser = (
   req: Request,
   res: Response,
   next: NextFunction

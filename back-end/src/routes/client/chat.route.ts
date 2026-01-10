@@ -7,7 +7,7 @@ const router: Router = Router()
 router.get(
   '/',
   authMiddleware.requireAuth,
-  controller.getClientChat
+  controller.getChat
 )
 
 export const chatRoutes: Router = router

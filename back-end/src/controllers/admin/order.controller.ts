@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 import filterOrderHelpers from '~/helpers/filterOrder'
 import Order from '~/models/order.model'
 import * as orderService from '~/services/admin/order.service'
@@ -13,7 +14,7 @@ export const index = async (req: Request, res: Response) => {
         objectPagination
     } = await orderService.getOrders(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Trả về orders thành công!',
       orders: orders,
@@ -23,10 +24,9 @@ export const index = async (req: Request, res: Response) => {
       allOrders: allOrders, // Tất cả những order ban đầu chưa có phân trang
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -40,16 +40,15 @@ export const changeStatusOrder = async (req: Request, res: Response) => {
       req['accountAdmin'].id
     )
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật trạng thái thành công đơn hàng!',
       updater: updater
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -77,7 +76,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.PENDING, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật trạng thái thành công ${ids.length} đơn hàng!`
         })
@@ -87,7 +86,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.TRANSPORTING, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật trạng thái thành công ${ids.length} đơn hàng!`
         })
@@ -97,7 +96,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.CONFIRMED, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật trạng thái thành công ${ids.length} đơn hàng!`
         })
@@ -107,7 +106,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.CANCELED, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật trạng thái thành công ${ids.length} đơn hàng!`
         })
@@ -117,23 +116,22 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { deleted: 'true', deletedAt: new Date() }
         )
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Đã xóa thành công ${ids.length} đơn hàng!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại đơn hàng!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -143,15 +141,14 @@ export const deleteOrder = async (req: Request, res: Response) => {
   try {
     await orderService.deleteOrder(req.params.id, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Đã xóa thành công đơn hàng!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -163,17 +160,16 @@ export const detailOrder = async (req: Request, res: Response) => {
   try {
     const order = await orderService.detailOrder(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Chi tiết đơn hàng!',
       order: order
     })
     
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -183,15 +179,14 @@ export const estimatedDeliveryDay = async (req: Request, res: Response) => {
   try {
     await orderService.estimatedDeliveryDay(req.body, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: `Cập nhật thành công thời gian giao hàng!`
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -201,15 +196,14 @@ export const estimatedConfirmedDay = async (req: Request, res: Response) => {
   try {
     await orderService.estimatedConfirmedDay(req.body, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: `Cập nhật thành công thời gian nhận hàng!`
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -234,11 +228,9 @@ export const exportOrder = async (req: Request, res: Response) => {
     res.end()
 
   } catch (error) {
-    console.error("Lỗi khi xuất Excel:", error)
-    res.status(500).json({ 
-      code: 500, 
-      message: "Lỗi máy chủ khi xuất file", 
-      error: error.message 
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -252,7 +244,7 @@ export const orderTrash = async (req: Request, res: Response) => {
       objectPagination
     } = await orderService.orderTrash(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Trả orderTrash thành công!',
       orders: orders,
@@ -260,10 +252,9 @@ export const orderTrash = async (req: Request, res: Response) => {
       pagination: objectPagination,
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -281,7 +272,7 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
     switch (type) {
       case Key.DELETEALL:
         await Order.deleteMany({ _id: { $in: ids } })
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Đã xóa vĩnh viễn thành công ${ids.length} đơn hàng!`
         })
@@ -291,23 +282,22 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { deleted: false, recoveredAt: new Date() }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Đã khôi phục thành công ${ids.length} đơn hàng!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -317,15 +307,14 @@ export const permanentlyDeleteOrder = async (req: Request, res: Response) => {
   try {
     await orderService.permanentlyDeleteOrder(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Đã xóa vĩnh viễn thành công đơn hàng!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -335,15 +324,14 @@ export const recoverOrder = async (req: Request, res: Response) => {
   try {
     await orderService.recoverOrder(req.params.id)
     
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Đã khôi phục thành công đơn hàng!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

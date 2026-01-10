@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 import * as accountService from '~/services/admin/account.service'
 
 // [GET] /admin/accounts
@@ -6,17 +7,16 @@ export const index = async (req: Request, res: Response) => {
   try {
     const { accounts, roles } = await accountService.getAccountsWithRoles()
   
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       accounts: accounts,
       roles: roles
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -24,18 +24,25 @@ export const index = async (req: Request, res: Response) => {
 // [POST] /admin/accounts/create
 export const createAccount = async (req: Request, res: Response) => {
   try {
-    const account = await accountService.createAccount(req.body)
+    const result = await accountService.createAccount(req.body)
+    if (!result.success) {
+      res.status(StatusCodes.CONFLICT).json({
+        code: result.code,
+        message: result.message
+      })
+      return
+    }
+    const { newAccount } = result
     
-    res.json({
+    res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm tài khoản thành công!',
-      data: account,
+      data: newAccount,
     })
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -45,15 +52,14 @@ export const changeStatusAccount = async (req: Request, res: Response) => {
   try {
     await accountService.changeStatusAccount(req.params.status, req.params.id)
     
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật trạng thái thành công!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -61,17 +67,22 @@ export const changeStatusAccount = async (req: Request, res: Response) => {
 // [PATCH] /admin/accounts/edit/:id
 export const editAccount = async (req: Request, res: Response) => {
   try {
-    await accountService.editAccount(req.body, req.params.id)
-
-    res.json({
+    const result = await accountService.editAccount(req.body, req.params.id)
+    if (!result.success) {
+      res.status(StatusCodes.CONFLICT).json({
+        code: result.code,
+        message: result.message
+      })
+      return
+    }
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công tài khoản!'
     })
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -81,17 +92,16 @@ export const detailAccount = async (req: Request, res: Response) => {
   try {
     const { account, roles } = await accountService.detailAccount(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       account: account,
       roles: roles
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -101,15 +111,14 @@ export const deleteAccount = async (req: Request, res: Response) => {
   try {
     await accountService.deleteAccount(req.params.id)
     
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Xóa thành công tài khoản!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

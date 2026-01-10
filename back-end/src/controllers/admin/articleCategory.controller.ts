@@ -3,6 +3,7 @@ import ArticleCategory from '~/models/articleCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
 import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusRecursive'
 import * as articleCategoryService from '~/services/admin/articleCategory.service'
+import { StatusCodes } from 'http-status-codes'
 
 // [GET] /admin/articles-category
 export const index = async (req: Request, res: Response) => {
@@ -15,7 +16,7 @@ export const index = async (req: Request, res: Response) => {
       objectPagination 
     } = await articleCategoryService.getArticleCategories(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       articleCategories: newArticleCategories,
@@ -26,10 +27,9 @@ export const index = async (req: Request, res: Response) => {
       pagination: objectPagination
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -71,15 +71,14 @@ export const changeStatusWithChildren = async (req: Request, res: Response) => {
       req['accountAdmin'].id
     )
 
-    return res.json({ 
+    return res.status(StatusCodes.OK).json({ 
       code: 200, 
       message: "Cập nhật thành công trạng thái danh mục bài viết!" 
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -102,37 +101,36 @@ export const changeMulti = async (req: Request, res: Response) => {
     switch (type) {
       case Key.ACTIVE:
         await updateManyStatusFast(ArticleCategory, Key.ACTIVE, ids, updatedBy)
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục bài viết!`
         })
         break
       case Key.INACTIVE:
         await updateManyStatusFast(ArticleCategory, Key.INACTIVE, ids, updatedBy)
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục bài viết!`
         })
         break
       case Key.DELETEALL:
         await deleteManyStatusFast(ArticleCategory, ids)
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Xóa thành công ${ids.length} danh mục bài viết!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại danh mục bài viết!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -142,15 +140,14 @@ export const deleteArticleCategory = async (req: Request, res: Response) => {
   try {
     await articleCategoryService.deleteArticleCategory(req.params.id, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Xóa thành công danh mục bài viết!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -160,16 +157,15 @@ export const createArticleCategory = async (req: Request, res: Response) => {
   try {
     const records = await articleCategoryService.createArticleCategory(req.body, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công danh mục bài viết!',
       data: records
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -179,15 +175,14 @@ export const editArticleCategory = async (req: Request, res: Response) => {
   try {
     await articleCategoryService.editArticleCategory(req.body, req.params.id, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công danh mục bài viết!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -197,16 +192,15 @@ export const detailArticleCategory = async (req: Request, res: Response) => {
   try {
     const articleCategory = await articleCategoryService.detailArticleCategory(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Lấy Thành công chi tiết danh mục bài viết!',
       articleCategory: articleCategory
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

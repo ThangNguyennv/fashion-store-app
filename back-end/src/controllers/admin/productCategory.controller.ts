@@ -5,6 +5,7 @@ import { TreeItem } from '~/helpers/createTree'
 import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
 import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusRecursive'
 import * as productCategoryService from '~/services/admin/productCategory.service'
+import { StatusCodes } from 'http-status-codes'
 
 // [GET] /admin/products-category
 export const index = async (req: Request, res: Response) => {
@@ -17,7 +18,7 @@ export const index = async (req: Request, res: Response) => {
       objectPagination
     } = await productCategoryService.getProductCategories(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       productCategories: newProductCategories,
@@ -28,9 +29,9 @@ export const index = async (req: Request, res: Response) => {
       pagination: objectPagination,
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -72,15 +73,14 @@ export const changeStatusWithChildren = async (req: Request, res: Response) => {
       req.params.id
     )
 
-    return res.json({ 
+    res.status(StatusCodes.OK).json({ 
       code: 200, 
       message: "Cập nhật thành công trạng thái danh mục sản phẩm!" 
-    });
+    })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -104,37 +104,36 @@ export const changeMulti = async (req: Request, res: Response) => {
       case Key.ACTIVE:
         await updateManyStatusFast(ProductCategory, Key.ACTIVE, ids, updatedBy)
 
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục sản phẩm!`
         })
         break
       case Key.INACTIVE:
         await updateManyStatusFast(ProductCategory, Key.INACTIVE, ids, updatedBy)
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} danh mục sản phẩm!`
         })
         break
       case Key.DELETEALL:
         await deleteManyStatusFast(ProductCategory, ids)
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Xóa thành công ${ids.length} danh mục sản phẩm!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại danh mục sản phẩm!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -144,15 +143,14 @@ export const deleteProductCategory = async (req: Request, res: Response) => {
   try {
     await productCategoryService.deleteProductCategory(req.params.id, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Xóa thành công danh mục sản phẩm!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -162,16 +160,15 @@ export const createProductCategory = async (req: Request, res: Response) => {
   try {
     const records = await productCategoryService.createProductCategory(req.body, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công danh mục sản phẩm!',
       data: records
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -185,15 +182,14 @@ export const editProductCategory = async (req: Request, res: Response) => {
       req['accountAdmin'].id
     )
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công danh mục sản phẩm!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -203,16 +199,15 @@ export const detailProductCategory = async (req: Request, res: Response) => {
   try {
     const productCategory = await productCategoryService.detailProductCategory(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Lấy Thành công chi tiết danh mục sản phẩm!',
       productCategory: productCategory
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -227,7 +222,7 @@ export const productCategoryTrash = async (req: Request, res: Response) => {
       objectPagination
     } = await productCategoryService.productCategoryTrash(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       productCategories: parentCategories,
@@ -236,10 +231,9 @@ export const productCategoryTrash = async (req: Request, res: Response) => {
       pagination: objectPagination,
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -302,7 +296,7 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
         // Xóa tất cả danh mục
         await ProductCategory.deleteMany({ _id: { $in: allIdsToDelete } })
         
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Đã xóa vĩnh viễn thành công ${allIdsToDelete.length} danh mục (bao gồm ${ids.length} danh mục đã chọn và các danh mục con)!`
         })
@@ -311,23 +305,22 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
         await ProductCategory.updateMany(
           { _id: { $in: ids } },
           { deleted: false, recoveredAt: new Date() })
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Khôi phục thành công ${ids.length} danh mục sản phẩm!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -335,18 +328,24 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
 // [DELETE] /admin/products-category/trash/permanentlyDelete/:id
 export const permanentlyDeleteProductCategory = async (req: Request, res: Response) => {
   try {
-    const allIdsToDelete = await productCategoryService.permanentlyDeleteProductCategory(req.params.id)
+    const result = await productCategoryService.permanentlyDeleteProductCategory(req.params.id)
+    if (!result.success) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        code: result.code,
+        message: result.message
+      })
+      return
+    }
+    const { allIdsToDelete } = result
 
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: `Đã xóa vĩnh viễn ${allIdsToDelete.length} danh mục (bao gồm danh mục con)!`
     })
   } catch (error) {
-    
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -356,15 +355,14 @@ export const recoverProductCategory = async (req: Request, res: Response) => {
   try {
     await productCategoryService.recoverProductCategory(req.params.id)
     
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Đã khôi phục thành công danh mục sản phẩm!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

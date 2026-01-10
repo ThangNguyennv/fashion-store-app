@@ -38,7 +38,7 @@ export const editRole = async (account_id: string, id: string, data: any) => {
     account_id: account_id,
     updatedAt: new Date()
   }
-  return Role.updateOne(
+  await Role.updateOne(
     { _id: id },
     {
       ...data,
@@ -50,7 +50,7 @@ export const editRole = async (account_id: string, id: string, data: any) => {
 }
 
 export const deleteRole = async (id: string, account_id: string) => {
-  return Role.updateOne(
+  await Role.updateOne(
     { _id: id },
     {
       deleted: true,

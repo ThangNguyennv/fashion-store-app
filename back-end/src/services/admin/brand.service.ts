@@ -54,7 +54,7 @@ export const editBrand = async (data: any, id: string, account_id: string) => {
       updatedAt: new Date()
     }
 
-    return Brand.updateOne(
+    await Brand.updateOne(
       { _id: id },
       { 
         ...data,
@@ -68,7 +68,7 @@ export const deleteBrand = async (id: string, account_id: string) => {
       account_id: account_id,
       deletedAt: new Date()
     }
-    return Brand.updateOne(
+    await Brand.updateOne(
       { _id: id },
       { deleted: true, deletedBy: deletedBy }
     )

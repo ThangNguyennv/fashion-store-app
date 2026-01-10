@@ -26,13 +26,13 @@ export const createAccount = async (data: CreateAccountInput) => {
       email,
       deleted: false
     })
-
-    if (isEmailExist) {
-        const error: any = new Error(`Email ${email} đã tồn tại`)
-        error.statusCode = 409
-        throw error
-    } 
-
+    if (!isEmailExist) {
+        return { 
+            success: false, 
+            code: 409, 
+            message: `Email ${email} đã tồn tại`
+        }
+    }
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
     const account = new Account({
@@ -42,14 +42,17 @@ export const createAccount = async (data: CreateAccountInput) => {
 
     await account.save()
 
-    const result = account.toObject()
-    delete result.password
+    const newAccount = account.toObject()
+    delete newAccount.password
 
-    return result
+    return {
+        success: true,
+        newAccount
+    }
 }
 
 export const changeStatusAccount = async (status: string, id: string) => {
-    return Account.updateOne({ _id: id }, { status: status })
+    await Account.updateOne({ _id: id }, { status: status })
 }
 
 export const editAccount = async (data: CreateAccountInput, id: string) => {
@@ -59,11 +62,13 @@ export const editAccount = async (data: CreateAccountInput, id: string) => {
       email: email,
       deleted: false
     })
-    if (isEmailExist) {
-        const error: any = new Error(`Email ${email} đã tồn tại`)
-        error.statusCode = 409
-        throw error
-    } 
+    if (!isEmailExist) {
+        return { 
+            success: false, 
+            code: 409, 
+            message: `Email ${email} đã tồn tại`
+        }
+    }
 
     if (password) {
         const salt = await bcrypt.genSalt(10)
@@ -72,7 +77,10 @@ export const editAccount = async (data: CreateAccountInput, id: string) => {
     } else {
         delete data.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
     }
-    return Account.updateOne({ _id: id }, data)
+    await Account.updateOne({ _id: id }, data)
+    return {
+        success: true
+    }
 }
 
 export const detailAccount = async (id: string) => {
@@ -89,8 +97,7 @@ export const detailAccount = async (id: string) => {
 }
 
 export const deleteAccount = async (id: string) => {
-    // Trả về Promise trực tiếp
-    return Account.updateOne(
+    await Account.updateOne(
       { _id: id },
       { deleted: true, deletedAt: new Date() }
     )

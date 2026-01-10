@@ -6,29 +6,36 @@ import Role from '~/models/role.model'
 export const loginAdmin = async (data: any) => {
   const { email, password } = data
 
-    const accountAdmin = await Account.findOne({
-      email: email,
-      deleted: false
-    }).select('+password')
+  const accountAdmin = await Account.findOne({
+    email: email,
+    deleted: false
+  }).select('+password')
 
-    if (!accountAdmin) {
-      const error: any = new Error('Tài khoản hoặc mật khẩu không chính xác!') 
-      error.statusCode = 401
-      throw error
-    }
-
-    const isMatch = await bcrypt.compare(password, accountAdmin.password)
-    if (!isMatch) {
-      const error: any = new Error('Tài khoản hoặc mật khẩu không chính xác!') 
-      error.statusCode = 401
-      throw error
+  if (!accountAdmin) {
+    return { 
+      success: false, 
+      code: 401, 
+      message: 'Tài khoản hoặc mật khẩu không chính xác!' 
+    }
   }
 
-    if (accountAdmin.status === 'INACTIVE') {
-      const error: any = new Error('Tài khoản đã bị khóa!') 
-      error.statusCode = 403
-      throw error
-    }
+  const isMatch = await bcrypt.compare(password, accountAdmin.password)
+
+  if (!isMatch) {
+    return { 
+      success: false, 
+      code: 401 ,
+      message: 'Tài khoản hoặc mật khẩu không chính xác!' 
+    }
+  }
+
+  if (accountAdmin.status === 'INACTIVE') {
+    return { 
+      success: false, 
+      code: 403, 
+      message: 'Tài khoản đã bị khóa!' 
+    }
+  }
 
   const payload = {
     accountId: accountAdmin._id,
@@ -47,21 +54,32 @@ export const loginAdmin = async (data: any) => {
     process.env.JWT_REFRESH_TOKEN_SECRET_ADMIN,
     '14d'
   )
-  const role = await Role.findOne({ _id: accountAdmin.role_id, deleted: false }).lean()
+  const role = await Role.findOne({ 
+    _id: accountAdmin.role_id, 
+    deleted: false 
+  }).lean()
+
+  const accountData = accountAdmin.toObject()
+  delete accountData.password
+
   return {
+    success: true,
     accessToken,
     refreshToken,
     role,
-    accountAdmin
+    accountAdmin: accountData,
   }
 }
 
 export const refreshTokenAdmin = async (refreshToken: string) => {
   if (!refreshToken) {
-      const error: any = new Error('Không tồn tại refreshToken!')
-      error.statusCode = 403
-      throw error
+    return { 
+      success: false, 
+      code: 401, 
+      message: 'Không tồn tại refreshToken!' 
+    }
   }
+
   const refreshTokenDecoded = await JWTProvider.verifyToken(
     refreshToken, 
     process.env.JWT_REFRESH_TOKEN_SECRET_ADMIN
@@ -70,16 +88,20 @@ export const refreshTokenAdmin = async (refreshToken: string) => {
     email: string,
     role_id: string
   }
+
   const account = await Account.findOne({
     _id: refreshTokenDecoded.accountId,
     deleted: false,
     status: "ACTIVE"
   })
   if (!account) {
-      const error: any = new Error('Account không tồn tại!')
-      error.statusCode = 403
-      throw error
+    return { 
+      success: false, 
+      code: 404, 
+      message: 'Tài khoản không tồn tại!' 
+    }
   }
+
   const payload = { 
     accountId: refreshTokenDecoded.accountId, 
     email: refreshTokenDecoded.email, 
@@ -91,5 +113,8 @@ export const refreshTokenAdmin = async (refreshToken: string) => {
     process.env.JWT_ACCESS_TOKEN_SECRET_ADMIN,
     '1h'
   )
-  return newAccessToken
+  return {
+    success: true,
+    newAccessToken
+  }
 }

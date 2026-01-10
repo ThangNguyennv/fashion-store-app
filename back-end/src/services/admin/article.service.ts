@@ -88,7 +88,7 @@ export const editArticle = async (data: any, id: string, account_id: string) => 
     account_id: account_id,
     updatedAt: new Date()
   }
-  return Article.updateOne(
+  await Article.updateOne(
     { _id: id },
     {
       ...data,
@@ -119,7 +119,7 @@ export const changeStatusArticle = async (status: string, id: string, account_id
 }
 
 export const deleteArticle = async (id: string, account_id: string) => {
-  return Article.updateOne(
+  await Article.updateOne(
     { _id: id },
     {
       deleted: true,

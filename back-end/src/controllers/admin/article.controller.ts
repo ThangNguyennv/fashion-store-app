@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import Article from '~/models/article.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
 import * as articleService from '~/services/admin/article.service'
+import { StatusCodes } from 'http-status-codes'
 
 // [GET] /admin/articles
 export const index = async (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ export const index = async (req: Request, res: Response) => {
       allArticles
     } = await articleService.getArticles(req.query)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       articles: articles,
@@ -24,10 +25,9 @@ export const index = async (req: Request, res: Response) => {
       allArticles: allArticles
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -37,16 +37,15 @@ export const createArticle = async (req: Request, res: Response) => {
   try {
     const article = await articleService.createArticle(req.body, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công bài viết!',
       data: article,
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -56,16 +55,15 @@ export const detailArticle = async (req: Request, res: Response) => {
   try {
     const article = await articleService.detailArticle(req.params.id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       article: article
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -75,15 +73,14 @@ export const editArticle = async (req: Request, res: Response) => {
   try {
     await articleService.editArticle(req.body, req.params.id, req['accountAdmin'].id)
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công bài viết!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -97,16 +94,15 @@ export const changeStatusArticle = async (req: Request, res: Response) => {
       req['accountAdmin'].id
     )
 
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công trạng thái bài viết!',
       updater: updater
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -132,7 +128,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.ACTIVE, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} bài viết!`
         })
@@ -142,7 +138,7 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { status: Key.INACTIVE, $push: { updatedBy: updatedBy } }
         )
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công trạng thái ${ids.length} bài viết!`
         })
@@ -152,23 +148,22 @@ export const changeMulti = async (req: Request, res: Response) => {
           { _id: { $in: ids } },
           { deleted: 'true', deletedAt: new Date() }
         )
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Xóa thành công ${ids.length} bài viết!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại bài viết!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -178,15 +173,14 @@ export const deleteArticle = async (req: Request, res: Response) => {
   try {
     await articleService.deleteArticle(req.params.id, req['accountAdmin'].id)
     
-    res.json({
+    res.status(StatusCodes.NO_CONTENT).json({
       code: 204,
       message: 'Xóa thành công bài viết!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

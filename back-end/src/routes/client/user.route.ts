@@ -11,8 +11,8 @@ import * as validate from '~/validations/client/user.validation'
 import * as authMiddleware from '~/middlewares/client/auth.middleware'
 import { setAuthCookies } from '~/controllers/client/user.controller'
 
-router.post('/register', validate.registerPost, controller.registerPost)
-router.post('/login', validate.loginPost, controller.loginPost)
+router.post('/register', validate.register, controller.register)
+router.post('/login', validate.login, controller.login)
 router.get('/logout', controller.logout)
 router.post('/refresh-token', controller.refreshToken)
 
@@ -57,14 +57,14 @@ router.patch(
   authMiddleware.requireAuth,
   multer().single('avatar'),
   uploadWithOneImageToCloud,
-  validate.editPatch,
-  controller.editPatch
+  validate.editUser,
+  controller.editUser
 )
 router.patch(
   '/account/info/change-password',
   authMiddleware.requireAuth,
-  validate.changePasswordPatch,
-  controller.changePasswordPatch
+  validate.changePasswordUser,
+  controller.changePasswordUser
 )
 
 router.get('/my-orders', authMiddleware.requireAuth, controller.getOrders)

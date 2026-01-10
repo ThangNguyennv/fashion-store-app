@@ -1,22 +1,30 @@
 import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 import Cart from '~/models/cart.model'
 import * as cartService from '~/services/client/cart.service'
 
 // [GET] /cart
 export const index = async (req: Request, res: Response) => {
   try {
-    const cart = await cartService.getCart(req["cartId"])
-
-    res.json({
+    const result = await cartService.getCart(req["cartId"])
+    if (!result.success) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        code: result.code,
+        message: result.message,
+        cart: result.cart
+      })
+      return
+    }
+    const { cart } = result
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Trả cart thành công!',
       cartDetail: cart
     })
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -26,15 +34,14 @@ export const addToCart = async (req: Request, res: Response) => {
   try {
     await cartService.addToCart(req.params.productId, req.body, req["cartId"])
 
-    res.json({
+    res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công sản phẩm vào giỏ hàng!'
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -44,9 +51,15 @@ export const updateQuantity = async (req: Request, res: Response) => {
   try {
     await cartService.updateQuantity(req['cartId'], req.body)
 
-    res.json({ code: 200, message: 'Cập nhật số lượng thành công!' })
+    res.status(StatusCodes.OK).json({ 
+      code: 200, 
+      message: 'Cập nhật số lượng thành công!' 
+    })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
+    })
   }
 }
 
@@ -55,9 +68,15 @@ export const deleteInCart = async (req: Request, res: Response) => {
   try {
     await cartService.deleteInCart(req['cartId'], req.body)
 
-    res.json({ code: 204, message: 'Xóa thành công sản phẩm khỏi giỏ hàng!' })
+    res.status(StatusCodes.NO_CONTENT).json({ 
+      code: 204, 
+      message: 'Xóa thành công sản phẩm khỏi giỏ hàng!' 
+    })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
+    })
   }
 }
 
@@ -87,7 +106,7 @@ export const changeMulti = async (req: Request, res: Response) => {
             $pull: { products: { product_id: { $in: arrayId } } }
           }
         )
-        res.json({
+        res.status(StatusCodes.NO_CONTENT).json({
           code: 204,
           message: `Xóa thành công ${ids.length} sản phẩm!`
         })
@@ -106,23 +125,22 @@ export const changeMulti = async (req: Request, res: Response) => {
             }
           )
         }
-        res.json({
+        res.status(StatusCodes.OK).json({
           code: 200,
           message: `Cập nhật thành công số lượng ${ids.length} sản phẩm!`
         })
         break
       default:
-        res.json({
+        res.status(StatusCodes.NOT_FOUND).json({
           code: 404,
           message: 'Không tồn tại sản phẩm!'
         })
         break
     }
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -133,11 +151,21 @@ export const updateVariant = async (req: Request, res: Response) => {
     const result = await cartService.updateVariant(req.body, req["cartId"])
 
     if (result.modifiedCount === 0) {
-      return res.json({ code: 404, message: 'Không tìm thấy sản phẩm trong giỏ hàng.' })
+      res.status(StatusCodes.NOT_FOUND).json({ 
+        code: 404, 
+        message: 'Không tìm thấy sản phẩm trong giỏ hàng.' 
+      })
+      return
     }
 
-    res.json({ code: 200, message: 'Cập nhật phân loại thành công!' })
+    res.status(StatusCodes.OK).json({ 
+      code: 200, 
+      message: 'Cập nhật phân loại thành công!' 
+    })
   } catch (error) {
-    res.json({ code: 400, message: 'Lỗi!', error })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
+    })
   }
 }

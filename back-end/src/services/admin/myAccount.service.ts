@@ -24,11 +24,15 @@ export const editMyAccount = async (data: any, account_id: string) => {
     email: email,
     deleted: false
   })
-  if (isEmailExist) {
-      const error: any = new Error(`Email ${email} đã tồn tại, vui lòng chọn email khác!`)
-      error.statusCode = 409
-      throw error
+
+  if (!isEmailExist) {
+    return { 
+      success: false, 
+      code: 409, 
+      message: `Email ${email} đã tồn tại, vui lòng chọn email khác!`
+    }
   } 
+
   if (password) {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
@@ -36,5 +40,8 @@ export const editMyAccount = async (data: any, account_id: string) => {
   } else {
     delete data.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
   }
-  return Account.updateOne({ _id: account_id }, data)
+  await Account.updateOne({ _id: account_id }, data)
+  return {
+    success: true
+  }
 }

@@ -94,11 +94,11 @@ export const changeStatusWithChildren = async (status: string, id: string, accou
     updatedAt: new Date()
   }
   
-  return updateStatusRecursiveForOneItem(ArticleCategory, status, id, updatedBy)
+  await updateStatusRecursiveForOneItem(ArticleCategory, status, id, updatedBy)
 }
 
 export const deleteArticleCategory = async (id: string, account_id: string) => {
-  return ArticleCategory.updateOne(
+  await ArticleCategory.updateOne(
     { _id: id },
     {
       deleted: true,
@@ -126,7 +126,7 @@ export const editArticleCategory = async (data: any, id: string, account_id: str
     account_id: account_id,
     updatedAt: new Date()
   }
-  return ArticleCategory.updateOne(
+  await ArticleCategory.updateOne(
     { _id: id },
     {
       ...data,

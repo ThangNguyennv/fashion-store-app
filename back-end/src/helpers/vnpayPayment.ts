@@ -4,14 +4,15 @@ import { Request } from 'express'
 import Cart from '~/models/cart.model'
 import Order from '~/models/order.model'
 import { ReturnQueryFromVNPay } from 'vnpay'
+import { StatusCodes } from 'http-status-codes'
 
 export const vnpaybuildPaymentUrl = new VNPay({
-  // ⚡ Cấu hình bắt buộc
+  //  Cấu hình bắt buộc
   tmnCode: process.env.VNP_TMN_CODE,
   secureSecret: process.env.VNP_HASH_SECRET,
   vnpayHost: 'https://sanbox.vnpayment.vn',
 
-  // 🔧 Cấu hình tùy chọn
+  //  Cấu hình tùy chọn
   testMode: true, // Chế độ test
   hashAlgorithm: HashAlgorithm.SHA512, // Thuật toán mã hóa
   loggerFn: ignoreLogger // Custom logger
@@ -20,7 +21,7 @@ export const vnpaybuildPaymentUrl = new VNPay({
 export const vnpayCreateOrder = (totalBill: number, orderId: string,  res: Response) => {
   const expire = new Date()
   expire.setMinutes(expire.getMinutes() + 15) 
-    // ✅ Sinh mã giao dịch mới mỗi lần thanh toán
+    //  Sinh mã giao dịch mới mỗi lần thanh toán
   const txnRef = `${orderId}-${Date.now()}`
   const vnpayResponse = vnpaybuildPaymentUrl.buildPaymentUrl({
     vnp_Amount: totalBill,
@@ -34,7 +35,7 @@ export const vnpayCreateOrder = (totalBill: number, orderId: string,  res: Respo
     vnp_CreateDate: dateFormat(new Date()),
     vnp_ExpireDate: dateFormat(expire),
   })
-  res.json({ 
+  return res.status(StatusCodes.CREATED).json({ 
     code: 201,  
     message: 'Tạo link thanh toán thành công!', 
     paymentUrl: vnpayResponse
@@ -58,7 +59,7 @@ export const vnpayReturn = async (req: Request, res: Response) => {
       
       const order = await Order.findById(orderId)
       if (!order) {
-        return res.json({ 
+        return res.status(StatusCodes.NOT_FOUND).json({ 
           code: 404,  
           message: 'Không tìm thấy đơn hàng'
         })
@@ -69,23 +70,22 @@ export const vnpayReturn = async (req: Request, res: Response) => {
       if (req.query["vnp_ResponseCode"] === "24" && req.query["vnp_TransactionStatus"] === "02") {
         return res.redirect(`${process.env.CLIENT_URL}/cart`)
       }
-      return res.json({ 
+      return res.status(StatusCodes.OK).json({ 
         code: 200,  
         RspCode: '00',  
         Message: 'Thành công'
       })
     } else {
-      return res.json({ 
+      return res.status(StatusCodes.BAD_REQUEST).json({ 
         code: 400,  
         RspCode: '97',
         Message: 'Sai chữ ký VNPay'
       })
     }
   } catch (error) {
-    return res.json({ 
-      code: 500,  
-      message: "Lỗi xử lý callback VNPay",
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -107,7 +107,7 @@ export const vnpayIpn = async (req: Request, res: Response) => {
       const order = await Order.findById(orderId)
 
       if (!order) {
-        return res.json({ 
+        return res.status(StatusCodes.NOT_FOUND).json({ 
           code: 404,
           RspCode: "01",  
           Message: 'Không tìm thấy đơn hàng!'
@@ -136,23 +136,22 @@ export const vnpayIpn = async (req: Request, res: Response) => {
         order.paymentInfo.status = 'FAILED'
       }
       await order.save()
-      return res.json({ 
+      return res.status(StatusCodes.OK).json({ 
         code: 200,
         RspCode: '00',  
         Message: 'Thành công'
       })
     } else {
-      return res.json({ 
-        code: 200,
+      return res.status(StatusCodes.BAD_REQUEST).json({ 
+        code: 400,
         RspCode: "97",  
         Message: 'Sai chữ ký VNPay'
       })
     }
   } catch (error) {
-    return res.json({ 
-      code: 500,  
-      message: "Lỗi xử lý ipn VNPay",
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

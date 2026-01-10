@@ -84,7 +84,7 @@ export const changeStatusOrder = async (status: string, id: string, account_id: 
 }
 
 export const deleteOrder = async (id: string, account_id: string) => {
-  return Order.updateOne(
+  await Order.updateOne(
     { _id: id },
     {
       deleted: true,
@@ -112,7 +112,7 @@ export const estimatedDeliveryDay = async (data: any, account_id: string) => {
     account_id: account_id,
     updatedAt: new Date()
   }
-  return Order.updateOne(
+  await Order.updateOne(
     { _id: orderId },
     { estimatedDeliveryDay: estimatedDeliveryDay, $push: { updatedBy: updatedBy }}
   )
@@ -125,7 +125,7 @@ export const estimatedConfirmedDay = async (data: any, account_id: string) => {
     account_id: account_id,
     updatedAt: new Date()
   }
-  return Order.updateOne(
+  await Order.updateOne(
     { _id: orderId },
     { estimatedConfirmedDay: estimatedConfirmedDay, $push: { updatedBy: updatedBy }}
   )
@@ -193,8 +193,8 @@ export const exportOrder = async (query: any) => {
     }
   }
   return {
-      workbook,
-      status
+    workbook,
+    status
   }
 }
 
@@ -244,20 +244,20 @@ export const orderTrash = async (query: any) => {
     .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
     .lean()
   return {
-      orders,
-      objectSearch,
-      objectPagination
+    orders,
+    objectSearch,
+    objectPagination
   }
 }
 
 export const permanentlyDeleteOrder = async (id: string) => {
-  return Order.deleteOne(
+  await Order.deleteOne(
     { _id: id }
   )
 }
 
 export const recoverOrder = async (id: string) => {
-  return Order.updateOne(
+  await Order.updateOne(
     { _id: id },
     { deleted: false, recoveredAt: new Date() }
   )

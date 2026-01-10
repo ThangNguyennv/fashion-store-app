@@ -13,7 +13,7 @@ export const cartId = async (
     // Tạo giỏ hàng
     const cart = new Cart()
     await cart.save()
-    res.cookie('cartId', cart.id, getCookieOptions('30 days'))
+    res.cookie('cartId', cart.id, getCookieOptions('30d'))
     req["cartId"] = cart.id,
     req['miniCart'] = cart
   } else {
@@ -24,7 +24,7 @@ export const cartId = async (
       // => Tạo giỏ hàng mới
       const newCart = new Cart()
       await newCart.save()
-      res.cookie('cartId', newCart.id, getCookieOptions('30 days'))
+      res.cookie('cartId', newCart.id, getCookieOptions('30d'))
       req["cartId"] = newCart.id,
       req['miniCart'] = newCart
     } else {

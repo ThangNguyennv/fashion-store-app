@@ -4,6 +4,7 @@ import { Response } from 'express'
 import Cart from '~/models/cart.model'
 import Order from '~/models/order.model'
 import { Request } from 'express'
+import { StatusCodes } from 'http-status-codes'
 
 export const momoCreateOrder = async (id: string, totalBill: number, res: Response) => {
   const newOrderId = `${id}-${Date.now()}`
@@ -58,9 +59,16 @@ export const momoCreateOrder = async (id: string, totalBill: number, res: Respon
   let result: any
   try {
     result = await axios(options)
-    return res.json({ code: 201, message: 'Thành công', data: result.data })
+    return res.status(StatusCodes.CREATED).json({ 
+      code: 201, 
+      message: 'Thành công', 
+      data: result.data 
+    })
   } catch (error) {
-    return res.json({ code: 500, message: 'Lỗi', error: error, data: result })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
+    })
   }
 }
 
@@ -99,7 +107,11 @@ export const momoCallback = async (req: Request, res: Response) => {
         deleted: false,
     })
     if (!order) {
-      return res.json({ resultCode : 42, message : 'order not found' })
+      return res.status(StatusCodes.NOT_FOUND).json({ 
+        code: 404,
+        resultCode : 42, 
+        message : 'order not found' 
+      })
     }
     if (dataJson.resultCode == 0) {
       // Thanh toán thành công
@@ -129,9 +141,14 @@ export const momoCallback = async (req: Request, res: Response) => {
       }
     }
     await order.save()
-    return res.json({ code: 200, message: "Thành công" })
+    return res.status(StatusCodes.OK).json({ 
+      code: 200, 
+      message: "Thành công" 
+    })
   } else {
-    // Sai chữ ký
-    return res.json({ code: 400, message: "invalid signature" })
+    res.status(StatusCodes.BAD_REQUEST).json({
+      code: 400,
+      message: 'Sai chữ ký!'
+    })
   }
 }

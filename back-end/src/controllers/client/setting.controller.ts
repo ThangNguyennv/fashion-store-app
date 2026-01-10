@@ -1,20 +1,21 @@
 import { Request, Response } from 'express'
-import SettingsGeneral from '~/models/settingGeneral.model'
+import { StatusCodes } from 'http-status-codes'
+import * as settingGeneralService from '~/services/client/setting.service'
 
 // [GET] /user/settings/general
 export const index = async (req: Request, res: Response) => {
   try {
-    const settingGeneral = await SettingsGeneral.find({})
-    res.json({
+    const settingGeneral = await settingGeneralService.getSettingGeneral()
+    
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
       settingGeneral: settingGeneral
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

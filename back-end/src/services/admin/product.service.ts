@@ -86,7 +86,7 @@ export const changeStatusProduct = async (id: string, status: string, account_id
 }
 
 export const deleteProduct = async (id: string, account_id: string) => {
-  return Product.updateOne(
+  await Product.updateOne(
     { _id: id },
     {
       deleted: true,
@@ -184,7 +184,7 @@ export const editProduct = async (data: any, account_id: string, id: string, fil
   }
   delete productData.updatedBy
 
-  return Product.updateOne(
+  await Product.updateOne(
     { _id: id },
     {
       ...productData, // Dùng productData đã được lắp ráp hoàn chỉnh
@@ -261,13 +261,13 @@ export const productTrash = async (query: any) => {
 }
 
 export const permanentlyDeleteProduct = async (id: string) => {
-  return Product.deleteOne(
+  await Product.deleteOne(
     { _id: id }
   )
 }
 
 export const recoverProduct = async (id: string) => {
-  return Product.updateOne(
+  await Product.updateOne(
     { _id: id },
     { deleted: false, recoveredAt: new Date() }
   )

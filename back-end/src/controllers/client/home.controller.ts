@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 import * as homeService from '~/services/client/home.service'
 
 // [GET] /
@@ -11,7 +12,7 @@ export const index = async (req: Request, res: Response) => {
       articlesNew
     } = await homeService.home()
     
-    res.json({
+    res.status(StatusCodes.OK).json({
       code: 200,
       message: ' Thành công!',
       productsFeatured: newProductsFeatured,
@@ -22,10 +23,9 @@ export const index = async (req: Request, res: Response) => {
       articleCategories: req['layoutArticlesCategory']
     })
   } catch (error) {
-    res.json({
-      code: 400,
-      message: 'Lỗi!',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

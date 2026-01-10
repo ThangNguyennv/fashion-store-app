@@ -9,13 +9,16 @@ import * as authService from '~/services/admin/auth.service'
 // [POST] /admin/auth/login
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
-    const {
-      accessToken,
-      refreshToken,
-      role,
-      accountAdmin
-    } = await authService.loginAdmin(req.body)
+    const result = await authService.loginAdmin(req.body)
 
+    if (!result.success) {
+      const statusCode = result.code === 401 ? StatusCodes.UNAUTHORIZED : StatusCodes.FORBIDDEN
+      res.status(statusCode).json({
+        code: result.code,
+        message: result.message
+      })
+      return
+    }
     // const parser = new UAParser(req.get("User-Agent"))
     // const device = parser.getDevice()
     // const os = parser.getOS()
@@ -30,22 +33,20 @@ export const loginAdmin = async (req: Request, res: Response) => {
     //   expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
     // })
     // await session.save()
+    const { accessToken, refreshToken, role, accountAdmin } = result
+    res.cookie('accessToken', accessToken, getCookieOptions('1h'))
+    res.cookie('refreshToken', refreshToken, getCookieOptions('14d'))
 
-    res.cookie('accessToken', accessToken, getCookieOptions('14 days'))
-    res.cookie('refreshToken', refreshToken, getCookieOptions('14 days'))
-
-    res.json({ 
+    res.status(StatusCodes.OK).json({ 
       code: 200, 
       message: 'Đăng nhập thành công!', 
-      accountAdmin: accountAdmin,
-      role: role
+      accountAdmin,
+      role
     })
-
   } catch (error) {
-    res.json({
-      code: error.statusCode || 400,
-      message: error.message || 'Lỗi',
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }
@@ -53,7 +54,6 @@ export const loginAdmin = async (req: Request, res: Response) => {
 // [POST] /admin/auth/refresh-token
 export const refreshToken = async (req: Request, res: Response) => {
   try {
-    const newAccessToken = await authService.refreshTokenAdmin(req.cookies?.refreshToken)
     // const session = await Session.findOne({
     //   accountId: new mongoose.Types.ObjectId(refreshTokenDecoded.accountId),
     //   refreshTokenHash: hashToken(refreshToken)
@@ -67,41 +67,48 @@ export const refreshToken = async (req: Request, res: Response) => {
     // // Xóa phiên cũ, tạo phiên mới + accessToken mới
     // await session.deleteOne()
 
-    
-
     // const newRefreshToken = await JWTProvider.generateToken(
     //   payload,
     //   process.env.JWT_REFRESH_TOKEN_SECRET_ADMIN,
     //   '14 days'
     // )
-    // console.log("🚀 ~ auth.controller.ts ~ refreshToken ~ newRefreshToken:", newRefreshToken);
+    const result = await authService.refreshTokenAdmin(req.cookies.refreshToken)
+    if (!result.success) {
+      const statusCode = result.code === 401 ? StatusCodes.UNAUTHORIZED : StatusCodes.NOT_FOUND
+      res.status(statusCode).json({ 
+        code: result.code, 
+        message: result.message
+      })
+      return
+    }
+    const { newAccessToken } = result
 
-    res.cookie('accessToken', newAccessToken, getCookieOptions('14 days'))
-
-    // res.cookie('refreshToken', newRefreshToken, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: 'none',
-    //   maxAge: ms('14 days'),
-    //   path: '/'
-    // })
-
-    res.status(StatusCodes.OK).json({ message: 'Làm mới accessToken thành công!' })
+    res.cookie('accessToken', newAccessToken, getCookieOptions('1h'))
+    res.status(StatusCodes.OK).json({ 
+      code: 200,
+      message: 'Làm mới accessToken thành công!' 
+    })
   } catch (error) {
-    res.status(StatusCodes.UNAUTHORIZED).json( {message: 'RefreshToken invalid!'} )
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
+    })
   }
 }
 // [DELETE] /admin/auth/logout
 export const logout = async (req: Request, res: Response) => {
   try {
-    res.clearCookie('accessToken', getCookieOptions('14 days'))
-    res.clearCookie('refreshToken', getCookieOptions('14 days'))
+    res.clearCookie('accessToken', getCookieOptions('1h'))
+    res.clearCookie('refreshToken', getCookieOptions('14d'))
 
-    res.json({ code: 200, message: "Đăng xuất thành công 1 thiết bị!" })
+    res.status(StatusCodes.OK).json({ 
+      code: 200, 
+      message: "Đăng xuất thành công 1 thiết bị!" 
+    })
   } catch (error) {
-    res.json({
-      code: 400,
-      error: error
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: 500,
+      message: 'Đã xảy ra lỗi hệ thống!'
     })
   }
 }

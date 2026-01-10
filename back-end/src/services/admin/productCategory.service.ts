@@ -97,11 +97,11 @@ export const changeStatusWithChildren = async (accoutn_id: string, status: strin
     updatedAt: new Date()
   }
 
-  return updateStatusRecursiveForOneItem(ProductCategory, status, id, updatedBy)
+  await updateStatusRecursiveForOneItem(ProductCategory, status, id, updatedBy)
 }
 
 export const deleteProductCategory = async (id: string, account_id: string) => {
-  return ProductCategory.updateOne(
+  await ProductCategory.updateOne(
     { _id: id },
     {
       deleted: true,
@@ -127,7 +127,7 @@ export const editProductCategory = async (data: any, id: string, account_id: str
     account_id: account_id,
     updatedAt: new Date()
   }
-  return ProductCategory.updateOne(
+  await ProductCategory.updateOne(
     { _id: id },
     {
       ...data,
@@ -212,9 +212,11 @@ export const permanentlyDeleteProductCategory = async (id: string) => {
   const rootCategory = await ProductCategory.findOne({ _id: id })
   
   if (!rootCategory) {
-      const error: any = new Error('Không tìm thấy danh mục!')
-      error.statusCode = 404
-      throw error
+    return { 
+      success: false, 
+      code: 404, 
+      message: 'Không tìm thấy danh mục!' 
+    }
   }
   
   // Lấy tất cả danh mục để tìm con
@@ -251,11 +253,14 @@ export const permanentlyDeleteProductCategory = async (id: string) => {
   await ProductCategory.deleteMany({
     _id: { $in: allIdsToDelete }
   })
-  return allIdsToDelete
+  return {
+    success: true,
+    allIdsToDelete
+  }
 }
 
 export const recoverProductCategory = async (id: string) => {
-  return ProductCategory.updateOne(
+  await ProductCategory.updateOne(
     { _id: id },
     { deleted: false, recoveredAt: new Date() }
   )

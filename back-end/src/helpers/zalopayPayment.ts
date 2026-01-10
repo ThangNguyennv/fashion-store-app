@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import { Request } from 'express'
 import Cart from '~/models/cart.model'
 import Order from '~/models/order.model'
+import { StatusCodes } from 'http-status-codes'
 
 export const zalopayCreateOrder = async (
   totalBill: number, 
@@ -55,7 +56,7 @@ export const zalopayCreateOrder = async (
   const zaloRes  = await axios.post(process.env.ZALOPAY_ENDPOINT_CREATE, null, { params: orderInfo })
   if (zaloRes.data.return_code !== 1) {
     // Thất bại
-    return res.json({ 
+    return res.status(StatusCodes.BAD_REQUEST).json({ 
       code: 400,  
       message: 'Giao dịch thất bại, tài khoản chưa bị trừ tiền, vui lòng thực hiện lại.', 
       error: zaloRes.data
@@ -63,7 +64,7 @@ export const zalopayCreateOrder = async (
   }
   if (zaloRes.data.return_code === 1 && zaloRes.data.sub_return_code === 1) {
     // Thành công
-    return res.json({ 
+    return res.status(StatusCodes.CREATED).json({ 
       code: 201,  
       message: 'Thành công!', 
       order_url: zaloRes.data.order_url, 
@@ -81,7 +82,10 @@ export const zalopayCallback = async (req: Request, res: Response) => {
       .digest("hex")
     
     if (macVerify !== mac) {
-      return res.json({ return_code: -1, return_message: "mac not match" }) // Báo lỗi, thường khi MAC không khớp (nghi ngờ giả mạo).
+      return res.json({ 
+        return_code: -1, 
+        return_message: "mac not match" 
+      }) // Báo lỗi, thường khi MAC không khớp (nghi ngờ giả mạo).
     }
     let dataJson = JSON.parse(data)
     const [phone, id] = dataJson.app_user.split("-");
@@ -91,7 +95,10 @@ export const zalopayCallback = async (req: Request, res: Response) => {
       deleted: false,
     })
     if (!order) {
-      return res.json({ return_code: 0, return_message: 'order not found' })
+      return res.json({ 
+        return_code: 0, 
+        return_message: 'order not found' 
+      })
     }
     // Thanh toán thành công
     await Cart.updateOne({ _id: order.cart_id }, { products: [] })
@@ -102,9 +109,15 @@ export const zalopayCallback = async (req: Request, res: Response) => {
       amount: dataJson.amount,
     }
     await order.save()
-    return res.json({ return_code: 1, return_message: "success" }) // Báo cho ZaloPay biết bạn đã nhận callback thành công.
+    return res.json({ 
+      return_code: 1, 
+      return_message: "success" 
+    }) // Báo cho ZaloPay biết bạn đã nhận callback thành công.
   } catch (error) {
-    return res.json({ return_code: 0, return_message: 'retry', error }) // Báo cho ZaloPay retry lại callback (ví dụ server bạn đang lỗi DB).
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      return_code: 0, 
+      return_message: 'retry'
+    }) // Báo cho ZaloPay retry lại callback (ví dụ server bạn đang lỗi DB).
   }
 }
 
