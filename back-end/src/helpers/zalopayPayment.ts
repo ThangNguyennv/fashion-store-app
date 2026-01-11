@@ -55,6 +55,7 @@ export const zalopayCreateOrder = async (
     .digest('hex')
 
   const zaloRes  = await axios.post(process.env.ZALOPAY_ENDPOINT_CREATE, null, { params: orderInfo })
+  console.log("🚀 ~ zalopayPayment.ts ~ zalopayCreateOrder ~ zaloRes:", zaloRes);
   if (zaloRes.data.return_code !== 1) {
     // Thất bại
     return res.status(StatusCodes.BAD_REQUEST).json({ 
