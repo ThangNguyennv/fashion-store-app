@@ -83,7 +83,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
     
     password: Joi.string()
       .required()
-      .min(8)
+      .min(1)
       .messages({
         "any.required": "Mật khẩu là bắt buộc!",
         "string.empty": "Mật khẩu không được để trống!"
@@ -318,6 +318,7 @@ export const changePasswordUser = (
     currentPassword: Joi.string()
       .trim()
       .required()
+      .min(1)
       .messages({
         'string.empty': 'Mật khẩu hiện tại không được để trống!',
         'any.required': 'Mật khẩu hiện tại là bắt buộc!'
