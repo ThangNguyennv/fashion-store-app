@@ -40,6 +40,7 @@ export const zalopayCreateOrder = async (
     callback_url: `${process.env.CLIENT_URL}/checkout/zalopay-callback`
   }
 
+  console.log('hello zalopayCreateOrder')
   const data = [
     orderInfo.app_id,
     orderInfo.app_trans_id,
@@ -77,6 +78,7 @@ export const zalopayCreateOrder = async (
 export const zalopayCallback = async (req: Request, res: Response) => {
   try {
     let { data, mac } = req.body
+      console.log('hello zalopayCallback')
     const macVerify = crypto.createHmac("sha256", process.env.ZALOPAY_KEY2)
       .update(data)
       .digest("hex")
