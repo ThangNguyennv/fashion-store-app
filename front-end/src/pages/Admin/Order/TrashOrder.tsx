@@ -1,6 +1,6 @@
-import Pagination from '~/components/adminn/paginationn/Pagination'
-import Search from '~/components/adminn/searchh/Search'
-import SortOrder from '~/components/adminn/sortt/SortOrder'
+import Pagination from '~/components/admin/pagination/Pagination'
+import Search from '~/components/admin/search/Search'
+import SortOrder from '~/components/admin/sort/SortOrder'
 import { useOrderTrash } from '~/hooks/admin/order/useOrderTrash'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -10,7 +10,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import { Link } from 'react-router-dom'
 import { IoArrowBackSharp } from 'react-icons/io5'
-import OrderTrashTable from '~/components/adminn/itemTablee/OrderTrashTable'
+import OrderTrashTable from '~/components/admin/itemTable/OrderTrashTable'
 import { ORDERTRASH_STATUSES_CHANGEMULTI } from '~/utils/constants'
 
 const TrashOrder = () => {

@@ -15,7 +15,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import { useTableTrash } from '~/hooks/admin/productCategory/useTrashTable'
-import ProductCategoryTrashTree from '../tableTreee/ProductCategoryTrashTree'
+import ProductCategoryTrashTree from '../tableTree/ProductCategoryTrashTree'
 
 const ProductCategoryTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
   const {

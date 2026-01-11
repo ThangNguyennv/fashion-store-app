@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import Checkbox from '@mui/material/Checkbox'
 import { useTable, type Props } from '~/hooks/admin/order/useTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
-import FormatDateTime from '../momentt/FormatDateTime'
+import FormatDateTime from '../moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
 import type { UpdatedBy } from '~/types/helper.type'
 import Skeleton from '@mui/material/Skeleton'

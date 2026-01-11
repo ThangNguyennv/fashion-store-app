@@ -6,7 +6,7 @@ import TableRow from '@mui/material/TableRow'
 import Checkbox from '@mui/material/Checkbox'
 import { useTableTrash, type Props } from '~/hooks/admin/order/useTrashTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
-import FormatDateTime from '../momentt/FormatDateTime'
+import FormatDateTime from '../moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'

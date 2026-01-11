@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import BoxHead from '~/components/client/boxHead/BoxHead'
 import CardItem from '~/components/client/cardItem/CardItem'
-import Pagination from '~/components/adminn/paginationn/Pagination'
+import Pagination from '~/components/admin/pagination/Pagination'
 import Skeleton from '@mui/material/Skeleton'
 import { FilterSidebar } from '~/components/client/filterSidebar/FilterSidebar'
 import { FaFilter, FaTimes, FaSort } from 'react-icons/fa'

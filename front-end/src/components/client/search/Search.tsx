@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useProductContext } from '~/contexts/client/ProductContext'
 import CardItem from '~/components/client/cardItem/CardItem'
 import Skeleton from '@mui/material/Skeleton' // Để hiển thị loading
-import Pagination from '~/components/adminn/paginationn/Pagination'
+import Pagination from '~/components/admin/pagination/Pagination'
 
 const Search = () => {
   const { stateProduct, fetchProduct } = useProductContext()

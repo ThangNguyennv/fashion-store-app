@@ -1,45 +1,54 @@
 /* eslint-disable no-unused-vars */
 import { TableRow, TableCell, Checkbox } from '@mui/material'
-import FormatDateTime from '../momentt/FormatDateTime'
+import { Link } from 'react-router-dom'
+import FormatDateTime from '../moment/FormatDateTime'
 import type { ProductCategoryActions, ProductCategoryInfoInterface } from '~/types/productCategory.type'
-import type { AccountInfoInterface } from '~/types/account.type'
+import type { PaginationInterface } from '~/types/helper.type'
 
 interface Props {
+  index: number // Vị trí trong cùng cấp
+  pagination: PaginationInterface | null
+  parentNumber?: string // STT của cha, ví dụ: "2" hoặc "2.1"
   productCategory: ProductCategoryInfoInterface
   level: number
   selectedIds: string[]
-  accounts: AccountInfoInterface[]
   handleCheckbox: (_id: string, checked: boolean) => void
+  handleToggleStatus: (_id: string, status: string) => void
   dispatchProductCategory: React.Dispatch<ProductCategoryActions>
   productCategories: ProductCategoryInfoInterface[]
-  openPermanentlyDelete: boolean
-  handleOpenPermanentlyDelete: (_id: string) => void
-  handleClosePermanentlyDelete: () => void
-  handlePermanentlyDelete: () => void
-  handleRecover: (_id: string) => void
+  open: boolean
+  handleOpen: (_id: string) => void
+  handleClose: () => void
+  handleDelete: () => void
 }
 
-const ProductCategoryTrashTree = ({
+const ProductTree = ({
+  index,
+  pagination,
+  parentNumber,
   productCategory,
   level,
   selectedIds,
-  accounts,
   handleCheckbox,
+  handleToggleStatus,
   dispatchProductCategory,
   productCategories,
-  openPermanentlyDelete,
-  handleOpenPermanentlyDelete,
-  handleClosePermanentlyDelete,
-  handlePermanentlyDelete,
-  handleRecover
+  open,
+  handleOpen,
+  handleClose,
+  handleDelete
 }: Props) => {
   const prefix = '— '.repeat(level)
-
-  const creator = accounts.find((account) => account._id === productCategory.createdBy.account_id)
+  const lastUpdaterName = productCategory.lastUpdatedBy // Người cập nhật gần nhất
+  const creatorName = productCategory.createdBy // Người tạo
+  const baseIndex = pagination ? (pagination.currentPage - 1) * pagination.limitItems : 0
+  const displayIndex = baseIndex + index + 1
+  // Tạo số thứ tự phân cấp
+  const currentNumber = parentNumber ? `${parentNumber}.${displayIndex}` : `${displayIndex}`
 
   return (
     <>
-      <TableRow key={productCategory._id}>
+      <TableRow>
         <TableCell align="center" sx={{ padding: '0px 2px' }}>
           <Checkbox
             checked={selectedIds.includes(productCategory._id ?? '')}
@@ -47,6 +56,9 @@ const ProductCategoryTrashTree = ({
             size="small"
             sx={{ padding: 0 }}
           />
+        </TableCell>
+        <TableCell align="center" sx={{ padding: '0px 2px' }}>
+          {currentNumber}
         </TableCell>
         <TableCell align="center" sx={{ padding: '10px 0px' }}>
           <div className="flex justify-center items-center">
@@ -64,6 +76,7 @@ const ProductCategoryTrashTree = ({
         </TableCell>
         <TableCell align="center" sx={{ padding: '6px 0px' }}>
           <button
+            onClick={() => handleToggleStatus(productCategory.status, productCategory._id ?? '')}
             className={`cursor-pointer border rounded-[5px] p-[5px] text-white 
               ${productCategory.status === 'ACTIVE' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
           >
@@ -71,65 +84,68 @@ const ProductCategoryTrashTree = ({
           </button>
         </TableCell>
         <TableCell align="center" sx={{ padding: '6px 0px' }}>
-          {creator ? (
+          {creatorName ? (
             <>
-              <p className="text-sm font-medium text-gray-800">{creator.fullName}</p>
+              <p className="text-sm font-medium text-gray-800">{creatorName.fullName}</p>
               <FormatDateTime time={productCategory.createdAt} />
             </>
           ) : (
             <p className="text-sm italic text-gray-400">Không xác định</p>
           )}
         </TableCell>
-        <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>{(() => {
-          const creator = accounts?.find(
-            (account) => account._id === productCategory.deletedBy?.account_id
-          )
-          return creator ? (
+        <TableCell align="center" sx={{ padding: '6px 0px' }}>
+          {lastUpdaterName ? (
             <>
-              <span className="text-sm font-medium text-gray-800">
-                {creator.fullName}
-              </span>
-              <FormatDateTime time={productCategory.deletedBy.deletedAt}/>
+              <p className="text-sm font-medium text-gray-800">{lastUpdaterName.fullName}</p>
+              <FormatDateTime time={lastUpdaterName.updatedAt} />
             </>
           ) : (
-            <span className="text-sm italic text-gray-400">Không xác định</span>
+            <p className="text-sm italic text-gray-400">Chưa có ai cập nhật</p>
           )
-        })()}
+          }
         </TableCell>
         <TableCell align="center" sx={{ padding: '6px 0px' }}>
-          <button
-            onClick={() => handleRecover(productCategory._id ?? '')}
-            className='nav-link border rounded-[5px] bg-[#525FE1] p-[5px] text-white'
+          <Link
+            to={`/admin/products-category/detail/${productCategory._id}`}
+            className="nav-link border rounded-[5px] bg-[#0542AB] p-[5px] text-white"
           >
-            Khôi phục
-          </button>
+            Chi tiết
+          </Link>
+          <Link
+            to={`/admin/products-category/edit/${productCategory._id}`}
+            className="nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white"
+          >
+            Sửa
+          </Link>
           <button
-            onClick={() => handleOpenPermanentlyDelete(productCategory._id ?? '')}
+            onClick={() => handleOpen(productCategory._id ?? '')}
             className="border rounded-[5px] bg-[#BC3433] p-[5px] text-white"
           >
-            Xóa vĩnh viễn
+            Xóa
           </button>
         </TableCell>
       </TableRow>
-      {productCategory.children?.map((child) => (
-        <ProductCategoryTrashTree
-          key={child._id}
+      {productCategory.children?.map((child, idx) => (
+        <ProductTree
+          key={idx}
+          index={idx}
+          pagination={pagination}
+          parentNumber={currentNumber}
           productCategory={child}
           level={level + 1}
           selectedIds={selectedIds}
-          accounts={accounts}
           handleCheckbox={handleCheckbox}
-          handlePermanentlyDelete={handlePermanentlyDelete}
+          handleToggleStatus={handleToggleStatus}
+          handleDelete={handleDelete}
           productCategories={productCategories}
           dispatchProductCategory={dispatchProductCategory}
-          openPermanentlyDelete={openPermanentlyDelete}
-          handleOpenPermanentlyDelete={handleOpenPermanentlyDelete}
-          handleClosePermanentlyDelete={handleClosePermanentlyDelete}
-          handleRecover={handleRecover}
+          open={open}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
         />
       ))}
     </>
   )
 }
 
-export default ProductCategoryTrashTree
+export default ProductTree

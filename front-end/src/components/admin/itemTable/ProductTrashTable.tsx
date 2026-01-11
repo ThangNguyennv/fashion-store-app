@@ -3,14 +3,12 @@ import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
-import { Link } from 'react-router-dom'
 import Checkbox from '@mui/material/Checkbox'
-import { useTable } from '~/hooks/admin/product/useTable'
+import { useTrashTable } from '~/hooks/admin/product/useTrashTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import type { Props } from '~/hooks/admin/product/useTable'
-import FormatDateTime from '../momentt/FormatDateTime'
+import FormatDateTime from '../moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
-import type { UpdatedBy } from '~/types/helper.type'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -20,20 +18,20 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import type { AccountInfoInterface } from '~/types/account.type'
 
-const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
+const ProductTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
   const {
     products,
     isLoading,
-    handleToggleStatus,
-    open,
-    handleOpen,
-    handleClose,
-    handleDelete,
+    openPermanentlyDelete,
+    handleOpenPermanentlyDelete,
+    handleClosePermanentlyDelete,
     handleCheckbox,
     handleCheckAll,
     isCheckAll,
+    handleRecover,
+    handlePermanentlyDelete,
     pagination
-  } = useTable({ selectedIds, setSelectedIds })
+  } = useTrashTable({ selectedIds, setSelectedIds })
 
   if (isLoading) {
     return (
@@ -64,9 +62,9 @@ const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Giá gốc (đ)</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Giảm giá (%)</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Số lượng</TableCell>
-              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái</TableCell>
+              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái cũ</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Người tạo / Thời gian tạo</TableCell>
-              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
+              <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian xóa</TableCell>
               <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
@@ -144,9 +142,9 @@ const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Giá gốc (đ)</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Giảm giá (%)</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Số lượng</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Trạng thái cũ</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Người tạo / Thời gian tạo</TableCell>
-                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Cập nhật lần cuối</TableCell>
+                <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Thời gian xóa</TableCell>
                 <TableCell align='center' sx={{ backgroundColor: '#003459', color: 'white', padding: '6px 0px' }}>Hành động</TableCell>
               </TableRow>
             </TableHead>
@@ -183,7 +181,6 @@ const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
                     <TableCell align="center" sx={{ padding: '6px 0px' }}>{product.stock.toLocaleString()}</TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }}>
                       <button
-                        onClick={() => handleToggleStatus(product._id ?? '', product.status)}
                         className={`border rounded-[5px] p-[5px] text-white 
                           ${product.status === 'ACTIVE' ? 'bg-[#18BA2A]' : 'bg-[#BC3433]'}`}
                       >
@@ -204,70 +201,54 @@ const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
                       )
                     })()}
                     </TableCell>
-                    <TableCell align='center' sx={{ padding: '6px 0px' }}>
-                      {(() => {
-                        const updatedBy = product.updatedBy?.[(product.updatedBy as UpdatedBy[]).length - 1]
-                        if (!updatedBy) {
-                          return (
-                            <>
-                              <p className="text-xs italic text-gray-400">Chưa có ai cập nhật</p>
-                            </>
-                          )
-                        }
-                        if (Array.isArray(product.updatedBy) && product.updatedBy.length > 0) {
-                          const updater = updatedBy?.account_id as AccountInfoInterface
-                          return updater ? (
-                            <>
-                              <span className="text-sm font-medium text-gray-800">
-                                {updater.fullName}
-                              </span>
-                              <FormatDateTime time={updatedBy.updatedAt}/>
-                            </>
-                          ) : (
-                            <span className="text-sm italic text-gray-400">
-                            Không xác định
-                            </span>
-                          )
-                        }
-                      })()}
+                    <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>{(() => {
+                      const deletor = product.deletedBy?.account_id as AccountInfoInterface
+                      return deletor ? (
+                        <>
+                          <span className="text-sm font-medium text-gray-800">
+                            {deletor.fullName}
+                          </span>
+                          <FormatDateTime time={product.deletedBy?.deletedAt}/>
+                        </>
+                      ) : (
+                        <span className="text-sm italic text-gray-400">Không xác định</span>
+                      )
+                    })()}
                     </TableCell>
-                    <TableCell align='center' sx={{ padding: '6px 0px' }} >
-                      <Link
-                        to={`/admin/products/detail/${product._id}`}
-                        className='nav-link border rounded-[5px] bg-[#0542AB] p-[5px] text-white'
-                      >
-                        Chi tiết
-                      </Link>
-                      <Link
-                        to={`/admin/products/edit/${product._id}`}
-                        className='nav-link border rounded-[5px] bg-[#FFAB19] p-[5px] text-white'
-                      >
-                          Sửa
-                      </Link>
-                      <button
-                        onClick={() => handleOpen(product._id ?? '')}
-                        className='border rounded-[5px] bg-[#BC3433] p-[5px] text-white'
-                      >
-                          Xóa
-                      </button>
+                    <TableCell align='center' sx={{ padding: '6px 0px' }}>
+                      <>
+                        <button
+                          onClick={() => handleRecover(product._id ?? '')}
+                          className='nav-link border rounded-[5px] bg-[#525FE1] p-[5px] text-white'
+                        >
+                          Khôi phục
+                        </button>
+                        <button
+                          onClick={() => handleOpenPermanentlyDelete(product._id ?? '')}
+                          className='border rounded-[5px] bg-[#BC3433] p-[5px] text-white'
+                        >
+                          Xóa vĩnh viễn
+                        </button>
+                      </>
+
                     </TableCell>
                   </TableRow>
                 ))}
             </TableBody>
             <Dialog
-              open={open}
-              onClose={handleClose}
+              open={openPermanentlyDelete}
+              onClose={handleClosePermanentlyDelete}
               aria-labelledby="delete-dialog-title"
             >
               <DialogTitle id="delete-dialog-title">Xác nhận xóa</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                    Bạn có chắc chắn muốn xóa sản phẩm này không?
+                    Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này không? (Một khi xóa sẽ không thể khôi phục lại được.)
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose}>Hủy</Button>
-                <Button onClick={handleDelete} color="error" variant="contained">
+                <Button onClick={handleClosePermanentlyDelete}>Hủy</Button>
+                <Button onClick={handlePermanentlyDelete} color="error" variant="contained">
                     Xóa
                 </Button>
               </DialogActions>
@@ -281,4 +262,4 @@ const ProductTable = ({ selectedIds, setSelectedIds }: Props) => {
   )
 }
 
-export default ProductTable
+export default ProductTrashTable

@@ -7,7 +7,7 @@ import Checkbox from '@mui/material/Checkbox'
 import { useTable } from '~/hooks/admin/productCategory/useTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import type { Props } from '~/hooks/admin/productCategory/useTable'
-import ProductTree from '../tableTreee/ProductTree'
+import ProductTree from '../tableTree/ProductTree'
 import TableContainer from '@mui/material/TableContainer'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'

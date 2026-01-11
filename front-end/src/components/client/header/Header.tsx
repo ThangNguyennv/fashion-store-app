@@ -16,7 +16,7 @@ import { IoChevronDown } from 'react-icons/io5'
 import { RiBillLine } from 'react-icons/ri'
 import SearchInput from './SearchInput'
 import useHeader from '~/hooks/client/header/useHeader'
-import SubMenuArticle from '../subMenuArticle/SubMenuArticle'
+import SubMenuArticle from '../subMenuArticlee/SubMenuArticle'
 
 const Header = () => {
   const {

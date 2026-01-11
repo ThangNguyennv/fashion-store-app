@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import BoxHead from '~/components/client/boxHead/BoxHead'
-import Pagination from '~/components/adminn/paginationn/Pagination'
+import Pagination from '~/components/admin/pagination/Pagination'
 import useIndex from '~/hooks/client/article/useIndex'
 import ArticleCard from '~/components/client/articleCard/ArticleCard'
 import Skeleton from '@mui/material/Skeleton'

@@ -1,5 +1,5 @@
-import Pagination from '~/components/adminn/paginationn/Pagination'
-import Search from '~/components/adminn/searchh/Search'
+import Pagination from '~/components/admin/pagination/Pagination'
+import Search from '~/components/admin/search/Search'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -10,8 +10,8 @@ import { Link } from 'react-router-dom'
 import { IoArrowBackSharp } from 'react-icons/io5'
 import { PRODUCTTRASH_STATUSES_CHANGEMULTI } from '~/utils/constants'
 import { useProductTrash } from '~/hooks/admin/product/useProductTrash'
-import ProductTrashTable from '~/components/adminn/itemTablee/ProductTrashTable'
-import SortProduct from '~/components/adminn/sortt/SortProduct'
+import ProductTrashTable from '~/components/admin/itemTable/ProductTrashTable'
+import SortProduct from '~/components/admin/sort/SortProduct'
 
 const TrashProduct = () => {
   const {

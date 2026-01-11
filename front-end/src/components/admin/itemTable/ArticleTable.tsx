@@ -8,7 +8,7 @@ import Checkbox from '@mui/material/Checkbox'
 import { useTable } from '~/hooks/admin/article/useTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import type { Props } from '~/hooks/admin/article/useTable'
-import FormatDateTime from '../momentt/FormatDateTime'
+import FormatDateTime from '../moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
 import type { UpdatedBy } from '~/types/helper.type'
 import Skeleton from '@mui/material/Skeleton'

@@ -1,7 +1,7 @@
 import { Editor } from '@tinymce/tinymce-react'
 import { API_KEY } from '~/utils/constants'
 import { useEdit } from '~/hooks/admin/article/useEdit'
-import SelectTree from '~/components/adminn/tableTreee/SelectTreeArticle'
+import SelectTree from '~/components/admin/tableTree/SelectTreeArticle'
 import Skeleton from '@mui/material/Skeleton'
 import { Link } from 'react-router-dom'
 
