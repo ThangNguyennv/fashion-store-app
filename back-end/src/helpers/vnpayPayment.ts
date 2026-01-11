@@ -10,7 +10,7 @@ export const vnpaybuildPaymentUrl = new VNPay({
   //  Cấu hình bắt buộc
   tmnCode: process.env.VNP_TMN_CODE,
   secureSecret: process.env.VNP_HASH_SECRET,
-  vnpayHost: 'https://sanbox.vnpayment.vn',
+  vnpayHost: 'https://sandbox.vnpayment.vn',
 
   //  Cấu hình tùy chọn
   testMode: true, // Chế độ test
@@ -18,14 +18,14 @@ export const vnpaybuildPaymentUrl = new VNPay({
   loggerFn: ignoreLogger // Custom logger
 })
 
-export const vnpayCreateOrder = (totalBill: number, orderId: string,  res: Response) => {
+export const vnpayCreateOrder = (req: Request, totalBill: number, orderId: string,  res: Response) => {
   const expire = new Date()
   expire.setMinutes(expire.getMinutes() + 15) 
     //  Sinh mã giao dịch mới mỗi lần thanh toán
   const txnRef = `${orderId}-${Date.now()}`
   const vnpayResponse = vnpaybuildPaymentUrl.buildPaymentUrl({
     vnp_Amount: totalBill,
-    vnp_IpAddr: '127.0.0.0.1', // ip test local
+    vnp_IpAddr: req.ip || req.headers['x-forwarded-for']?.toString().split(',')[0] || '127.0.0.1',
     vnp_TxnRef: txnRef,
     vnp_OrderInfo: `Thanh toán đơn hàng: ${txnRef}`,
     vnp_OrderType: ProductCode.Other,

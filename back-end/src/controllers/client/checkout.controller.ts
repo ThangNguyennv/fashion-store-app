@@ -61,7 +61,7 @@ export const order = async (req: Request, res: Response) => {
       })
       return
     } else if (paymentMethod === 'VNPAY') {
-      vnpayCreateOrder(newOrder.amount, newOrder.id, res)
+      vnpayCreateOrder(req, newOrder.amount, newOrder.id, res)
     } else if (paymentMethod === 'ZALOPAY') {
       const zaloProducts = newOrder.products.map(p => ({
         product_id: p.product_id.toString(),

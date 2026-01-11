@@ -35,17 +35,17 @@ const routeClient = (app: Express): void => {
 
   // --- NHÓM 2: KHÔNG CACHE (Private/Dynamic) ---
   app.use('/cart', noCache, cartMiddleware.cartId, cartRoutes)
-  // Thêm middleware log TẤT CẢ request vào /checkout
-app.use('/checkout', (req, res, next) => {
-  console.log('=== INCOMING REQUEST TO /checkout ===')
-  console.log('Method:', req.method)
-  console.log('Path:', req.path)
-  console.log('Full URL:', req.originalUrl)
-  console.log('Body:', req.body)
-  console.log('Headers:', req.headers)
-  console.log('Cookies:', req.cookies)
-  next()
-})
+//   // Thêm middleware log TẤT CẢ request vào /checkout
+// app.use('/checkout', (req, res, next) => {
+//   console.log('=== INCOMING REQUEST TO /checkout ===')
+//   console.log('Method:', req.method)
+//   console.log('Path:', req.path)
+//   console.log('Full URL:', req.originalUrl)
+//   console.log('Body:', req.body)
+//   console.log('Headers:', req.headers)
+//   console.log('Cookies:', req.cookies)
+//   next()
+// })
   app.use('/checkout', noCache, cartMiddleware.cartId, checkoutRoutes)
   app.use('/user', noCache, userRoutes)
   app.use('/settings', noCache, settingRoutes)
