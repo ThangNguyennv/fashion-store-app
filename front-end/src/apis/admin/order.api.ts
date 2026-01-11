@@ -102,3 +102,16 @@ export const fetchRecoverOrderAPI = async (id: string) => {
   )
   return response.data
 }
+
+export const exportOrdersAPI = async (status?: string): Promise<Blob> => {
+  const queryParams = new URLSearchParams()
+  if (status) queryParams.set('status', status.toUpperCase())
+
+  const response = await authorizedAxiosInstance.get(
+    `${API_ROOT}/admin/orders/export?${queryParams.toString()}`,
+    {
+      responseType: 'blob' // Quan trọng: nhận file dạng blob
+    }
+  )
+  return response.data
+}

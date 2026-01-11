@@ -13,7 +13,7 @@ import OrderTable from '~/components/admin/itemTable/OrderTable'
 import type { OrderStatus } from '~/types/order.type'
 import { FaTrashAlt } from 'react-icons/fa'
 import { FaFileExcel } from 'react-icons/fa'
-import { API_ROOT, ORDER_STATUSES_CHANGEMULTI } from '~/utils/constants'
+import { ORDER_STATUSES_CHANGEMULTI } from '~/utils/constants'
 import { Link } from 'react-router-dom'
 
 const OrderAdmin = () => {
@@ -39,7 +39,8 @@ const OrderAdmin = () => {
     handleConfirmDeleteAll,
     role,
     allOrders,
-    orders
+    orders,
+    handleExportExcel
   } = useOrder()
 
   return (
@@ -112,14 +113,13 @@ const OrderAdmin = () => {
                   <span>Thùng rác</span>
                 </Link>
               </button>
-              <a
-                href={`${API_ROOT}/admin/orders/export?status=${status.toUpperCase()}`}
-                download={`don-hang-${status || 'all'}.xlsx`}
+              <button
+                onClick={() => handleExportExcel(status)}
                 className='p-[5px] border rounded-[5px] border-green-600 text-green-600 hover:bg-green-600 hover:text-white flex items-center justify-center gap-[5px]'
               >
                 <FaFileExcel />
                 <span>Xuất Excel</span>
-              </a>
+              </button>
               <SortOrder
                 handleSort={handleSort}
                 sortKey={sortKey}

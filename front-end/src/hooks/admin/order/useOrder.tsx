@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { fetchChangeMultiAPI } from '~/apis/admin/order.api'
+import { exportOrdersAPI, fetchChangeMultiAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useOrderContext } from '~/contexts/admin/OrderContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
@@ -130,6 +131,26 @@ export const useOrder = () => {
     updateParams({ status: urlFriendlyStatus, page: 1 })
   }, [updateParams])
 
+  const handleExportExcel = async (status?: string) => {
+    try {
+      const blob = await exportOrdersAPI(status)
+
+      // Tạo URL tạm thời và trigger download
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `don-hang-${status || 'all'}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Export failed:', error)
+    }
+  }
+
   return {
     dispatchOrder,
     orders,
@@ -152,6 +173,7 @@ export const useOrder = () => {
     handleClose,
     handleConfirmDeleteAll,
     role,
-    allOrders
+    allOrders,
+    handleExportExcel
   }
 }
