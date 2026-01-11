@@ -98,6 +98,7 @@ export const order = async (req: Request, res: Response) => {
       )
     }
   } catch (error) {
+    console.log("Loi ht")
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       code: 500,
       message: 'Đã xảy ra lỗi hệ thống!'

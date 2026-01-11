@@ -19,6 +19,8 @@ export const vnpaybuildPaymentUrl = new VNPay({
 })
 
 export const vnpayCreateOrder = (req: Request, totalBill: number, orderId: string,  res: Response) => {
+  console.log(req.ip)
+  console.log(req.headers['x-forwarded-for']?.toString())
   const expire = new Date()
   expire.setMinutes(expire.getMinutes() + 15) 
     //  Sinh mã giao dịch mới mỗi lần thanh toán
