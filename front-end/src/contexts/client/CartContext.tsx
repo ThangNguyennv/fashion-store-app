@@ -7,12 +7,11 @@ import type { CartInfoInterface } from '~/types/cart.type'
 
 interface CartContextType {
  cartDetail: CartInfoInterface | null
-  // Cập nhật lại kiểu dữ liệu của hàm addToCart
  addToCart: (
     productId: string,
     quantity: number,
-    color?: string | null, // Thêm color (tùy chọn)
-    size?: string | null // Thêm size (tùy chọn)
+    color?: string | null,
+    size?: string | null
   ) => Promise<void>
  refreshCart: () => Promise<void>
 }
@@ -27,13 +26,11 @@ export const CartClientProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetchCartAPI()
       setCartDetail(res.cartDetail)
     } catch (error) {
-      // Xử lý lỗi nếu người dùng chưa đăng nhập, không có giỏ hàng
       console.error('Failed to refresh cart:', error)
       setCartDetail(null)
     }
   }
 
-  // SỬA LẠI HÀM NÀY
   const addToCart = async (
     productId: string,
     quantity: number,
