@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '~/contexts/client/AuthContext'
 import { CircularProgress, Box } from '@mui/material'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosClient'
+import { API_ROOT } from '~/utils/constants'
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams()
@@ -26,15 +27,13 @@ const GoogleCallback = () => {
       try {
         // 1. Gọi API để Backend set cặp Cookies HttpOnly
         await authorizedAxiosInstance.post(
-          `${import.meta.env.VITE_API_ROOT}/user/set-auth-cookies`,
-          { accessTokenUser, refreshTokenUser, cartId },
-          { withCredentials: true }
+          `${API_ROOT}/user/set-auth-cookies`,
+          { accessTokenUser, refreshTokenUser, cartId }
         )
 
         // 2. Lấy thông tin User để đưa vào Context
         const response = await authorizedAxiosInstance.get(
-          `${import.meta.env.VITE_API_ROOT}/user/account/info`,
-          { withCredentials: true }
+          `${API_ROOT}/user/account/info`
         )
         setAccountUser(response.data.accountUser)
 
@@ -48,7 +47,6 @@ const GoogleCallback = () => {
 
     handleCallback()
   }, [searchParams, navigate, setAccountUser])
-
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
