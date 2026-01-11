@@ -23,6 +23,15 @@ export const vnpayCreateOrder = (req: Request, totalBill: number, orderId: strin
   console.log("req.headers['x-forwarded-for']?.toString()", req.headers['x-forwarded-for']?.toString())
   const now = new Date()
   const expire = new Date(now.getTime() + 30 * 60 * 1000) // +30 phút
+  // ✅ LOG ĐỂ KIỂM TRA
+  console.log("=== KIỂM TRA THỜI GIAN ===")
+  console.log("Server timezone:", process.env.TZ)
+  console.log("Current time (now):", now.toString())
+  console.log("Current time (ISO):", now.toISOString())
+  console.log("Expire time:", expire.toString())
+  console.log("CreateDate formatted:", dateFormat(now))
+  console.log("ExpireDate formatted:", dateFormat(expire))
+  console.log("========================")
     //  Sinh mã giao dịch mới mỗi lần thanh toán
   const txnRef = `${orderId}-${Date.now()}`
   const vnpayResponse = vnpaybuildPaymentUrl.buildPaymentUrl({
