@@ -23,20 +23,20 @@ export const vnpayCreateOrder = (req: Request, totalBill: number, orderId: strin
   console.log("req.headers['x-forwarded-for']?.toString()", req.headers['x-forwarded-for']?.toString())
   const now = new Date()
   const expire = new Date(now.getTime() + 30 * 60 * 1000) // +30 phút
-  // ✅ LOG ĐỂ KIỂM TRA
-  console.log("=== KIỂM TRA THỜI GIAN ===")
-  console.log("Server timezone:", process.env.TZ)
-  console.log("Current time (now):", now.toString())
-  console.log("Current time (ISO):", now.toISOString())
-  console.log("Expire time:", expire.toString())
-  console.log("CreateDate formatted:", dateFormat(now))
-  console.log("ExpireDate formatted:", dateFormat(expire))
-  console.log("========================")
+
     //  Sinh mã giao dịch mới mỗi lần thanh toán
   const txnRef = `${orderId}-${Date.now()}`
   const vnNow = new Date(now.getTime() + 7 * 60 * 60 * 1000)
   const vnExpire = new Date(expire.getTime() + 7 * 60 * 60 * 1000)
-
+  // ✅ LOG ĐỂ KIỂM TRA
+  console.log("=== KIỂM TRA THỜI GIAN ===")
+  console.log("Current time UTC:", now.toString())
+  console.log("Current time VN:", vnNow.toString())
+  console.log("Expire time UTC:", expire.toString())
+  console.log("Expire time VN:", vnExpire.toString())
+  console.log("CreateDate formatted:", dateFormat(vnNow))   // ✅ Log vnNow
+  console.log("ExpireDate formatted:", dateFormat(vnExpire)) // ✅ Log vnExpire
+  console.log("========================")
   const vnpayResponse = vnpaybuildPaymentUrl.buildPaymentUrl({
     vnp_Amount: totalBill,
     vnp_IpAddr: req.ip || req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || '127.0.0.1',
