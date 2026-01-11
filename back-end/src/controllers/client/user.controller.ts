@@ -359,6 +359,7 @@ export const googleCallback = async (req: Request, res: Response) => {
       refreshTokenUser, 
       finalCartId 
     } = await userSerivice.googleCallback(req.cookies.cartId, user)
+      console.log("🚀 ~ user.controller.ts ~ googleCallback ~ finalCartId:", finalCartId);
 
 
     // 4. Gửi JWT về client qua cookie
@@ -380,6 +381,7 @@ export const googleCallback = async (req: Request, res: Response) => {
 export const setAuthCookies = async (req: Request, res: Response) => {
   try {
     const { accessTokenUser, refreshTokenUser, cartId } = req.body
+    console.log("🚀 ~ user.controller.ts ~ setAuthCookies ~ cartId:", cartId);
 
     res.cookie('accessTokenUser', accessTokenUser, getCookieOptions('1h'))
     res.cookie('refreshTokenUser', refreshTokenUser, getCookieOptions('14d'))
