@@ -36,8 +36,8 @@ export const zalopayCreateOrder = async (
     description: `Thanh toán đơn hàng ${transID}`,
     bank_code: "", 
     mac: '',
-    // Thay CLIENT_URL = link ngrok
-    callback_url: `${process.env.CLIENT_URL}/checkout/zalopay-callback`
+    // Thay API_ROOT = link ngrok
+    callback_url: `${process.env.API_ROOT}/checkout/zalopay-callback`
   }
 
   console.log('hello zalopayCreateOrder')
