@@ -1,11 +1,13 @@
 import searchHelpers from '~/helpers/search'
-import { buildTree, TreeItem } from '~/helpers/createTree'
-import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
+import { buildTreeForItems } from '~/helpers/createChildForAllParents'
+import { addLogInfoToTree } from '~/helpers/addLogInfoToChildren'
 import paginationHelpers from '~/helpers/pagination'
-import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
+import { buildTreeForPagedItems } from '~/helpers/createChildForPagedParents'
 import Account from '~/models/account.model'
 import ArticleCategory from '~/models/articleCategory.model'
-import { updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
+import { updateStatusRecursiveForOneItem } from '~/helpers/updateStatusItem'
+import { LogNodeInterface, TreeInterface } from '~/interfaces/admin/general.interface'
+import { ArticleCategoryInterface } from '~/interfaces/admin/articleCategory.interface'
 
 export const getArticleCategories = async (query: any) => {
   const find: any = { deleted: false }
@@ -50,14 +52,16 @@ export const getArticleCategories = async (query: any) => {
   // End Pagination
   
   //  Query song song bằng Promise.all (giảm round-trip)
+  // parentCategories: Các danh mục bài viết cấp cao nhất (Cấp 1) (đã được phân trang)
+  // allCategories: Tất cả các danh mục bài viết cấp cao nhất (Cấp 1)
   const [parentCategories, accounts, allCategories] = await Promise.all([
     ArticleCategory.find(parentFind)
       .sort(sort)
       .limit(objectPagination.limitItems)
-      .skip(objectPagination.skip) // chỉ parent
+      .skip(objectPagination.skip)
       .lean(),
     Account
-      .find({ deleted: false }) // account info
+      .find({ deleted: false })
       .lean(),
     ArticleCategory
       .find({ deleted: false })
@@ -65,84 +69,97 @@ export const getArticleCategories = async (query: any) => {
       .lean()
   ])
 
-  // Tạo cây phân cấp
-  const newArticleCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
-  const newAllArticleCategories = buildTree(allCategories as unknown as TreeItem[])
+  // Tạo cây phân cấp (Mỗi cha sẽ được gán thêm trường children)
+  const articleCategories = buildTreeForPagedItems(parentCategories as unknown as TreeInterface[], allCategories as unknown as TreeInterface[])
 
-  // Gắn account info cho tree
+  // Tạo cây phân cấp (Mỗi cha sẽ được gán thêm trường children)
+  const allArticleCategories = buildTreeForItems(allCategories as unknown as TreeInterface[])
+
+  // Gán account info cho tree
   const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-  addLogInfoToTree(newArticleCategories as LogNode[], accountMap)
-  addLogInfoToTree(newAllArticleCategories as LogNode[], accountMap)
+  addLogInfoToTree(articleCategories as LogNodeInterface[], accountMap)
+  addLogInfoToTree(allArticleCategories as LogNodeInterface[], accountMap)
 
   return {
-    newArticleCategories,
-    newAllArticleCategories,
+    articleCategories,
+    allArticleCategories,
     accounts,
     objectSearch,
     objectPagination
   }
 }
 
-export interface UpdatedBy {
-  account_id: string,
-  updatedAt: Date
-}
-
-export const changeStatusWithChildren = async (status: string, id: string, account_id: string) => {
-  const updatedBy: UpdatedBy = {
-    account_id: account_id,
+export const changeStatusWithChildren = async (status: string, category_id: string, account_id: string) => {
+  const updatedBy = {
+    account_id,
     updatedAt: new Date()
   }
   
-  await updateStatusRecursiveForOneItem(ArticleCategory, status, id, updatedBy)
+  await updateStatusRecursiveForOneItem(ArticleCategory, status, category_id, updatedBy)
 }
 
 export const deleteArticleCategory = async (id: string, account_id: string) => {
   await ArticleCategory.updateOne(
     { _id: id },
     {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id: account_id,
+          deletedAt: new Date()
+        }
       }
     }
   )
 }
 
-export const createArticleCategory = async (data: any, account_id: string) => {
-  data.createdBy = {
-    account_id: account_id
+export const createArticleCategory = async (data: ArticleCategoryInterface, account_id: string) => {
+  const dataTemp = {
+    title: data.title,
+    parent_id: data.parent_id,
+    descriptionShort: data.descriptionShort,
+    descriptionDetail: data.descriptionDetail,
+    status: data.status,
+    thumbnail: data.thumbnail,
+    createdBy: {
+      account_id
+    }
   }
+  const articleCategory = new ArticleCategory(dataTemp)
+  await articleCategory.save()
+  const articleCategoryToObject = articleCategory.toObject()
 
-  const records = new ArticleCategory(data)
-  await records.save()
-
-  return records
+  return articleCategoryToObject
 }
 
 export const editArticleCategory = async (data: any, id: string, account_id: string) => {
   const updatedBy = {
-    account_id: account_id,
+    account_id,
     updatedAt: new Date()
+  }
+  const dataTemp = {
+    title: data.title,
+    parent_id: data.parent_id,
+    descriptionShort: data.descriptionShort,
+    descriptionDetail: data.descriptionDetail,
+    status: data.status,
+    thumbnail: data.thumbnail
   }
   await ArticleCategory.updateOne(
     { _id: id },
     {
-      ...data,
+      $set: dataTemp,
       $push: {
-        updatedBy: updatedBy
+        updatedBy
       }
     }
   )
 }
 
 export const detailArticleCategory = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-
-  const articleCategory = await ArticleCategory.findOne(find)
+  const articleCategory = await ArticleCategory
+    .findOne({ _id: id, deleted: false })
+    .lean()
+    
   return articleCategory
 }

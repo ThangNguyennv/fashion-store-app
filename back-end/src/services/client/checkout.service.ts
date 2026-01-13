@@ -4,6 +4,7 @@ import Order from '~/models/order.model'
 import * as productsHelper from '~/helpers/product'
 import { OneProduct } from '~/helpers/product'
 import "~/crons/order.cron"
+import { CheckoutInterface } from '~/interfaces/client/checkout.interface'
 
 export const getCheckout = async (cartId: string) => {
   const cart = await Cart
@@ -44,12 +45,18 @@ export const getCheckout = async (cartId: string) => {
   }
 }
 
-export const order = async (cartId: string, userId: string, data: any) => {
-  const { note, paymentMethod, fullName, phone, address } = data
+export const order = async (cartId: string, userId: string, data: CheckoutInterface) => {
+  const dataTemp = {
+    fullName: data.fullName,
+    phone: data.phone,
+    address: data.address,
+    paymentMethod: data.paymentMethod,
+    note: data.note
+  }
   const userInfo = {
-    fullName: fullName,
-    phone: phone, 
-    address: address
+    fullName: dataTemp.fullName,
+    phone: dataTemp.phone, 
+    address: dataTemp.address
   }
   const cart = await Cart.findById(cartId).populate({
     path: 'products.product_id',
@@ -88,8 +95,8 @@ export const order = async (cartId: string, userId: string, data: any) => {
     userInfo,
     products,
     amount: Math.floor(totalBill),
-    note,
-    paymentInfo: { method: paymentMethod, status: 'PENDING' }
+    note: dataTemp.note,
+    paymentInfo: { method: dataTemp.paymentMethod, status: 'PENDING' }
   }
 
   const newOrder = new Order(orderInfo)
@@ -97,14 +104,12 @@ export const order = async (cartId: string, userId: string, data: any) => {
   return {
     success: true,
     newOrder,
-    paymentMethod
+    paymentMethod: dataTemp.paymentMethod
   }
 }
 
 export const success = async (orderId: string) => {
-  const order = await Order.findOne({
-    _id: orderId
-  })
+  const order = await Order.findOne({ _id: orderId })
   for (const product of order.products) {
     const productInfo = await Product
       .findOne({ _id: product.product_id })

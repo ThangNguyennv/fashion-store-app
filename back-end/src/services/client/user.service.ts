@@ -7,14 +7,19 @@ import Order from '~/models/order.model'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 import { JWTProvider } from '~/providers/jwt.provider'
+import { UserChangePasswordInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserResetPasswordInterface } from '~/interfaces/client/user.interface'
 
-export const register = async (data: any) => {
-    const { fullName, email, password } = data
-    
+export const register = async (data: UserRegisterInterface) => {
+  const dataTemp = {
+    fullName: data.fullName,
+    email: data.email,
+    password: data.password,
+    confirmPassword: data.confirmPassword
+  }
     const isExistEmail = await User.findOne({
-      email: email
+      email: dataTemp.email
     })
-    if (!isExistEmail) {
+    if (isExistEmail) {
       return { 
         success: false, 
         code: 409, 
@@ -22,25 +27,25 @@ export const register = async (data: any) => {
       }
     }
     const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const hashedPassword = await bcrypt.hash(dataTemp.password, salt)
 
     const user = new User({
-      fullName: fullName,
-      email: email,
+      fullName: dataTemp.fullName,
+      email: dataTemp.email,
       password: hashedPassword
     })
     await user.save()
 
-    return {
-      success: true
-    }
+    return { success: true }
 }
 
-export const login = async (data: any, cartId: string) => {
-    const { email, password } = data
-
+export const login = async (data: UserLoginInterface, cartId: string) => {
+    const dataTemp = {
+    email: data.email,
+    password: data.password
+  }
     const user = await User.findOne({
-      email: email,
+      email: dataTemp.email,
       deleted: false
     }).select('+password')
 
@@ -52,7 +57,7 @@ export const login = async (data: any, cartId: string) => {
       }
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(dataTemp.password, user.password)
 
     if (!isMatch) {
       return { 
@@ -102,7 +107,10 @@ export const login = async (data: any, cartId: string) => {
       if (guestCartId) {
         // Case 2a: User chưa có giỏ, nhưng có giỏ khách
         // => Gán giỏ khách cho user
-        await Cart.updateOne({ _id: guestCartId }, { user_id: user._id })
+        await Cart.updateOne(
+          { _id: guestCartId }, 
+          { $set: { user_id: user._id } }
+        )
         finalCartId = guestCartId
       } else {
         // Case 2b: User mới, không có giỏ nào
@@ -194,15 +202,16 @@ export const forgotPasswordPost = async (email: string) => {
     <p>Đường link này sẽ hết hạn sau 15 phút.</p>
     `
   sendMailHelper.sendMail(email, subject, html)
-  return {
-    success: true
-  }
+  return { success: true }
 }
 
-export const resetPasswordPost = async (data: any) => {
-  const { password, resetToken } = data
-
-  if (!resetToken) {
+export const resetPasswordPost = async (data: UserResetPasswordInterface) => {
+  const dataTemp = {
+    password: data.password,
+    confirmPassword: data.confirmPassword,
+    resetToken: data.resetToken
+  }
+  if (!dataTemp.resetToken) {
     return {
       success: false,
       code: 401,
@@ -211,7 +220,7 @@ export const resetPasswordPost = async (data: any) => {
   }
   let resetTokenDecoded: any
   resetTokenDecoded = await JWTProvider.verifyToken(
-    resetToken,
+    dataTemp.resetToken,
     process.env.JWT_SECRET_RESET_PASSWORD
   ) as {
     userId: string
@@ -230,33 +239,43 @@ export const resetPasswordPost = async (data: any) => {
   }
   // Băm mật khẩu mới
   const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
+  const hashedPassword = await bcrypt.hash(dataTemp.password, salt)
   await User.updateOne(
       { _id: user._id },
-      { password: hashedPassword }
+      { $set: { password: hashedPassword } }
    )
 }
 
-export const editUser = async (account_id: string, data: any) => {
-  const isEmailExist = await User.findOne({
-    _id: { $ne: account_id }, // $ne ($notequal) -> Tránh trường hợp khi tìm bị lặp và không cập nhật lại lên đc.
+export const editUser = async (account_id: string, data: UserInterface) => {
+  const dataTemp = {
+    fullName: data.fullName,
     email: data.email,
+    phone: data.phone,
+    address: data.address,
+    avatar: data.avatar
+  }
+  const isExistEmail = await User.findOne({
+    _id: { $ne: account_id }, // $ne ($notequal) -> Tránh trường hợp khi tìm bị lặp và không cập nhật lại lên đc.
+    email: dataTemp.email,
     deleted: false
   })
-  if (!isEmailExist) {
+  if (isExistEmail) {
     return {
       success: false,
       code: 409,
-      message: `Email ${data.email} đã tồn tại, vui lòng chọn email khác!`
+      message: `Email ${dataTemp.email} đã tồn tại, vui lòng chọn email khác!`
     }
   }
-  await User.updateOne({ _id: account_id }, data)
-  return {
-    success: true
-  }
+  await User.updateOne({ _id: account_id }, { $set: dataTemp })
+  return { success: true }
 }
 
-export const changePasswordUser = async (account_id: string, data: any) => {
+export const changePasswordUser = async (account_id: string, data: UserChangePasswordInterface) => {
+  const dataTemp = {
+    currentPassword: data.currentPassword,
+    password: data.password,
+    confirmPassword: data.confirmPassword
+  }
   const user = await User.findOne({
     _id: account_id,
     deleted: false
@@ -268,7 +287,7 @@ export const changePasswordUser = async (account_id: string, data: any) => {
       message: 'Không tìm thấy người dùng!'
     }
   }
-  const isMatch = await bcrypt.compare(data.currentPassword, user.password)
+  const isMatch = await bcrypt.compare(dataTemp.currentPassword, user.password)
   if (!isMatch) {
     return {
       success: false,
@@ -277,14 +296,12 @@ export const changePasswordUser = async (account_id: string, data: any) => {
     }
   }
   const salt = await bcrypt.genSalt(10)
-  const newHashedPassword = await bcrypt.hash(data.password, salt)
+  const newHashedPassword = await bcrypt.hash(dataTemp.password, salt)
   await User.updateOne(
     { _id: account_id }, 
-    { password: newHashedPassword }
+    { $set: { password: newHashedPassword } }
   )
-  return {
-    success: true
-  }
+  return { success: true }
 }
 
 export const getOrders = async (account_id: string, query: any) => {
@@ -362,11 +379,10 @@ export const getOrders = async (account_id: string, query: any) => {
   }
 }
 
-export const cancelOrder = async (id: string) => {
-  const orderId = id
+export const cancelOrder = async (order_id: string) => {
   await Order.updateOne(
-    { _id: orderId },
-    { status: 'CANCELED' }
+    { _id: order_id },
+    { $set: { status: 'CANCELED' } }
   )
 }
 
@@ -441,7 +457,7 @@ export const googleCallback = async (cartId: string, user: any) => {
       // TH2a: User chưa có giỏ, nhưng có giỏ khách
       // => Gán giỏ khách cho user
       finalCartId = guestCartId
-      await Cart.updateOne({ _id: guestCartId }, { user_id: user._id })
+      await Cart.updateOne({ _id: guestCartId }, { $set: { user_id: user._id } })
     } else {
       // TH2b: User mới, không có giỏ nào
       // => Tạo giỏ mới cho user

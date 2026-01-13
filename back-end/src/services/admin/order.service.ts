@@ -2,6 +2,7 @@ import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
 import Order from '~/models/order.model'
 import ExcelJS from 'exceljs'
+import { EstimatedConfirmedDayInterface, EstimatedDeliveryDayInterface } from '~/interfaces/admin/order.interface'
 
 export const getOrders = async (query: any) => {
   const find: any = { deleted: false }
@@ -64,70 +65,79 @@ export const getOrders = async (query: any) => {
   }
 }
 
-export const changeStatusOrder = async (status: string, id: string, account_id: string) => {
+export const changeStatusOrder = async (status: string, order_id: string, account_id: string) => {
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
   const updater = await Order
     .findByIdAndUpdate(
-      { _id: id },
+      { _id: order_id },
       {
-        status: status,
-        $push: { updatedBy: updatedBy }
+        $set: { status },
+        $push: { updatedBy }
       },
       { new: true } // Trả về document sau update
     )
     .populate('updatedBy.account_id', 'fullName email')
     .lean() 
+
   return updater
 }
 
-export const deleteOrder = async (id: string, account_id: string) => {
+export const deleteOrder = async (order_id: string, account_id: string) => {
   await Order.updateOne(
-    { _id: id },
+    { _id: order_id },
     {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id: account_id,
+          deletedAt: new Date()
+        }
       }
     }
   )
 }
 
-export const detailOrder = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-  const order = await Order.findOne(find)
+export const detailOrder = async (order_id: string) => {
+  const order = await Order.findOne({ _id: order_id, deleted: false })
   return order
 }
 
-export const estimatedDeliveryDay = async (data: any, account_id: string) => {
-  const estimatedDeliveryDay = data.estimatedDeliveryDay
-  const orderId = data.id
+export const estimatedDeliveryDay = async (data: EstimatedDeliveryDayInterface, account_id: string) => {
+  const dataTemp = {
+    estimatedDeliveryDay: data.estimatedDeliveryDay,
+    orderId: data.id
+  }
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
   await Order.updateOne(
-    { _id: orderId },
-    { estimatedDeliveryDay: estimatedDeliveryDay, $push: { updatedBy: updatedBy }}
+    { _id: dataTemp.orderId },
+    { 
+      $set: { estimatedDeliveryDay: dataTemp.estimatedDeliveryDay }, 
+      $push: { updatedBy }
+    }
   )
 }
 
-export const estimatedConfirmedDay = async (data: any, account_id: string) => {
-  const estimatedConfirmedDay = data.estimatedConfirmedDay
-  const orderId = data.id
+export const estimatedConfirmedDay = async (data: EstimatedConfirmedDayInterface, account_id: string) => {
+  const dataTemp = {
+    estimatedConfirmedDay: data.estimatedConfirmedDay,
+    orderId: data.id
+  }
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
   await Order.updateOne(
-    { _id: orderId },
-    { estimatedConfirmedDay: estimatedConfirmedDay, $push: { updatedBy: updatedBy }}
+    { _id: dataTemp.orderId },
+    { 
+      $set: { estimatedConfirmedDay: dataTemp.estimatedConfirmedDay }, 
+      $push: { updatedBy }
+    }
   )
 }
 
@@ -192,10 +202,7 @@ export const exportOrder = async (query: any) => {
       })
     }
   }
-  return {
-    workbook,
-    status
-  }
+  return { workbook, status }
 }
 
 export const orderTrash = async (query: any) => {
@@ -243,6 +250,7 @@ export const orderTrash = async (query: any) => {
     .skip(objectPagination.skip)
     .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
     .lean()
+
   return {
     orders,
     objectSearch,
@@ -251,14 +259,12 @@ export const orderTrash = async (query: any) => {
 }
 
 export const permanentlyDeleteOrder = async (id: string) => {
-  await Order.deleteOne(
-    { _id: id }
-  )
+  await Order.deleteOne({ _id: id })
 }
 
 export const recoverOrder = async (id: string) => {
   await Order.updateOne(
     { _id: id },
-    { deleted: false, recoveredAt: new Date() }
+    { $set: { deleted: false, recoveredAt: new Date() } }
   )
 }

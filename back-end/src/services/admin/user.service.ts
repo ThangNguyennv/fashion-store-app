@@ -1,57 +1,60 @@
 import User from '~/models/user.model'
 import bcrypt from 'bcrypt'
+import { UserInterface } from '~/interfaces/admin/user.interface'
 
 export const getUsers = async () => {
-  const find = {
-    deleted: false
-  }
-  const users = await User.find(find)
+  const users = await User.find({ deleted: false })
   return users
 }
 
 export const changeStatusUser = async (status: string, id: string) => {
-  await User.updateOne({ _id: id }, { status: status })
+  await User.updateOne(
+    { _id: id }, 
+    { $set: { status } }
+  )
 }
 
-export const editUser = async (data: any, id: string) => {
-  const { email, password } = data
+export const editUser = async (data: UserInterface, id: string) => {
+  const dataTemp = {
+    fullName: data.fullName,
+    email: data.email,
+    password: data.password,
+    phone: data.phone,
+    avatar: data.avatar,
+    address: data.address,
+    status: data.status
+  }
   const isEmailExist = await User.findOne({
     _id: { $ne: id }, // $ne ($notequal) -> Tránh trường hợp khi tìm bị lặp và không cập nhật lại lên đc.
-    email: email,
+    email: dataTemp.email,
     deleted: false
   })
-  if (!isEmailExist) {
+  if (isEmailExist) {
     return { 
       success: false, 
       code: 409, 
-      message: `Email ${email} đã tồn tại` 
+      message: `Email ${dataTemp.email} đã tồn tại` 
     }
   } 
-  if (password) {
+  if (dataTemp.password) {
     const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-    data.password = hashedPassword
+    const hashedPassword = await bcrypt.hash(dataTemp.password, salt)
+    dataTemp.password = hashedPassword
   } else {
-    delete data.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
+    delete dataTemp.password // Xóa value password, tránh cập nhật lại vào db xóa mất mật khẩu cũ
   }
-  await User.updateOne({ _id: id }, data)
-  return {
-    success: true
-  }
+  await User.updateOne({ _id: id }, { $set: dataTemp })
+  return { success: true }
 }
 
-export const detailUser = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-  const accountUser = await User.findOne(find)
+export const detailUser = async (user_id: string) => {
+  const accountUser = await User.findOne({  _id: user_id, deleted: false })
   return accountUser
 }
 
-export const deleteUser = async (id: string) => {
+export const deleteUser = async (user_id: string) => {
   await User.updateOne(
-    { _id: id }, 
-    { deleted: true, deletedAt: new Date() }
+    { _id: user_id }, 
+    { $set: { deleted: true, deletedAt: new Date() } }
   )
 }

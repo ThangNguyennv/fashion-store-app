@@ -8,7 +8,6 @@ export const cartId = async (
   next: NextFunction
 ): Promise<void> => {
   const cartId = req.cookies.cartId
-  console.log("🚀 ~ cart.middleware.ts ~ cartId ~ cartId:", cartId);
 
   if (!cartId) {
     // Tạo giỏ hàng

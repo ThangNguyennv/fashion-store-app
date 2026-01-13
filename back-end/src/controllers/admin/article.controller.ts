@@ -35,12 +35,12 @@ export const index = async (req: Request, res: Response) => {
 // [POST] /admin/articles/create
 export const createArticle = async (req: Request, res: Response) => {
   try {
-    const article = await articleService.createArticle(req.body, req['accountAdmin'].id)
+    const articleToObject = await articleService.createArticle(req.body, req['accountAdmin'].id)
 
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công bài viết!',
-      data: article,
+      data: articleToObject,
     })
   } catch (error) {
    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

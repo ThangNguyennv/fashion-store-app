@@ -144,13 +144,13 @@ export const getFilters = async () => {
     const [categories, productAggregations] = await Promise.all([
         // Tác vụ 1: Lấy danh mục Cấp 1
         ProductCategory
-        .find({
-            deleted: false, status: 'ACTIVE',
-            $or: [{ parent_id: null }, { parent_id: '' }] // Chỉ lấy danh mục gốc
-        })
-        .select('title slug _id')
-        .sort({ title: 1 })
-        .lean(),
+            .find({
+                deleted: false, status: 'ACTIVE',
+                $or: [{ parent_id: null }, { parent_id: '' }] // Chỉ lấy danh mục gốc
+            })
+            .select('title slug _id')
+            .sort({ title: 1 })
+            .lean(),
 
         // Tác vụ 2: Chạy aggregation trên sản phẩm
         Product.aggregate([
@@ -158,26 +158,28 @@ export const getFilters = async () => {
         // Dùng $facet để chạy 3 pipeline con song song mà không làm bùng nổ dữ liệu
         {
             $facet: {
-            // Pipeline con 1: Lấy tất cả màu sắc
-            'allColors': [
-                { $unwind: '$colors' },
-                // Nhóm theo mã màu để đảm bảo tính duy nhất
-                { $group: { _id: '$colors.code', name: { $first: '$colors.name' } } },
-                { $project: { _id: 0, name: '$name', code: '$_id' } },
-                { $sort: { name: 1 } } // Sắp xếp theo tên
-            ],
-            // Pipeline con 2: Lấy tất cả kích cỡ
-            'allSizes': [
-                { $unwind: '$sizes' },
-                { $match: { sizes: { $nin: ['', null] } } }, 
-                { $group: { _id: '$sizes' } },
-                { $sort: { _id: 1 } }, // Sắp xếp A-Z
-                { $project: { _id: 0, name: '$_id' } }
-            ],
-            // Pipeline con 3: Lấy giá cao nhất
-            'maxPrice': [
-                { $group: { _id: null, max: { $max: '$price' } } }
-            ]
+                // Pipeline con 1: Lấy tất cả màu sắc
+                'allColors': [
+                    { $unwind: '$colors' },
+                    // Nhóm theo mã màu để đảm bảo tính duy nhất, Lấy giá trị đầu tiên trong nhóm
+                    { $group: { _id: '$colors.code', name: { $first: '$colors.name' } } },
+                    // Loại bỏ _id, giữ name, Đổi _id gán vào code
+                    { $project: { _id: 0, name: '$name', code: '$_id' } },
+                    { $sort: { name: 1 } } // Sắp xếp theo tên
+                ],
+                // Pipeline con 2: Lấy tất cả kích cỡ
+                'allSizes': [
+                    { $unwind: '$sizes' },
+                    { $match: { sizes: { $nin: ['', null] } } }, 
+                    { $group: { _id: '$sizes' } },
+                    { $sort: { _id: 1 } }, // Sắp xếp A-Z
+                    // Loại bỏ _id, Đổi _id gán vào name
+                    { $project: { _id: 0, name: '$_id' } }
+                ],
+                // Pipeline con 3: Lấy giá cao nhất
+                'maxPrice': [
+                    { $group: { _id: null, max: { $max: '$price' } } }
+                ]
             }
         }
         ])
@@ -381,7 +383,6 @@ export const getTopRatedReviews = async () => {
     {
     $project: {
         _id: 0,
-        // Giả sử model User có 'fullName'. Nếu không, hãy đổi thành 'username' v.v.
         name: { $arrayElemAt: ['$commentUser.fullName', 0] },
         quote: '$content',
         rating: '$rating',

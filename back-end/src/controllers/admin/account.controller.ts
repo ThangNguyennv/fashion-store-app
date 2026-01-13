@@ -25,6 +25,7 @@ export const index = async (req: Request, res: Response) => {
 export const createAccount = async (req: Request, res: Response) => {
   try {
     const result = await accountService.createAccount(req.body)
+
     if (!result.success) {
       res.status(StatusCodes.CONFLICT).json({
         code: result.code,
@@ -32,12 +33,12 @@ export const createAccount = async (req: Request, res: Response) => {
       })
       return
     }
-    const { newAccount } = result
+    const { accountToObject } = result
     
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm tài khoản thành công!',
-      data: newAccount,
+      data: accountToObject,
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -68,6 +69,7 @@ export const changeStatusAccount = async (req: Request, res: Response) => {
 export const editAccount = async (req: Request, res: Response) => {
   try {
     const result = await accountService.editAccount(req.body, req.params.id)
+
     if (!result.success) {
       res.status(StatusCodes.CONFLICT).json({
         code: result.code,
@@ -75,6 +77,7 @@ export const editAccount = async (req: Request, res: Response) => {
       })
       return
     }
+
     res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Cập nhật thành công tài khoản!'

@@ -15,7 +15,6 @@ export const chatSocket = (io: Server) => {
       const tokenUser = parsedCookies.accessTokenUser
 
       if (tokenAdmin) {
-        console.log("hello admin")
         // Xác thực Admin (Account)
         const decoded = await JWTProvider.verifyToken(
           tokenAdmin, 
@@ -32,7 +31,6 @@ export const chatSocket = (io: Server) => {
         socket.data.role = 'admin'
         return next()
       } else if (tokenUser) {
-        console.log("hello user")
         // Xác thực Client (User)
         const decoded = await JWTProvider.verifyToken(
           tokenUser,

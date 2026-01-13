@@ -59,15 +59,15 @@ export const loginAdmin = async (data: any) => {
     deleted: false 
   }).lean()
 
-  const accountData = accountAdmin.toObject()
-  delete accountData.password
+  const accountToObject = accountAdmin.toObject()
+  delete accountToObject.password
 
   return {
     success: true,
     accessToken,
     refreshToken,
     role,
-    accountAdmin: accountData,
+    accountAdmin: accountToObject,
   }
 }
 
@@ -93,7 +93,8 @@ export const refreshTokenAdmin = async (refreshToken: string) => {
     _id: refreshTokenDecoded.accountId,
     deleted: false,
     status: "ACTIVE"
-  })
+  }).lean()
+  
   if (!account) {
     return { 
       success: false, 

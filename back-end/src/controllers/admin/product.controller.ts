@@ -134,7 +134,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
 // [POST] /admin/products/create
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const records = await productService.createProduct(
+    const productToObject = await productService.createProduct(
       req.body, 
       req['accountAdmin'].id, 
       req['fileUrls']
@@ -143,7 +143,7 @@ export const createProduct = async (req: Request, res: Response) => {
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công sản phẩm!',
-      data: records,
+      data: productToObject,
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

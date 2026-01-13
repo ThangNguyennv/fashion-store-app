@@ -29,6 +29,13 @@ const createProductCategorySchema = Joi.object({
     .messages({
       'any.only': 'Trạng thái không hợp lệ!',
       'any.required': 'Trạng thái là bắt buộc!'
+    }),
+  thumbnail: Joi.any()
+    .required()
+    .invalid(null, '')
+    .messages({
+      'any.invalid': 'Ảnh đại diện không hợp lệ!',
+      'any.required': 'Ảnh đại diện là bắt buộc!'
     })
 })
 

@@ -9,27 +9,27 @@ interface ObjectSearch {
 }
 
 export const getSearch = async (keyword: any) => {
-    const objectSearch: ObjectSearch = {
-      keyword: ''
-    }
-    let newProducts = []
-    if (keyword) {
-      objectSearch.keyword = keyword as string | never
-      const stringSlug = convertToSlug(String(keyword))
-      const stringSlugRegex = new RegExp(stringSlug, 'i')
-      const regex = new RegExp(objectSearch.keyword, 'i')
-      const products = await Product.find({
-        $or: [
-          { title: regex },
-          { slug: stringSlugRegex }
-        ],
-        deleted: false,
-        status: 'ACTIVE'
-      })
-      newProducts = productsHelper.priceNewProducts(products as OneProduct[])
-    }
-    return {
-        objectSearch,
-        newProducts
-    }
+  const objectSearch: ObjectSearch = {
+    keyword: ''
+  }
+  let newProducts = []
+  if (keyword) {
+    objectSearch.keyword = keyword as string | never
+    const stringSlug = convertToSlug(String(keyword))
+    const stringSlugRegex = new RegExp(stringSlug, 'i')
+    const regex = new RegExp(objectSearch.keyword, 'i')
+    const products = await Product.find({
+      $or: [
+        { title: regex },
+        { slug: stringSlugRegex }
+      ],
+      deleted: false,
+      status: 'ACTIVE'
+    })
+    newProducts = productsHelper.priceNewProducts(products as OneProduct[])
+  }
+  return {
+    objectSearch,
+    newProducts
+  }
 }

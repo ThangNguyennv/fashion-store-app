@@ -50,7 +50,6 @@ export const order = async (req: Request, res: Response) => {
       return
     }
     const { newOrder, paymentMethod } = result
-    console.log("🚀 ~ checkout.controller.ts ~ order ~ paymentMethod:", paymentMethod);
 
     if (paymentMethod === 'COD') {
       await Cart.updateOne({ _id: cartId }, { products: [] })
@@ -98,7 +97,6 @@ export const order = async (req: Request, res: Response) => {
       )
     }
   } catch (error) {
-    console.log("Loi ht")
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       code: 500,
       message: 'Đã xảy ra lỗi hệ thống!'

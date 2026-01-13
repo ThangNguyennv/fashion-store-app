@@ -1,6 +1,7 @@
 import Product from '~/models/product.model'
 import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
+import { ProductInterface } from '~/interfaces/admin/product.interface'
 
 export const getProducts = async (query: any) => {
   const find: any = { deleted: false }
@@ -57,6 +58,7 @@ export const getProducts = async (query: any) => {
       .find({ deleted: false })
       .lean()
   ])
+
   return {
     products,
     allProducts,
@@ -65,7 +67,7 @@ export const getProducts = async (query: any) => {
   }
 }
 
-export const changeStatusProduct = async (id: string, status: string, account_id: string) => {
+export const changeStatusProduct = async (product_id: string, status: string, account_id: string) => {
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
@@ -73,47 +75,65 @@ export const changeStatusProduct = async (id: string, status: string, account_id
 
   const updater = await Product
     .findByIdAndUpdate(
-      { _id: id },
+      { _id: product_id },
       {
-        status: status,
-        $push: { updatedBy: updatedBy }
+        $set: { status },
+        $push: { updatedBy }
       },
       { new: true } // Trả về document sau update
     )
+    .populate('createdBy.account_id', 'fullName email')
     .populate('updatedBy.account_id', 'fullName email')
     .lean() 
+
   return updater
 }
 
-export const deleteProduct = async (id: string, account_id: string) => {
+export const deleteProduct = async (product_id: string, account_id: string) => {
   await Product.updateOne(
-    { _id: id },
+    { _id: product_id },
     {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id: account_id,
+          deletedAt: new Date()
+        }
       }
     }
   )
 }
 
-export const createProduct = async (data: any, account_id: string, fileUrls: any) => {
-  // 1. Parse dữ liệu sản phẩm từ chuỗi JSON
-  const productData = data
-
+export const createProduct = async (data: ProductInterface, account_id: string, fileUrls: any) => {
+  // const productData = data
+  const dataTemp = {
+    title: data.title,
+    product_category_id: data.product_category_id,
+    featured: data.featured,
+    description: data.description,
+    price: data.price,
+    discountPercentage: data.discountPercentage,
+    stock: data.stock,
+    colors: data.colors,
+    sizes: data.sizes,
+    thumbnail: data.thumbnail,
+    status: data.status,
+    createdBy: {
+      account_id
+    }
+  }
   // 2. Lấy mảng URL đã được upload từ middleware
   const uploadedUrls = fileUrls || []
   let urlIndex = 0
 
   // 3. Xử lý ảnh đại diện (thumbnail)
-  if (productData.thumbnail === '__THUMBNAIL_PLACEHOLDER__') {
-    productData.thumbnail = uploadedUrls[urlIndex]
+  if (dataTemp.thumbnail === '__THUMBNAIL_PLACEHOLDER__') {
+    dataTemp.thumbnail = uploadedUrls[urlIndex]
     urlIndex++
   }
   
   // 4. Lắp ráp URL vào đúng vị trí trong mảng colors
-  for (const color of productData.colors) {
+  for (const color of dataTemp.colors) {
     const imageCount = color.images.length // Số lượng ảnh cần cho màu này
     if (imageCount > 0) {
       // Lấy đúng số lượng URL từ mảng đã upload
@@ -123,43 +143,47 @@ export const createProduct = async (data: any, account_id: string, fileUrls: any
     }
   }
 
-  productData.price = parseInt(productData.price) || 0
-  productData.discountPercentage = parseInt(productData.discountPercentage) || 0
-  productData.stock = parseInt(productData.stock) || 0
-  
-  // let position: number
-  // if (!productData.position) {
-  //   const count = await Product.countDocuments({ deleted: false })
-  //   position = count + 1
-  // } else {
-  //   position = parseInt(productData.position)
-  // }
-  // productData.position = position
-  productData.createdBy = {
-    account_id: account_id
-  }
+  // dataTemp.price = parseInt(dataTemp.price) || 0
+  // dataTemp.discountPercentage = parseInt(dataTemp.discountPercentage) || 0
+  // dataTemp.stock = parseInt(dataTemp.stock) || 0
 
-  const records = new Product(productData)
-  await records.save()
-  return records
+  // productData.createdBy = {
+  //   account_id: account_id
+  // }
+
+  const product = new Product(dataTemp)
+  await product.save()
+  const productToObject = product.toObject()
+  return productToObject
 }
 
-export const editProduct = async (data: any, account_id: string, id: string, fileUrls: any) => {
+export const editProduct = async (data: ProductInterface, account_id: string, id: string, fileUrls: any) => {
   // 1. Parse dữ liệu sản phẩm từ chuỗi JSON
-  const productData = data
-
+  const dataTemp = {
+    title: data.title,
+    product_category_id: data.product_category_id,
+    featured: data.featured,
+    description: data.description,
+    price: data.price,
+    discountPercentage: data.discountPercentage,
+    stock: data.stock,
+    colors: data.colors,
+    sizes: data.sizes,
+    thumbnail: data.thumbnail,
+    status: data.status,
+  }
   // 2. Lấy mảng URL của các ảnh MỚI đã được upload
   const uploadedUrls = fileUrls || []
   let urlIndex = 0
 
   // 3. Xử lý ảnh đại diện (thumbnail)
-  if (productData.thumbnail === '__THUMBNAIL_PLACEHOLDER__') {
-    productData.thumbnail = uploadedUrls[urlIndex]
+  if (dataTemp.thumbnail === '__THUMBNAIL_PLACEHOLDER__') {
+    dataTemp.thumbnail = uploadedUrls[urlIndex]
     urlIndex++
   }
 
   // 4. Lắp ráp lại mảng ảnh cho từng màu
-  for (const color of productData.colors) {
+  for (const color of dataTemp.colors) {
     // Thay thế các placeholder bằng URL mới
     color.images = color.images.map((image: string) => {
       if (image === '__IMAGE_PLACEHOLDER__') {
@@ -173,32 +197,28 @@ export const editProduct = async (data: any, account_id: string, id: string, fil
   }
 
   // Logic parseInt không đổi
-  productData.price = parseInt(productData.price) || 0
-  productData.discountPercentage = parseInt(productData.discountPercentage) || 0
-  productData.stock = parseInt(productData.stock) || 0
+  // productData.price = parseInt(productData.price) || 0
+  // productData.discountPercentage = parseInt(productData.discountPercentage) || 0
+  // productData.stock = parseInt(productData.stock) || 0
   // productData.position = parseInt(productData.position) || 0
 
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
-  delete productData.updatedBy
+  // delete dataTemp.updatedBy
 
   await Product.updateOne(
     { _id: id },
     {
-      ...productData, // Dùng productData đã được lắp ráp hoàn chỉnh
-      $push: { updatedBy: updatedBy }
+      $set: dataTemp,
+      $push: { updatedBy }
     }
   )
 }
 
 export const detaiProduct = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-  const product = await Product.findOne(find)
+  const product = await Product.findOne({ _id: id, deleted: false }).lean()
   return product
 }
 
@@ -253,6 +273,7 @@ export const productTrash = async (query: any) => {
     .populate('createdBy.account_id', 'fullName email')
     .populate('deletedBy.account_id', 'fullName email') // Lấy thông tin người tạo
     .lean()
+
   return {
     products,
     objectSearch,
@@ -261,14 +282,12 @@ export const productTrash = async (query: any) => {
 }
 
 export const permanentlyDeleteProduct = async (id: string) => {
-  await Product.deleteOne(
-    { _id: id }
-  )
+  await Product.deleteOne({ _id: id })
 }
 
 export const recoverProduct = async (id: string) => {
   await Product.updateOne(
     { _id: id },
-    { deleted: false, recoveredAt: new Date() }
+    { $set: { deleted: false, recoveredAt: new Date() }}
   )
 }

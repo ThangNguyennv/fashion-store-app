@@ -24,7 +24,7 @@ export const index = async (req: Request, res: Response) => {
 // [POST] /admin/brands/create
 export const createBrand = async (req: Request, res: Response) => {
   try {
-    const brand = await brandService.createBrand(
+    const brandToObject = await brandService.createBrand(
         req.body, 
         req['accountAdmin'].id
     )
@@ -32,7 +32,7 @@ export const createBrand = async (req: Request, res: Response) => {
     res.status(StatusCodes.CREATED).json({ 
         code: 201, 
         message: 'Tạo mới thương hiệu thành công!', 
-        data: brand 
+        data: brandToObject 
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

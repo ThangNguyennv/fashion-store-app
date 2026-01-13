@@ -1,12 +1,10 @@
 import Role from '~/models/role.model'
 import Account from '~/models/account.model'
+import { RoleInterface } from '~/interfaces/admin/role.interface'
 
 export const getRoles = async () => {
-  const find = {
-    deleted: false
-  }
+  const roles = await Role.find({ deleted: false })
 
-  const roles = await Role.find(find)
   for (const record of roles) {
     // Lấy ra thông tin người cập nhật
     const updatedBy = record.updatedBy[record.updatedBy.length - 1] // Lấy phần tử cuối của mảng updatedBy
@@ -18,56 +16,60 @@ export const getRoles = async () => {
     }
   }
 
-  const accounts = await Account.find({
-    deleted: false
-  })
-  return {
-    roles,
-    accounts
+  const accounts = await Account.find({ deleted: false })
+
+  return { roles, accounts }
+}
+
+export const createRole = async (data: RoleInterface) => {
+  const dataTemp = {
+    title: data.title,
+    titleId: data.titleId,
+    description: data.description
   }
-}
-
-export const createRole = async (data: any) => {
-  const role = new Role(data)
+  const role = new Role(dataTemp)
   await role.save()
-  return role
+  const roleToObject = role.toObject()
+
+  return roleToObject
 }
 
-export const editRole = async (account_id: string, id: string, data: any) => {
+export const editRole = async (account_id: string, role_id: string, data: RoleInterface) => {
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
-  await Role.updateOne(
-    { _id: id },
-    {
-      ...data,
-      $push: {
-        updatedBy: updatedBy
-      }
-    }
-  )
-}
-
-export const deleteRole = async (id: string, account_id: string) => {
-  await Role.updateOne(
-    { _id: id },
-    {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
-      }
-    }
-  )
-}
-
-export const detailRole = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
+  const dataTemp = {
+    title: data.title,
+    titleId: data.titleId,
+    description: data.description
   }
-  const role = await Role.findOne(find)
+  await Role.updateOne(
+    { _id: role_id },
+    {
+      $set: dataTemp,
+      $push: { updatedBy }
+    }
+  )
+}
+
+export const deleteRole = async (role_id: string, account_id: string) => {
+  await Role.updateOne(
+    { _id: role_id },
+    {
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id: account_id,
+          deletedAt: new Date()
+        }
+      }
+    }
+  )
+}
+
+export const detailRole = async (role_id: string) => {
+  const role = await Role.findOne({ _id: role_id, deleted: false })
   return role
 }
 
@@ -79,7 +81,7 @@ export const permissionsPatch = async (permissionRequireList: any) => {
     }
       await Role.updateOne(
       { _id: item._id },
-      { permissions: item.permissions }
+      { $set: { permissions: item.permissions }}
     )
   }
 }

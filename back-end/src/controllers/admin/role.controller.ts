@@ -24,12 +24,12 @@ export const index = async (req: Request, res: Response) => {
 // [POST] /admin/roles/create
 export const createRole = async (req: Request, res: Response) => {
   try {
-    const role = await roleService.createRole(req.body)
+    const roleToObject = await roleService.createRole(req.body)
 
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Tạo thành công nhóm quyền!',
-      data: role
+      data: roleToObject
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

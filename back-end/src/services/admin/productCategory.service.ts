@@ -1,11 +1,14 @@
 import ProductCategory from '~/models/productCategory.model'
 import searchHelpers from '~/helpers/search'
-import { buildTree, TreeItem } from '~/helpers/createTree'
-import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
-import { addLogInfoToTree, LogNode } from '~/helpers/addLogInfoToChildren'
+import { buildTreeForPagedItems } from '~/helpers/createChildForPagedParents'
+import { addLogInfoToTree } from '~/helpers/addLogInfoToChildren'
 import Account from '~/models/account.model'
 import paginationHelpers from '~/helpers/pagination'
-import { updateStatusRecursiveForOneItem } from '~/helpers/updateStatusRecursive'
+import { updateStatusRecursiveForOneItem } from '~/helpers/updateStatusItem'
+import { buildTreeForItems } from '~/helpers/createChildForAllParents'
+import { LogNodeInterface, TreeInterface, UpdatedBy } from '~/interfaces/admin/general.interface'
+import { string } from 'joi'
+import { ProductCategoryInterface } from '~/interfaces/admin/productCategory.interface'
 
 export const getProductCategories = async (query: any) => {
   const find: any = { deleted: false }
@@ -68,15 +71,16 @@ export const getProductCategories = async (query: any) => {
   ])
   
   // Add children vào cha (Đã phân trang giới hạn 2 item)
-  const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeItem[], allCategories as unknown as TreeItem[])
+  const newProductCategories = buildTreeForPagedItems(parentCategories as unknown as TreeInterface[], allCategories as unknown as TreeInterface[])
 
   // Add children vào cha (Không có phân trang, lấy tất cả item)
-  const newAllProductCategories = buildTree(allCategories as unknown as TreeItem[])
+  const newAllProductCategories = buildTreeForItems(allCategories as unknown as TreeInterface[])
 
   // Gắn account info cho tree
   const accountMap = new Map(accounts.map(acc => [acc._id.toString(), acc.fullName]))
-  addLogInfoToTree(newProductCategories as LogNode[], accountMap)
-  addLogInfoToTree(newAllProductCategories as LogNode[], accountMap)
+  addLogInfoToTree(newProductCategories as LogNodeInterface[], accountMap)
+  addLogInfoToTree(newAllProductCategories as LogNodeInterface[], accountMap)
+  
   return {
     newProductCategories,
     newAllProductCategories,
@@ -86,10 +90,7 @@ export const getProductCategories = async (query: any) => {
   }
 }
 
-export interface UpdatedBy {
-  account_id: string,
-  updatedAt: Date
-}
+
 
 export const changeStatusWithChildren = async (accoutn_id: string, status: string, id: string) => {
   const updatedBy: UpdatedBy = {
@@ -104,46 +105,58 @@ export const deleteProductCategory = async (id: string, account_id: string) => {
   await ProductCategory.updateOne(
     { _id: id },
     {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id: account_id,
+          deletedAt: new Date()
+        }
       }
     }
   )
 }
 
-export const createProductCategory = async (data: any, account_id: string) => {
-  data.createdBy = {
-    account_id: account_id
+export const createProductCategory = async (data: ProductCategoryInterface, account_id: string) => {
+  const dataTemp = {
+    title: data.title,
+    parent_id: data.parent_id,
+    description: data.description,
+    status: data.status,
+    thumbnail: data.thumbnail,
+    createdBy: {
+      account_id
+    }
   }
-  const records = new ProductCategory(data)
-  await records.save()
-  return records
+  const productCategory = new ProductCategory(dataTemp)
+  await productCategory.save()
+  const productCategoryToObject = productCategory.toObject()
+
+  return productCategoryToObject
 }
 
-export const editProductCategory = async (data: any, id: string, account_id: string) => {
+export const editProductCategory = async (data: ProductCategoryInterface, id: string, account_id: string) => {
   const updatedBy = {
     account_id: account_id,
     updatedAt: new Date()
   }
+  const dataTemp = {
+    title: data.title,
+    parent_id: data.parent_id,
+    description: data.description,
+    status: data.status,
+    thumbnail: data.thumbnail
+  }
   await ProductCategory.updateOne(
     { _id: id },
     {
-      ...data,
-      $push: {
-        updatedBy: updatedBy
-      }
+      $set: dataTemp,
+      $push: { updatedBy }
     }
   )
 }
 
 export const detailProductCategory = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-  const productCategory = await ProductCategory.findOne(find)
+  const productCategory = await ProductCategory.findOne({ _id: id, deleted: false })
   return productCategory
 }
 
@@ -199,6 +212,7 @@ export const productCategoryTrash = async (query: any) => {
       .find({ deleted: false }) // account info
       .lean()
   ])
+
   return {
     parentCategories,
     accounts,
@@ -209,7 +223,7 @@ export const productCategoryTrash = async (query: any) => {
 
 export const permanentlyDeleteProductCategory = async (id: string) => {
   // Lấy danh mục gốc cần xóa
-  const rootCategory = await ProductCategory.findOne({ _id: id })
+  const rootCategory = await ProductCategory.findOne({ _id: id }).lean()
   
   if (!rootCategory) {
     return { 
@@ -220,16 +234,15 @@ export const permanentlyDeleteProductCategory = async (id: string) => {
   }
   
   // Lấy tất cả danh mục để tìm con
-  const allCategories = await ProductCategory.find({})
+  const allCategories = await ProductCategory.find({}).lean()
   
   // Tạo cây từ danh mục gốc
   const tree = buildTreeForPagedItems(
-    [rootCategory as any as TreeItem], 
-    allCategories as any as TreeItem[]
+    [rootCategory as any as TreeInterface], allCategories as any as TreeInterface[]
   )
   
   // Hàm đệ quy lấy tất cả ID từ cây
-  const getAllIdsFromTree = (items: TreeItem[]): string[] => {
+  const getAllIdsFromTree = (items: TreeInterface[]): string[] => {
     let ids: string[] = []
     
     items.forEach(item => {
@@ -253,15 +266,13 @@ export const permanentlyDeleteProductCategory = async (id: string) => {
   await ProductCategory.deleteMany({
     _id: { $in: allIdsToDelete }
   })
-  return {
-    success: true,
-    allIdsToDelete
-  }
+
+  return { success: true, allIdsToDelete }
 }
 
 export const recoverProductCategory = async (id: string) => {
   await ProductCategory.updateOne(
     { _id: id },
-    { deleted: false, recoveredAt: new Date() }
+    { $set: { deleted: false, recoveredAt: new Date() }}
   )
 }

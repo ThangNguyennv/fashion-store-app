@@ -37,10 +37,7 @@ export const getCart = async (cartId: any) => {
     }
   }
   cart.totalsPrice = totalsPrice
-  return {
-    success: true,
-    cart
-  }
+  return { success: true, cart }
 }
 
 export const addToCart = async (productId: string, data: any, cartId: any) => {
@@ -49,7 +46,7 @@ export const addToCart = async (productId: string, data: any, cartId: any) => {
     {
       _id: cartId,
       products: {
-        $elemMatch: {
+        $elemMatch: { // Match 1 phần tử mảng với nhiều điều kiện
           product_id: productId,
           color: color,
           size: size

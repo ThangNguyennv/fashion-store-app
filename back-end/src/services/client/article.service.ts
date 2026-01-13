@@ -31,6 +31,7 @@ export const getArticles = async (query: any) => {
       .sort({ createdAt: -1 })
       .lean()
   ])
+
   return {
     articles,
     objectPagination,
@@ -68,10 +69,8 @@ export const category = async (slugCategory: string) => {
     })
     .sort({ createdAt: -1 })
     .lean()
-  return {
-    articles,
-    category
-  }
+
+  return { articles, category }
 }
 
 export const detailArticle = async (slugArticle: string) => {

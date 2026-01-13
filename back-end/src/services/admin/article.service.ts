@@ -1,6 +1,7 @@
 import Article from '~/models/article.model'
 import searchHelpers from '~/helpers/search'
 import paginationHelpers from '~/helpers/pagination'
+import { ArticleInterface } from '~/interfaces/admin/article.interface'
 
 export const getArticles = async (query: any) => {
   const find: any = { deleted: false }
@@ -43,6 +44,7 @@ export const getArticles = async (query: any) => {
     countArticles
   )
   // End Pagination
+
   const [articles, allArticles] = await Promise.all([
     Article
       .find(find)
@@ -56,6 +58,7 @@ export const getArticles = async (query: any) => {
       .find({ deleted: false })
       .lean()
   ])
+
   return {
     articles,
     objectSearch,
@@ -64,68 +67,89 @@ export const getArticles = async (query: any) => {
   }
 }
 
-export const createArticle = async (data: any, account_id: string) => {
-  data.createdBy = {
-    account_id: account_id
+export const createArticle = async (data: ArticleInterface, account_id: string) => {
+  const dataTemp = {
+    title: data.title,
+    article_category_id: data.article_category_id,
+    featured: data.featured,
+    descriptionShort: data.descriptionShort,
+    descriptionDetail: data.descriptionDetail,
+    status: data.status,
+    thumbnail: data.thumbnail,
+    createdBy: {
+      account_id
+    }
   }
-  const article = new Article(data)
+
+  const article = new Article(dataTemp)
   await article.save()
+  const articleToObject = article.toObject()
+
+  return articleToObject
+}
+
+export const detailArticle = async (article_id: string) => {
+  const article = await Article
+    .findOne({ _id: article_id, deleted: false })
+    .lean()
+    
   return article
 }
 
-export const detailArticle = async (id: string) => {
-  const find = {
-    deleted: false,
-    _id: id
-  }
-
-  const article = await Article.findOne(find)
-  return article
-}
-
-export const editArticle = async (data: any, id: string, account_id: string) => {
+export const editArticle = async (data: ArticleInterface, article_id: string, account_id: string) => {
   const updatedBy = {
-    account_id: account_id,
+    account_id,
     updatedAt: new Date()
   }
+  const dataTemp = {
+    title: data.title,
+    article_category_id: data.article_category_id,
+    featured: data.featured,
+    descriptionShort: data.descriptionShort,
+    descriptionDetail: data.descriptionDetail,
+    status: data.status,
+    thumbnail: data.thumbnail,
+  }
   await Article.updateOne(
-    { _id: id },
-    {
-      ...data,
-      $push: {
-        updatedBy: updatedBy
-      }
+    { _id: article_id },
+    { 
+      $set: dataTemp,
+      $push: { updatedBy }
     }
   )
 }
 
-export const changeStatusArticle = async (status: string, id: string, account_id: string) => {
+export const changeStatusArticle = async (status: string, article_id: string, account_id: string) => {
   const updatedBy = {
-    account_id: account_id,
+    account_id,
     updatedAt: new Date()
   }
   const updater = await Article
     .findByIdAndUpdate(
-      { _id: id },
+      { _id: article_id },
       {
-        status: status,
-        $push: { updatedBy: updatedBy }
+        $set: { status },
+        $push: { updatedBy }
       },
       { new: true } // Trả về document sau update
     )
+    .populate('createdBy.account_id', 'fullName email')
     .populate('updatedBy.account_id', 'fullName email')
     .lean() 
+
   return updater
 }
 
-export const deleteArticle = async (id: string, account_id: string) => {
+export const deleteArticle = async (article_id: string, account_id: string) => {
   await Article.updateOne(
-    { _id: id },
+    { _id: article_id },
     {
-      deleted: true,
-      deletedBy: {
-        account_id: account_id,
-        deletedAt: new Date()
+      $set: {
+        deleted: true,
+        deletedBy: {
+          account_id,
+          deletedAt: new Date()
+        }
       }
     }
   )

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import ProductCategory from '~/models/productCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
-import { TreeItem } from '~/helpers/createTree'
-import { buildTreeForPagedItems } from '~/helpers/createChildForParent'
-import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusRecursive'
+import { buildTreeForPagedItems } from '~/helpers/createChildForPagedParents'
+import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusItem'
 import * as productCategoryService from '~/services/admin/productCategory.service'
 import { StatusCodes } from 'http-status-codes'
+import { TreeInterface } from '~/interfaces/admin/general.interface'
 
 // [GET] /admin/products-category
 export const index = async (req: Request, res: Response) => {
@@ -158,12 +158,12 @@ export const deleteProductCategory = async (req: Request, res: Response) => {
 // [POST] /admin/products-category/create
 export const createProductCategory = async (req: Request, res: Response) => {
   try {
-    const records = await productCategoryService.createProductCategory(req.body, req['accountAdmin'].id)
+    const productCategoryToObject = await productCategoryService.createProductCategory(req.body, req['accountAdmin'].id)
 
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công danh mục sản phẩm!',
-      data: records
+      data: productCategoryToObject
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -251,10 +251,10 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
     switch (type) {
       case Key.DELETEALL:
         // Lấy tất cả danh mục để tìm con
-        const allCategories = await ProductCategory.find({})
+        const allCategories = await ProductCategory.find({}).lean()
         
         // Hàm đệ quy lấy tất cả ID từ cây
-        const getAllIdsFromTree = (items: TreeItem[]): string[] => {
+        const getAllIdsFromTree = (items: TreeInterface[]): string[] => {
           let idList: string[] = []
           
           items.forEach(item => {
@@ -275,13 +275,13 @@ export const changeMultiTrash = async (req: Request, res: Response) => {
         let allIdsToDelete: string[] = []
         
         for (const id of ids) {
-          const category = await ProductCategory.findOne({ _id: id })
+          const category = await ProductCategory.findOne({ _id: id }).lean()
           
           if (category) {
             // Tạo cây cho từng danh mục
             const tree = buildTreeForPagedItems(
-              [category as any as TreeItem],
-              allCategories as any as TreeItem[]
+              [category as any as TreeInterface],
+              allCategories as any as TreeInterface[]
             )
             
             // Lấy tất cả ID từ cây

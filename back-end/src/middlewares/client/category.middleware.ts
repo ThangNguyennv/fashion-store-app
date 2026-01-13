@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import ProductCategory from '~/models/productCategory.model'
 import ArticleCategory from '~/models/articleCategory.model'
-import { buildTree, TreeItem } from '~/helpers/createTree'
+import { buildTreeForItems } from '~/helpers/createChildForAllParents'
+import { TreeInterface } from '~/interfaces/admin/general.interface'
 
 export const categoryProduct = async (
   req: Request,
@@ -11,7 +12,7 @@ export const categoryProduct = async (
   const productsCategory = await ProductCategory.find({
     deleted: false
   }).lean()
-  const newProductsCategory = buildTree(productsCategory as unknown as TreeItem[])
+  const newProductsCategory = buildTreeForItems(productsCategory as unknown as TreeInterface[])
   req['layoutProductsCategory'] = newProductsCategory 
   next()
 }
@@ -24,7 +25,7 @@ export const categoryArticle = async (
   const articlesCategory = await ArticleCategory.find({
     deleted: false
   }).lean()
-  const newArticlesCategory = buildTree(articlesCategory as unknown as TreeItem[])
+  const newArticlesCategory = buildTreeForItems(articlesCategory as unknown as TreeInterface[])
   req['layoutArticlesCategory'] = newArticlesCategory
   next()
 }

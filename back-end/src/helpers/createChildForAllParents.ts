@@ -1,21 +1,15 @@
-export interface TreeItem {
-  _id: any
-  parent_id: string
-  [key: string]: any
-  index?: number
-  children?: TreeItem[]
-}
+import { TreeInterface } from "~/interfaces/admin/general.interface"
 
 let count = 0
 
-export const createTree = (parentItems: TreeItem[], parentId: string = ''): TreeItem[] => {
-  const tree: TreeItem[] = []
+export const createTree = (parentItems: TreeInterface[], parentId: string = ''): TreeInterface[] => {
+  const tree: TreeInterface[] = []
 
   parentItems.forEach((item) => {
     const itemId = item._id?.toString() || ''
     if (item.parent_id === parentId) {
       count++
-      const newItem = { ...item, index: count } as TreeItem
+      const newItem = { ...item, index: count } as TreeInterface
       
       const children = createTree(parentItems, itemId)
       if (children.length > 0) {
@@ -27,7 +21,7 @@ export const createTree = (parentItems: TreeItem[], parentId: string = ''): Tree
   return tree
 }
 
-export const buildTree = (parentItems: TreeItem[], parentId: string = ''): TreeItem[] => {
+export const buildTreeForItems = (parentItems: TreeInterface[], parentId: string = ''): TreeInterface[] => {
   count = 0
   return createTree(parentItems, parentId)
 }

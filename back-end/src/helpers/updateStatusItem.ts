@@ -1,14 +1,14 @@
-import { UpdatedBy } from "~/services/admin/productCategory.service"
+import { UpdatedBy } from "~/interfaces/admin/general.interface"
 
-export const updateStatusRecursiveForOneItem = async (model: any, status: string, id: string, currentUser: UpdatedBy): Promise<void> => {
-  const stack = [id]
+export const updateStatusRecursiveForOneItem = async (model: any, status: string, item_id: string, currentUser: UpdatedBy): Promise<void> => {
+  const stack = [item_id]
   while (stack.length > 0) {
     const currentId = stack.pop()!
 
     await model.updateOne(
       { _id: currentId },
       { 
-        status: status, 
+        $set: { status }, 
         $push: {
           updatedBy: {
             account_id: currentUser.account_id,
@@ -19,8 +19,8 @@ export const updateStatusRecursiveForOneItem = async (model: any, status: string
     ) 
     const children = await model.find(
       { parent_id: currentId },
-      { _id: 1 } // Chỉ lần id
-    )
+      { _id: 1 } // Chỉ lấy id
+    ).lean()
 
     for (const child of children) {
       stack.push(child._id.toString())
@@ -33,7 +33,7 @@ export const updateManyStatusFast = async (model: any, status: string, ids: stri
   // Dùng Set để lọc trùng ID (đề phòng Frontend gửi trùng)
   const uniqueIds = [...new Set(ids)]
 
-  // Thực hiện Update 1 lần cho tất cả
+  // Thực hiện Update 1 lần cho tất cả (front-end đã đệ quy sẵn cho rồi)
   await model.updateMany(
     { 
       _id: { $in: uniqueIds } // Tìm tất cả thằng nào có ID nằm trong danh sách này

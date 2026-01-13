@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import ArticleCategory from '~/models/articleCategory.model'
 import filterStatusHelpers from '~/helpers/filterStatus'
-import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusRecursive'
+import { deleteManyStatusFast, updateManyStatusFast } from '~/helpers/updateStatusItem'
 import * as articleCategoryService from '~/services/admin/articleCategory.service'
 import { StatusCodes } from 'http-status-codes'
 
@@ -9,8 +9,8 @@ import { StatusCodes } from 'http-status-codes'
 export const index = async (req: Request, res: Response) => {
   try {
     const { 
-      newArticleCategories,
-      newAllArticleCategories,
+      articleCategories,
+      allArticleCategories,
       accounts,
       objectSearch,
       objectPagination 
@@ -19,8 +19,8 @@ export const index = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({
       code: 200,
       message: 'Thành công!',
-      articleCategories: newArticleCategories,
-      allArticleCategories: newAllArticleCategories,
+      articleCategories: articleCategories,
+      allArticleCategories: allArticleCategories,
       accounts: accounts,
       filterStatus: filterStatusHelpers(req.query),
       keyword: objectSearch.keyword,
@@ -88,7 +88,7 @@ export const changeMulti = async (req: Request, res: Response) => {
   try {
     const body = req.body as { type: string; ids: string[] }
     const type = body.type
-    const ids = body.ids
+    const ids = body.ids // Chứa tất cả id cả cha và con đã được front-end gửi lên
     const updatedBy = {
       account_id: req['accountAdmin'].id,
       updatedAt: new Date()
@@ -155,12 +155,12 @@ export const deleteArticleCategory = async (req: Request, res: Response) => {
 // [POST] /admin/articles-category/create
 export const createArticleCategory = async (req: Request, res: Response) => {
   try {
-    const records = await articleCategoryService.createArticleCategory(req.body, req['accountAdmin'].id)
+    const articleCategoryToObject = await articleCategoryService.createArticleCategory(req.body, req['accountAdmin'].id)
 
     res.status(StatusCodes.CREATED).json({
       code: 201,
       message: 'Thêm thành công danh mục bài viết!',
-      data: records
+      data: articleCategoryToObject
     })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
