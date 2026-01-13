@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { SearchInterface } from '~/types/search.type'
+import type { SearchInterface } from '~/interfaces/search.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchSearchAPI = async (currentKeyword: string): Promise<SearchInterface> => {

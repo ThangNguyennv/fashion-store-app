@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailUserAPI } from '~/apis/admin/user.api'
-import type { UserInfoInterface, UserAPIResponse } from '~/types/user.type'
+import type { UserInfoInterface, UserAPIResponse } from '~/interfaces/user.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
 const useDetail = () => {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailArticleAPI } from '~/apis/client/article.api' // (Giả sử bạn đã có hàm này)
-import type { ArticleDetailInterface, ArticleInfoInterface } from '~/types/article.type'
+import type { ArticleDetailInterface, ArticleInfoInterface } from '~/interfaces/article.interface'
 
 const useDetail = () => {
   const [articleDetail, setArticleDetail] = useState<ArticleInfoInterface | null>(null)

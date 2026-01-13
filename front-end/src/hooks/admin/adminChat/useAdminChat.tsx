@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { fetchAdminChatRoomsAPI, fetchAdminChatHistoryAPI } from '~/apis/admin/chat.api'
 import { API_ROOT } from '~/utils/constants'
 import io from 'socket.io-client'
-import type { ChatRoom, Message } from '~/types/chat.type'
+import type { ChatRoom, Message } from '~/interfaces/chat.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
 const useAdminChat = () => {

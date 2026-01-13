@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { FaStar } from 'react-icons/fa' // Import icon sao
-import type { ProductInfoInterface } from '~/types/product.type'
+import type { ProductInfoInterface } from '~/interfaces/product.interface'
 
 type CardItemProps = {
   item: ProductInfoInterface

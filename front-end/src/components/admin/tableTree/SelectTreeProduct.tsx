@@ -1,4 +1,4 @@
-import type { ProductCategoryInfoInterface } from '~/types/productCategory.type'
+import type { ProductCategoryInfoInterface } from '~/interfaces/productCategory.interface'
 
 interface Props {
   productCategory: ProductCategoryInfoInterface

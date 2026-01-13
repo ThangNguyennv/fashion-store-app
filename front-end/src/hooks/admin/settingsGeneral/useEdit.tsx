@@ -4,10 +4,10 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchEditSettingGeneralAPI, fetchSettingGeneralAPI } from '~/apis/admin/settingGeneral.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { SettingGeneralAPIResponse } from '~/types/setting.type'
+import type { SettingGeneralAPIResponse } from '~/interfaces/setting.interface'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editSettingsGeneralSchema, type EditSettingGeneralFormData } from '~/validations/admin/setting.validate'
+import { editSettingsGeneralSchema, type EditSettingGeneralFormData } from '~/validations/admin/setting.validation'
 
 const useEditSettingsGeneral = () => {
   const { dispatchAlert } = useAlertContext()

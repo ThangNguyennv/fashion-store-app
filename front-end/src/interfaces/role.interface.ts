@@ -1,5 +1,5 @@
-import type { AccountInfoInterface } from './account.type'
-import type { UpdatedBy } from './helper.type'
+import type { AccountInfoInterface } from './account.interface'
+import type { UpdatedBy } from './helper.interface'
 
 export interface RoleInfoInterface {
   _id: string,

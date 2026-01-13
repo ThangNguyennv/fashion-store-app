@@ -1,5 +1,5 @@
-import type { ArticleInfoInterface } from './article.type'
-import type { GeneralInfoInterface, HelperInterface } from './helper.type'
+import type { ArticleInfoInterface } from './article.interface'
+import type { GeneralInfoInterface, HelperInterface } from './helper.interface'
 
 export interface ArticleCategoryInfoInterface extends GeneralInfoInterface {
   children: ArticleCategoryInfoInterface[] | [],

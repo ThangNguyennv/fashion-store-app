@@ -6,7 +6,7 @@ import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginFormData } from '~/validations/admin/auth.validate'
+import { loginSchema, type LoginFormData } from '~/validations/admin/auth.validation'
 
 export const useLoginAdmin = () => {
   const navigate = useNavigate()

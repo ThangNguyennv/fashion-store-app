@@ -1,7 +1,7 @@
-import type { ArticleInfoInterface } from './article.type'
-import type { ArticleCategoryInfoInterface } from './articleCategory.type'
-import type { ProductInfoInterface } from './product.type'
-import type { ProductCategoryInfoInterface } from './productCategory.type'
+import type { ArticleInfoInterface } from './article.interface'
+import type { ArticleCategoryInfoInterface } from './articleCategory.interface'
+import type { ProductInfoInterface } from './product.interface'
+import type { ProductCategoryInfoInterface } from './productCategory.interface'
 
 export interface HomeAPIReponse {
   productCategories: ProductCategoryInfoInterface[],

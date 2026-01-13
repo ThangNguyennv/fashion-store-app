@@ -4,8 +4,8 @@
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchOrderTrashAPI } from '~/apis/admin/order.api'
 import { initialOrderState, orderReducer } from '~/reducers/admin/orderReducer'
-import type { AllParams } from '~/types/helper.type'
-import type { OrderAction, OrderAPIResponse, OrderState } from '~/types/order.type'
+import type { AllParams } from '~/interfaces/helper.interface'
+import type { OrderAction, OrderAPIResponse, OrderState } from '~/interfaces/order.interface'
 
 interface OrderTrashContextType {
   stateOrder: OrderState

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailAccountAPI } from '~/apis/admin/account.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AccountAPIResponse, AccountInfoInterface } from '~/types/account.type'
+import type { AccountAPIResponse, AccountInfoInterface } from '~/interfaces/account.interface'
 
 const useDetail = () => {
   const [accountInfo, setAccountInfo] = useState<AccountInfoInterface | null>(null)

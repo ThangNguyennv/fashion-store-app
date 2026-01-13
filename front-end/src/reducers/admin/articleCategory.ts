@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 
-import type { ArticleCategoryActions, ArticleCategoryStates } from '~/types/articleCategory.type'
+import type { ArticleCategoryActions, ArticleCategoryStates } from '~/interfaces/articleCategory.interface'
 
 export const initialState: ArticleCategoryStates = {
   articleCategories: [],

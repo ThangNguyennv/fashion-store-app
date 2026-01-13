@@ -1,5 +1,5 @@
-import type { GeneralInfoInterface, HelperInterface } from './helper.type'
-import type { ProductInfoInterface } from './product.type'
+import type { GeneralInfoInterface, HelperInterface } from './helper.interface'
+import type { ProductInfoInterface } from './product.interface'
 
 export interface ProductCategoryInfoInterface extends GeneralInfoInterface {
   children: ProductCategoryInfoInterface[] | [],

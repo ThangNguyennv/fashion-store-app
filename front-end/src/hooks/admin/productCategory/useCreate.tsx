@@ -6,7 +6,7 @@ import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryConte
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { productCategorySchema, type ProductCategoryFormData } from '~/validations/admin/productCategory.validate'
+import { productCategorySchema, type ProductCategoryFormData } from '~/validations/admin/productCategory.validation'
 
 export const useCreate = () => {
   const { stateProductCategory } = useProductCategoryContext()
@@ -83,10 +83,7 @@ export const useCreate = () => {
     formData.append('parent_id', data.parent_id || '')
     formData.append('description', data.description || '')
     formData.append('status', data.status)
-
-    if (data.thumbnail) {
-      formData.append('thumbnail', data.thumbnail)
-    }
+    formData.append('thumbnail', data.thumbnail)
 
     const response = await fetchCreateProductCategoryAPI(formData)
 

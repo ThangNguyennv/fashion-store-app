@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { fetchLoginAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/client/AuthContext'
-import { loginSchema, type LoginFormData } from '~/validations/client/auth.validate'
+import { loginSchema, type LoginFormData } from '~/validations/client/auth.validation'
 
 const useLoginClient = () => {
   const { setAccountUser } = useAuth()

@@ -4,8 +4,8 @@ import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchProductAPI } from '~/apis/client/product.api'
 import { initialState } from '~/reducers/client/productReducer'
 import { productReducer } from '~/reducers/client/productReducer'
-import type { AllParams } from '~/types/helper.type'
-import type { ProductAPIResponse, ProductClientActions, ProductStates } from '~/types/product.type'
+import type { AllParams } from '~/interfaces/helper.interface'
+import type { ProductAPIResponse, ProductClientActions, ProductStates } from '~/interfaces/product.interface'
 
 interface ProductContextType {
   stateProduct: ProductStates

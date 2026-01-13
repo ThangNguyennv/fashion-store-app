@@ -1,5 +1,5 @@
-import type { ArticleCategoryAPIResponse, ArticleCategoryDetailInterface } from '~/types/articleCategory.type'
-import type { AllParams } from '~/types/helper.type'
+import type { ArticleCategoryAPIResponse, ArticleCategoryDetailInterface } from '~/interfaces/articleCategory.interface'
+import type { AllParams } from '~/interfaces/helper.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { HomeAPIReponse } from '~/types/home.type'
+import type { HomeAPIReponse } from '~/interfaces/home.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchHomeAPI = async (): Promise<HomeAPIReponse> => {

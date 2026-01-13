@@ -2,8 +2,8 @@
 import { TableRow, TableCell, Checkbox } from '@mui/material'
 import { Link } from 'react-router-dom'
 import FormatDateTime from '../moment/FormatDateTime'
-import type { ProductCategoryActions, ProductCategoryInfoInterface } from '~/types/productCategory.type'
-import type { PaginationInterface } from '~/types/helper.type'
+import type { ProductCategoryActions, ProductCategoryInfoInterface } from '~/interfaces/productCategory.interface'
+import type { PaginationInterface } from '~/interfaces/helper.interface'
 
 interface Props {
   index: number // Vị trí trong cùng cấp

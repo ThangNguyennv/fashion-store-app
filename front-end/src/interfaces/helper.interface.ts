@@ -1,4 +1,4 @@
-import type { AccountInfoInterface } from './account.type'
+import type { AccountInfoInterface } from './account.interface'
 
 export interface UpdatedBy {
   account_id: AccountInfoInterface | string,

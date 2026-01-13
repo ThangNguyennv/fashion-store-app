@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import type { HomeAPIReponse } from '~/types/home.type'
+import type { HomeAPIReponse } from '~/interfaces/home.interface'
 
 interface HomeContextType {
   dataHome: HomeAPIReponse

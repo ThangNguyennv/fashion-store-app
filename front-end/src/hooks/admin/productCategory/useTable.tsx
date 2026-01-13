@@ -1,7 +1,7 @@
 import { fetchChangeStatusWithChildren, fetchDeleteProductCategoryAPI } from '~/apis/admin/productCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
-import { getAllIdsInTree, getFamilyIds } from '~/helpers/updateStatusRecursiveForProduct'
+import { getAllIdsInTree, getFamilyIds } from '~/helpers/getId.helper'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
@@ -134,7 +134,7 @@ export const useTable = ({ selectedIds, setSelectedIds }: Props) => {
   //     setSelectedIds([])
   //   }
   // }
-  // LOGIC MỚI: Check All (Phải lấy hết ID trong cây, không chỉ root)
+  // Check All (Phải lấy hết ID trong cây, không chỉ root)
   const handleCheckAll = (checked: boolean) => {
     if (checked) {
       const allIds = getAllIdsInTree(productCategories)

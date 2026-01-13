@@ -7,7 +7,7 @@ import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editRoleSchema, type EditRoleFormData } from '~/validations/admin/role.validate'
+import { editRoleSchema, type EditRoleFormData } from '~/validations/admin/role.validation'
 
 const useEdit = () => {
   const params = useParams()

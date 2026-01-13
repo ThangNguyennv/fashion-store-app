@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { API_ROOT } from '~/utils/constants'
-import type { BranchApiResponse, Brand } from '~/types/brand.type'
+import type { BranchApiResponse, Brand } from '~/interfaces/brand.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
+import type { PaginationInterface } from '~/interfaces/helper.interface'
 
-export const fetchBrandAPI = async (page = 1, keyword = ''): Promise<BranchApiResponse & { brands: Brand[], pagination: any }> => {
+export const fetchBrandAPI = async (page = 1, keyword = ''): Promise<BranchApiResponse & { brands: Brand[], pagination: PaginationInterface }> => {
   const response = await authorizedAxiosInstance.get(
     `${API_ROOT}/admin/brands?page=${page}&keyword=${keyword}`
   )

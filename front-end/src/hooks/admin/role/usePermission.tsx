@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { fetchPermissions, fetchRoleAPI } from '~/apis/admin/role.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { PermissionsInterface, RoleInfoInterface, RolesResponseInterface } from '~/types/role.type'
+import type { PermissionsInterface, RoleInfoInterface, RolesResponseInterface } from '~/interfaces/role.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { permissionSections } from '~/utils/constants'
 

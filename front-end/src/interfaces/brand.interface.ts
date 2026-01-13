@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GeneralInfoInterface, HelperInterface, PaginationInterface, ParamsInterface } from './helper.type'
+import type { GeneralInfoInterface, HelperInterface, PaginationInterface, ParamsInterface } from './helper.interface'
 
 export interface BrandCategory extends GeneralInfoInterface {
   parent_id?: string

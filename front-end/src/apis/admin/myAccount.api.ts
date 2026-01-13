@@ -1,4 +1,4 @@
-import type { MyAccountAPIResponse } from '~/types/account.type'
+import type { MyAccountAPIResponse } from '~/interfaces/account.interface'
 import { API_ROOT } from '~/utils/constants'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 

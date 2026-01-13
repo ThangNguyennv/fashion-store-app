@@ -1,4 +1,4 @@
-import type { StatisticInterface } from '~/types/statistic.type'
+import type { StatisticInterface } from '~/interfaces/statistic.interface'
 import { API_ROOT } from '~/utils/constants'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 

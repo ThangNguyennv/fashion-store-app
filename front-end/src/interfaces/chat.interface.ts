@@ -1,4 +1,4 @@
-import type { UserInfoInterface } from './user.type'
+import type { UserInfoInterface } from './user.interface'
 
 export interface Message {
   _id: string

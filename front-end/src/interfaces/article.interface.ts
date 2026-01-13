@@ -1,4 +1,4 @@
-import type { GeneralInfoInterface, HelperInterface } from './helper.type'
+import type { GeneralInfoInterface, HelperInterface } from './helper.interface'
 
 export interface ArticleInfoInterface extends GeneralInfoInterface {
   article_category_id: string,

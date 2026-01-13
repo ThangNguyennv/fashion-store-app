@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'rea
 import { useSearchParams } from 'react-router-dom'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 import { useProductCategoryTrashContext } from '~/contexts/admin/ProductCategoryTrashContext'
 import { fetchChangeMultiTrashAPI } from '~/apis/admin/productCategory.api'
 

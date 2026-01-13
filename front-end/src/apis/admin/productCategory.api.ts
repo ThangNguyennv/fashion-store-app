@@ -1,5 +1,5 @@
-import type { AllParams } from '~/types/helper.type'
-import type { ProductCategoryAPIResponse, ProductCategoryDetailInterface } from '~/types/productCategory.type'
+import type { AllParams } from '~/interfaces/helper.interface'
+import type { ProductCategoryAPIResponse, ProductCategoryDetailInterface } from '~/interfaces/productCategory.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchSuccessAPI } from '~/apis/client/checkout.api'
-import type { OrderDetailInterface, OrderInfoInterface } from '~/types/order.type'
+import type { OrderDetailInterface, OrderInfoInterface } from '~/interfaces/order.interface'
 
 const useSuccess = () => {
   const params = useParams()

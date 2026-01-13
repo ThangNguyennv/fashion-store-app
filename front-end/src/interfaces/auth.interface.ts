@@ -1,5 +1,5 @@
-import type { AccountInfoInterface } from './account.type'
-import type { RoleInfoInterface } from './role.type'
+import type { AccountInfoInterface } from './account.interface'
+import type { RoleInfoInterface } from './role.interface'
 export interface LoginAPIResponse {
   code: number,
   email: string,

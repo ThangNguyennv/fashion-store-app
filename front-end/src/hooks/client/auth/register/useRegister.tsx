@@ -6,7 +6,7 @@ import { fetchRegisterAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { registerSchema, type RegisterFormData } from '~/validations/client/auth.validate'
+import { registerSchema, type RegisterFormData } from '~/validations/client/auth.validation'
 
 const useRegister = () => {
   const navigate = useNavigate()

@@ -1,4 +1,4 @@
-import type { SettingGeneralAPIResponse } from '~/types/setting.type'
+import type { SettingGeneralAPIResponse } from '~/interfaces/setting.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 

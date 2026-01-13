@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailProductCategoryAPI } from '~/apis/client/product.api'
-import type { ProductInfoInterface, ProductsWithCategoryDetailInterface } from '~/types/product.type'
+import type { ProductInfoInterface, ProductsWithCategoryDetailInterface } from '~/interfaces/product.interface'
 
 const useCategory = () => {
   const [productCategory, setProductCategory] = useState<ProductInfoInterface[]>([])

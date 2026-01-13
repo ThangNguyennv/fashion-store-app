@@ -6,7 +6,7 @@ import { FaFilter } from 'react-icons/fa'
 import FormatDateTime from '~/components/admin/moment/FormatDateTime'
 import OrderProgress from '~/pages/client/myAccount/OrderProgress'
 import Pagination from '~/components/admin/pagination/Pagination'
-import { formatDateIntl } from '~/helpers/formatDateIntl'
+import { formatDateIntl } from '~/helpers/formatDateIntl.helper'
 import useMyOrder from '~/hooks/client/myAccount/useMyOrder'
 import { MYORDER_STATUSES } from '~/utils/constants'
 

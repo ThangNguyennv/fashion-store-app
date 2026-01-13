@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react'
 import io from 'socket.io-client'
 import { fetchClientChatAPI } from '~/apis/client/chat.api'
 import { API_ROOT } from '~/utils/constants'
-import type { Message } from '~/types/chat.type'
+import type { Message } from '~/interfaces/chat.interface'
 import { useAuth } from '~/contexts/client/AuthContext'
 
 const useChat = () => {

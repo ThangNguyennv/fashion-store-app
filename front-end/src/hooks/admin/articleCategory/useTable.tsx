@@ -3,7 +3,7 @@ import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleCategoryContext } from '~/contexts/admin/ArticleCategoryContext'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { getAllIdsInTree, getFamilyIds } from '~/helpers/updateStatusRecursiveForProduct'
+import { getAllIdsInTree, getFamilyIds } from '~/helpers/getId.helper'
 
 export interface Props {
   selectedIds: string[],

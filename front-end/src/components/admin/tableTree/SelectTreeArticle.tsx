@@ -1,4 +1,4 @@
-import type { ArticleCategoryInfoInterface } from '~/types/articleCategory.type'
+import type { ArticleCategoryInfoInterface } from '~/interfaces/articleCategory.interface'
 
 interface Props {
   articleCategory: ArticleCategoryInfoInterface

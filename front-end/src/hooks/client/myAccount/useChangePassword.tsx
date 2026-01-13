@@ -2,11 +2,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchChangePasswordInfoUserAPI, fetchInfoUserAPI } from '~/apis/client/user.api'
-import type { UserAPIResponse, UserInfoInterface } from '~/types/user.type'
+import type { UserAPIResponse, UserInfoInterface } from '~/interfaces/user.interface'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { changePasswordSchema, type changePasswordFormData } from '~/validations/client/myAccount.validate'
+import { changePasswordSchema, type changePasswordFormData } from '~/validations/client/myAccount.validation'
 
 const useChangePassword = () => {
   const [myAccount, setMyAccount] = useState<UserInfoInterface | null>(null)

@@ -1,6 +1,6 @@
 import type { RoleFormData } from '~/hooks/admin/role/useCreate'
 import type { EditRoleFormData } from '~/hooks/admin/role/useEdit'
-import type { PermissionsInterface, RolesDetailInterface, RolesResponseInterface } from '~/types/role.type'
+import type { PermissionsInterface, RolesDetailInterface, RolesResponseInterface } from '~/interfaces/role.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 import { API_ROOT } from '~/utils/constants'
 

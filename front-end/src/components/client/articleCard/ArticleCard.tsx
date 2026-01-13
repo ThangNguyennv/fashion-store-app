@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import type { ArticleInfoInterface } from '~/types/article.type'
+import type { ArticleInfoInterface } from '~/interfaces/article.interface'
 
 type CardItemProps = {
   item: ArticleInfoInterface

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { CartDetailInterface } from '~/types/cart.type'
+import type { CartDetailInterface } from '~/interfaces/cart.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchCartAPI = async (): Promise<CartDetailInterface> => {

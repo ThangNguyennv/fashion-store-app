@@ -4,12 +4,12 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailAccountAPI, fetchEditAccountAPI } from '~/apis/admin/account.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountAPIResponse } from '~/types/account.type'
-import type { RoleInfoInterface } from '~/types/role.type'
+import type { AccountAPIResponse } from '~/interfaces/account.interface'
+import type { RoleInfoInterface } from '~/interfaces/role.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editAccountSchema, type EditAccountFormData } from '~/validations/admin/account.validate'
+import { editAccountSchema, type EditAccountFormData } from '~/validations/admin/account.validation'
 
 const useEdit = () => {
   const [roles, setRoles] = useState<RoleInfoInterface[]>([])

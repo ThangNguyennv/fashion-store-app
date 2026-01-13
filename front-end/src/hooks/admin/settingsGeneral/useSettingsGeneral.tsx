@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchSettingGeneralAPI } from '~/apis/admin/settingGeneral.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
-import type { SettingGeneralAPIResponse, SettingGeneralInfoInterface } from '~/types/setting.type'
+import type { SettingGeneralAPIResponse, SettingGeneralInfoInterface } from '~/interfaces/setting.interface'
 
 const useSettingsGeneral = () => {
   const [general, setGeneral] = useState<SettingGeneralInfoInterface | null>(null)

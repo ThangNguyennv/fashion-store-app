@@ -2,7 +2,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { SettingGeneralAPIResponse } from '~/types/setting.type'
+import type { SettingGeneralAPIResponse } from '~/interfaces/setting.interface'
 import { fetchSettingGeneralAPI } from '~/apis/client/settingGeneral.api'
 import { motion } from 'framer-motion'
 import CircularProgress from '@mui/material/CircularProgress'

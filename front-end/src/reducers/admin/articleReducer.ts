@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import type { ArticleActions, ArticleStates } from '~/types/article.type'
+import type { ArticleActions, ArticleStates } from '~/interfaces/article.interface'
 
 export const initialState: ArticleStates = {
   articles: [],

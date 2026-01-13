@@ -6,7 +6,7 @@ import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createArticleSchema, type CreateArticleFormData } from '~/validations/admin/article.validate'
+import { createArticleSchema, type CreateArticleFormData } from '~/validations/admin/article.validation'
 
 export const useCreate = () => {
   const {

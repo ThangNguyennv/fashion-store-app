@@ -1,4 +1,4 @@
-import type { ProductInfoInterface } from './product.type'
+import type { ProductInfoInterface } from './product.interface'
 
 // Định nghĩa cho MỘT sản phẩm trong giỏ hàng
 export interface CartItemInterface {

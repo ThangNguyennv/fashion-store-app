@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import type { AlertActions, AlertStates } from '~/types/alert.type'
+import type { AlertActions, AlertStates } from '~/interfaces/alert.interface'
 
 export const initialState: AlertStates = {
   open: false,

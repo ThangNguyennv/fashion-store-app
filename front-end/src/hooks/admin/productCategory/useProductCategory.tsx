@@ -4,7 +4,7 @@ import { fetchChangeMultiAPI } from '~/apis/admin/productCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 export const useProductCategory = () => {
   const { stateProductCategory, fetchProductCategory, dispatchProductCategory } = useProductCategoryContext()

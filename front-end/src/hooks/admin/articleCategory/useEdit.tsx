@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { fetchDetailArticleCategoryAPI, fetchEditArticleCategoryAPI } from '~/apis/admin/articleCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleCategoryContext } from '~/contexts/admin/ArticleCategoryContext'
-import type { ArticleCategoryDetailInterface } from '~/types/articleCategory.type'
+import type { ArticleCategoryDetailInterface } from '~/interfaces/articleCategory.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import { editArticleCategorySchema, type EditArticleCategoryFormData } from '~/validations/admin/articleCategory.validate'
+import { editArticleCategorySchema, type EditArticleCategoryFormData } from '~/validations/admin/articleCategory.validation'
 
 export const useEdit = () => {
   const params = useParams()

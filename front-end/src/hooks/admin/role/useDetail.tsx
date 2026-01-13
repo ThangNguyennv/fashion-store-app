@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailRoleAPI } from '~/apis/admin/role.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { RolesDetailInterface, RoleInfoInterface } from '~/types/role.type'
+import type { RolesDetailInterface, RoleInfoInterface } from '~/interfaces/role.interface'
 
 const useDetail = () => {
   const [roleDetail, setRoleDetail] = useState<RoleInfoInterface | null>(null)

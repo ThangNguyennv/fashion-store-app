@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { fetchCartAPI, fetchAddProductToCartAPI } from '~/apis/client/cart.api'
-import type { CartInfoInterface } from '~/types/cart.type'
+import type { CartInfoInterface } from '~/interfaces/cart.interface'
 
 interface CartContextType {
  cartDetail: CartInfoInterface | null

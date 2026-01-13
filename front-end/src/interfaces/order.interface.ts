@@ -1,4 +1,4 @@
-import type { CreatedBy, DeletedBy, FilterStatusInterface, PaginationInterface, UpdatedBy } from './helper.type'
+import type { CreatedBy, DeletedBy, FilterStatusInterface, PaginationInterface, UpdatedBy } from './helper.interface'
 
 interface PaymentDetails {
   vnp_TxnRef?: string

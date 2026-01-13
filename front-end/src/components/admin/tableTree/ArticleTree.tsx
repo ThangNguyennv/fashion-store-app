@@ -2,9 +2,9 @@
 import { TableRow, TableCell, Checkbox } from '@mui/material'
 import { Link } from 'react-router-dom'
 import FormatDateTime from '../moment/FormatDateTime'
-import type { ArticleCategoryActions, ArticleCategoryInfoInterface } from '~/types/articleCategory.type'
-import type { AccountInfoInterface } from '~/types/account.type'
-import type { PaginationInterface } from '~/types/helper.type'
+import type { ArticleCategoryActions, ArticleCategoryInfoInterface } from '~/interfaces/articleCategory.interface'
+import type { AccountInfoInterface } from '~/interfaces/account.interface'
+import type { PaginationInterface } from '~/interfaces/helper.interface'
 
 interface Props {
   articleCategory: ArticleCategoryInfoInterface

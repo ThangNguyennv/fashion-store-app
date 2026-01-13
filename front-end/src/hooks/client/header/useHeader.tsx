@@ -7,7 +7,7 @@ import { useSettingGeneral } from '~/contexts/client/SettingGeneralContext'
 import { fetchHomeAPI } from '~/apis/client/home.api'
 import { useHome } from '~/contexts/client/HomeContext'
 import { useCart } from '~/contexts/client/CartContext'
-import type { ProductInfoInterface } from '~/types/product.type'
+import type { ProductInfoInterface } from '~/interfaces/product.interface'
 import { fetchSearchSuggestionsAPI } from '~/apis/client/product.api'
 import { useAuth } from '~/contexts/client/AuthContext'
 

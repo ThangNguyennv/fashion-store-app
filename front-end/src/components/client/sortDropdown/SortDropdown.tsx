@@ -1,5 +1,5 @@
 import { FaCheck } from 'react-icons/fa6'
-import type { SortDropdownProps } from '~/types/product.type'
+import type { SortDropdownProps } from '~/interfaces/product.interface'
 import { sortOptions } from '~/utils/constants'
 
 export const SortDropdown = ({

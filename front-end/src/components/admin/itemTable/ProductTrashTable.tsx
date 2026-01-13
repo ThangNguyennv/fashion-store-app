@@ -16,7 +16,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import type { AccountInfoInterface } from '~/types/account.type'
+import type { AccountInfoInterface } from '~/interfaces/account.interface'
 
 const ProductTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
   const {
@@ -188,7 +188,7 @@ const ProductTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
                       </button>
                     </TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>{(() => {
-                      const creator = product.createdBy.account_id as AccountInfoInterface
+                      const creator = product.createdBy?.account_id as AccountInfoInterface
                       return creator ? (
                         <>
                           <span className="text-sm font-medium text-gray-800">

@@ -5,11 +5,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailProductCategoryAPI, fetchEditProductCategoryAPI } from '~/apis/admin/productCategory.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
-import type { ProductCategoryDetailInterface } from '~/types/productCategory.type'
+import type { ProductCategoryDetailInterface } from '~/interfaces/productCategory.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editProductCategorySchema, type EditProductCategoryFormData } from '~/validations/admin/productCategory.validate'
+import { editProductCategorySchema, type EditProductCategoryFormData } from '~/validations/admin/productCategory.validation'
 
 export const useEdit = () => {
   const params = useParams()

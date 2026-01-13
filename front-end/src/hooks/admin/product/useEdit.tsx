@@ -5,12 +5,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailProductAPI, fetchEditProductAPI } from '~/apis/admin/product.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useProductCategoryContext } from '~/contexts/admin/ProductCategoryContext'
-import type { ProductDetailInterface } from '~/types/product.type'
+import type { ProductDetailInterface } from '~/interfaces/product.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { availableColors, availableSizes } from '~/utils/constants'
-import { editProductSchema, type EditProductFormData } from '~/validations/admin/product.validate'
+import { editProductSchema, type EditProductFormData } from '~/validations/admin/product.validation'
 
 export const useEdit = () => {
   const params = useParams()

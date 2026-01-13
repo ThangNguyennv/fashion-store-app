@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchStatisticAPI } from '~/apis/admin/statistic.api'
-import type { StatisticInterface } from '~/types/statistic.type'
+import type { StatisticInterface } from '~/interfaces/statistic.interface'
 import type { ChartData } from 'chart.js'
 import { useAuth } from '~/contexts/admin/AuthContext'
 

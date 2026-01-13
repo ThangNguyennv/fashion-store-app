@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import type { OrderAction, OrderState } from '~/types/order.type'
+import type { OrderAction, OrderState } from '~/interfaces/order.interface'
 
 export const initialOrderState: OrderState = {
   orders: [],

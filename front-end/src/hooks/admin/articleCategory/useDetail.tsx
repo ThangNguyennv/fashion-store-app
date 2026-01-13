@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailArticleCategoryAPI } from '~/apis/admin/articleCategory.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { ArticleCategoryDetailInterface, ArticleCategoryInfoInterface } from '~/types/articleCategory.type'
+import type { ArticleCategoryDetailInterface, ArticleCategoryInfoInterface } from '~/interfaces/articleCategory.interface'
 
 export const useDetail = () => {
   const [articleCategoryDetail, setArticleCategoryDetail] = useState<ArticleCategoryInfoInterface | null>(null)

@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import { Link } from 'react-router-dom'
 import FormatDateTime from '~/components/admin/moment/FormatDateTime'
-import type { UpdatedBy } from '~/types/helper.type'
+import type { UpdatedBy } from '~/interfaces/helper.interface'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'

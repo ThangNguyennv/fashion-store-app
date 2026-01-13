@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { fetchInfoUserAPI } from '~/apis/client/user.api'
-import type { UserAPIResponse } from '~/types/user.type'
+import type { UserAPIResponse } from '~/interfaces/user.interface'
 import CircularProgress from '@mui/material/CircularProgress'
 
 interface AuthContextType {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailArticleCategoryAPI } from '~/apis/client/article.api'
-import type { ArticleInfoInterface, ArticlesWithCategoryDetailInterface } from '~/types/article.type'
+import type { ArticleInfoInterface, ArticlesWithCategoryDetailInterface } from '~/interfaces/article.interface'
 
 const useCategory = () => {
   const [articleCategory, setArticleCategory] = useState<ArticleInfoInterface[]>([])

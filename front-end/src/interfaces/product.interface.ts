@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import type { AccountInfoInterface } from './account.type'
-import type { GeneralInfoInterface, HelperInterface } from './helper.type'
+import type { AccountInfoInterface } from './account.interface'
+import type { GeneralInfoInterface, HelperInterface } from './helper.interface'
 
 export interface ProductInfoInterface extends GeneralInfoInterface {
   price: number,

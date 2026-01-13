@@ -1,5 +1,5 @@
 import { FaStar } from 'react-icons/fa6'
-import type { ProductInfoInterface } from '~/types/product.type'
+import type { ProductInfoInterface } from '~/interfaces/product.interface'
 
 // Lấy kiểu dữ liệu của một comment từ ProductInfoInterface
 type Comment = ProductInfoInterface['comments'][0];

@@ -1,7 +1,7 @@
 import axios from 'axios'
-import type { ArticleAPIResponse, ArticlesWithCategoryDetailInterface } from '~/types/article.type'
-import type { ArticleDetailInterface } from '~/types/article.type'
-import type { AllParams } from '~/types/helper.type'
+import type { ArticleAPIResponse, ArticlesWithCategoryDetailInterface } from '~/interfaces/article.interface'
+import type { ArticleDetailInterface } from '~/interfaces/article.interface'
+import type { AllParams } from '~/interfaces/helper.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchAllArticlesAPI = async (

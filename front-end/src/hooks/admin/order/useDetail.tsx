@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { fetchDetailOrderAPI, fetchEditEstimatedConfirmedDay, fetchEditEstimatedDeliveryDay } from '~/apis/admin/order.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { OrderDetailInterface, OrderInfoInterface } from '~/types/order.type'
+import type { OrderDetailInterface, OrderInfoInterface } from '~/interfaces/order.interface'
 
 export const useDetail = () => {
   const [orderDetail, setOrderDetail] = useState<OrderInfoInterface | null>(null)

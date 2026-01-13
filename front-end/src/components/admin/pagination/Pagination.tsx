@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { PiGreaterThan } from 'react-icons/pi'
 import { PiLessThan } from 'react-icons/pi'
-import type { PaginationInterface } from '~/types/helper.type'
+import type { PaginationInterface } from '~/interfaces/helper.interface'
 
 interface Props {
   pagination: PaginationInterface | null

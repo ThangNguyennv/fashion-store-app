@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fetchDeleteRoleAPI, fetchRoleAPI } from '~/apis/admin/role.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountInfoInterface } from '~/types/account.type'
-import type { RoleInfoInterface, RolesResponseInterface } from '~/types/role.type'
+import type { AccountInfoInterface } from '~/interfaces/account.interface'
+import type { RoleInfoInterface, RolesResponseInterface } from '~/interfaces/role.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
 const useRole = () => {

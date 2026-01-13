@@ -1,4 +1,4 @@
-import type { RoleInfoInterface } from './role.type'
+import type { RoleInfoInterface } from './role.interface'
 
 export interface AccountInfoInterface {
   _id: string,

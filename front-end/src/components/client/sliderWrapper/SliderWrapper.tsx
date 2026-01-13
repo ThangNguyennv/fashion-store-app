@@ -6,7 +6,7 @@ import 'swiper/css/pagination'
 import CardItem from '../cardItem/CardItem'
 import { Link } from 'react-router-dom'
 import Skeleton from '@mui/material/Skeleton'
-import type { ProductInfoInterface } from '~/types/product.type'
+import type { ProductInfoInterface } from '~/interfaces/product.interface'
 
 interface SliderWrapperProps {
   items: ProductInfoInterface[]

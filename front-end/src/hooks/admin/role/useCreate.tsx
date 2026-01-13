@@ -5,7 +5,7 @@ import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { roleSchema, type RoleFormData } from '~/validations/admin/role.validate'
+import { roleSchema, type RoleFormData } from '~/validations/admin/role.validation'
 
 const useCreate = () => {
   const { dispatchAlert } = useAlertContext()

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useArticleContext } from '~/contexts/client/ArticleContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 const useIndex = () => {
   const { stateArticle, fetchArticle } = useArticleContext()

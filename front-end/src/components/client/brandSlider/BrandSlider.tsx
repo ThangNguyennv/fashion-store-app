@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Autoplay } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
-import type { ArticleInfoInterface } from '~/types/article.type'
+import type { ArticleInfoInterface } from '~/interfaces/article.interface'
 import Skeleton from '@mui/material/Skeleton'
 import ArticleCard from '../articleCard/ArticleCard'
 

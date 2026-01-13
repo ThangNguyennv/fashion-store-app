@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import type { ProductActions, ProductStates } from '~/types/product.type'
+import type { ProductActions, ProductStates } from '~/interfaces/product.interface'
 
 export const initialState: ProductStates = {
   products: [],

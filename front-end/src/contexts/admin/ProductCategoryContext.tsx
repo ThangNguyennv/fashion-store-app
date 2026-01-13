@@ -4,9 +4,9 @@
 import { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
 import { fetchProductCategoryAPI } from '~/apis/admin/productCategory.api'
 import { initialState, productCategoryReducer } from '~/reducers/admin/productCategoryReducer'
-import type { ProductCategoryActions, ProductCategoryAPIResponse, ProductCategoryStates } from '~/types/productCategory.type'
+import type { ProductCategoryActions, ProductCategoryAPIResponse, ProductCategoryStates } from '~/interfaces/productCategory.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 interface ProductCategoryContextType {
   stateProductCategory: ProductCategoryStates

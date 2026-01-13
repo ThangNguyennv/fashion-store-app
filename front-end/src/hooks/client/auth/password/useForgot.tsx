@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fetchForgotPasswordAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { forgotPasswordSchema, type ForgotFormData } from '~/validations/client/auth.validate'
+import { forgotPasswordSchema, type ForgotFormData } from '~/validations/client/auth.validation'
 
 const useForgot = () => {
   // const navigate = useNavigate()

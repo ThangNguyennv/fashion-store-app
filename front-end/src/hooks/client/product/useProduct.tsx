@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useProductContext } from '~/contexts/client/ProductContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 const useProduct = () => {
   const { stateProduct, fetchProduct } = useProductContext()

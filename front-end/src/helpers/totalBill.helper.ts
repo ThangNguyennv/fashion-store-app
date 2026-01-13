@@ -1,4 +1,4 @@
-import type { OrderInfoInterface } from '~/types/order.type'
+import type { OrderInfoInterface } from '~/interfaces/order.interface'
 
 export const getTotalBill = (order: OrderInfoInterface): number => {
   const result = order.products.reduce((acc, item) => {

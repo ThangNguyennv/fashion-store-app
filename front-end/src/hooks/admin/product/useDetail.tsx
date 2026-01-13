@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchDetailProductAPI } from '~/apis/admin/product.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { ProductDetailInterface, ProductInfoInterface } from '~/types/product.type'
+import type { ProductDetailInterface, ProductInfoInterface } from '~/interfaces/product.interface'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 
 export const useDetail = () => {

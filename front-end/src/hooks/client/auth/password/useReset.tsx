@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fetchResetPasswordAPI } from '~/apis/client/auth.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { resetSchema, type ResetFormData } from '~/validations/client/auth.validate'
+import { resetSchema, type ResetFormData } from '~/validations/client/auth.validation'
 
 const useReset = () => {
   const navigate = useNavigate()

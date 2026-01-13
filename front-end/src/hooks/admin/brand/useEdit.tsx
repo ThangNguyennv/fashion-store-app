@@ -5,7 +5,7 @@ import { useState, useEffect, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchBrandDetailAPI, updateBrandAPI } from '~/apis/admin/brand.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { Brand } from '~/types/brand.type'
+import type { Brand } from '~/interfaces/brand.interface'
 
 const useEdit = () => {
   const { id } = useParams<{ id: string }>()

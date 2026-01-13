@@ -1,4 +1,4 @@
-import type { LoginAPIResponse, LogoutInterface } from '~/types/auth.type'
+import type { LoginAPIResponse, LogoutInterface } from '~/interfaces/auth.interface'
 import { API_ROOT } from '~/utils/constants'
 import axios from 'axios'
 

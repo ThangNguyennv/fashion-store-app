@@ -4,11 +4,11 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchDetailUserAPI, fetchEditUserAPI } from '~/apis/admin/user.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { UserAPIResponse } from '~/types/user.type'
+import type { UserAPIResponse } from '~/interfaces/user.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editUserSchema, type EditUserFormData } from '~/validations/admin/user.validate'
+import { editUserSchema, type EditUserFormData } from '~/validations/admin/user.validation'
 
 const useEdit = () => {
   // const [userInfo, setUserInfo] = useState<UserInfoInterface | null>(null)

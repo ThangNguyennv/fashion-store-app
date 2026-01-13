@@ -9,7 +9,7 @@ import { useTable, type Props } from '~/hooks/admin/order/useTable'
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } }
 import FormatDateTime from '../moment/FormatDateTime'
 import TableContainer from '@mui/material/TableContainer'
-import type { UpdatedBy } from '~/types/helper.type'
+import type { UpdatedBy } from '~/interfaces/helper.interface'
 import Skeleton from '@mui/material/Skeleton'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -17,9 +17,9 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import { getTotalBill } from '~/helpers/totalBill'
-import type { OrderStatus } from '~/types/order.type'
-import type { AccountInfoInterface } from '~/types/account.type'
+import { getTotalBill } from '~/helpers/totalBill.helper'
+import type { OrderStatus } from '~/interfaces/order.interface'
+import type { AccountInfoInterface } from '~/interfaces/account.interface'
 
 const OrderTable = ({ selectedIds, setSelectedIds, filterOrder }: Props) => {
 

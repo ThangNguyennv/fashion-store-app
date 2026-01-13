@@ -8,7 +8,7 @@ import {
   fetchUpdateVariantAPI,
   fetchUpdateQuantityAPI
 } from '~/apis/client/cart.api'
-import type { CartInfoInterface, CartItemInterface } from '~/types/cart.type'
+import type { CartInfoInterface, CartItemInterface } from '~/interfaces/cart.interface'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 
 const useCart = () => {

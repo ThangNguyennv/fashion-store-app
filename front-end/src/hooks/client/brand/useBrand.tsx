@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import { useEffect, useState } from 'react'
 import { fetchClientBrandsAPI } from '~/apis/client/brand.api'
-import type { BrandGroup } from '~/types/brand.type'
+import type { BrandGroup } from '~/interfaces/brand.interface'
 
 const useBrand = () => {
   const [brandGroups, setBrandGroups] = useState<BrandGroup[]>([])

@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import Skeleton from '@mui/material/Skeleton'
 import { useMemo } from 'react'
-import type { FilterStatusInterface } from '~/types/helper.type'
-import type { OrderStatus } from '~/types/order.type'
+import type { FilterStatusInterface } from '~/interfaces/helper.interface'
+import type { OrderStatus } from '~/interfaces/order.interface'
 
 interface Props {
   filterOrder: FilterStatusInterface[]

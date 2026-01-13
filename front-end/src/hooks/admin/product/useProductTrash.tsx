@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { fetchChangeMultiTrashAPI } from '~/apis/admin/product.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 import { useProductTrashContext } from '~/contexts/admin/ProductTrashContext'
 
 export const useProductTrash = () => {

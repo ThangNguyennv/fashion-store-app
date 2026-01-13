@@ -1,4 +1,4 @@
-import type { ProductInfoInterface } from './product.type'
+import type { ProductInfoInterface } from './product.interface'
 
 export interface SearchInterface {
     products: ProductInfoInterface[],

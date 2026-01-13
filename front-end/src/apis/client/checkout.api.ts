@@ -1,4 +1,4 @@
-import type { OrderDetailInterface } from '~/types/order.type'
+import type { OrderDetailInterface } from '~/interfaces/order.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosClient'
 import { API_ROOT } from '~/utils/constants'
 

@@ -1,6 +1,6 @@
 import axios from 'axios'
-import type { AllParams } from '~/types/helper.type'
-import type { ProductAPIResponse, ProductDetailInterface, ProductsWithCategoryDetailInterface } from '~/types/product.type'
+import type { AllParams } from '~/interfaces/helper.interface'
+import type { ProductAPIResponse, ProductDetailInterface, ProductsWithCategoryDetailInterface } from '~/interfaces/product.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchProductAPI = async (

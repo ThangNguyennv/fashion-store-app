@@ -15,8 +15,8 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import { getTotalBill } from '~/helpers/totalBill'
-import type { AccountInfoInterface } from '~/types/account.type'
+import { getTotalBill } from '~/helpers/totalBill.helper'
+import type { AccountInfoInterface } from '~/interfaces/account.interface'
 
 const OrderTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
 
@@ -205,13 +205,13 @@ const OrderTrashTable = ({ selectedIds, setSelectedIds }: Props) => {
                       <FormatDateTime time={order.createdAt}/>
                     </TableCell>
                     <TableCell align='center' sx={{ padding: '6px 0px' }} className='font-[700] '>{(() => {
-                      const deletor = order.deletedBy.account_id as AccountInfoInterface
+                      const deletor = order.deletedBy?.account_id as AccountInfoInterface
                       return deletor ? (
                         <>
                           <span className="text-sm font-medium text-gray-800">
                             {deletor.fullName}
                           </span>
-                          <FormatDateTime time={order.deletedBy.deletedAt}/>
+                          <FormatDateTime time={order.deletedBy?.deletedAt}/>
                         </>
                       ) : (
                         <span className="text-sm italic text-gray-400">Không xác định</span>

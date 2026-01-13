@@ -3,9 +3,9 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
 import { initialState, articleCategoryReducer } from '~/reducers/admin/articleCategory'
-import type { ArticleCategoryActions, ArticleCategoryAPIResponse, ArticleCategoryStates } from '~/types/articleCategory.type'
+import type { ArticleCategoryActions, ArticleCategoryAPIResponse, ArticleCategoryStates } from '~/interfaces/articleCategory.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 import { fetchArticleCategoryAPI } from '~/apis/admin/articleCategory.api'
 
 interface ArticleCategoryContextType {

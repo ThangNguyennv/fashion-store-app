@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom'
 import { fetchDetailProductAPI, fetchRelatedProductsAPI } from '~/apis/client/product.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useCart } from '~/contexts/client/CartContext'
-import type { ProductDetailInterface, ProductInfoInterface } from '~/types/product.type'
+import type { ProductDetailInterface, ProductInfoInterface } from '~/interfaces/product.interface'
 import { useMemo } from 'react' // Import useMemo để tối ưu
 
 const useDetail = () => {

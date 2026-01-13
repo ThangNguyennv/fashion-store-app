@@ -1,9 +1,9 @@
 import { fetchChangeStatusAPI, fetchDeleteOrderAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { FilterStatusInterface } from '~/types/helper.type'
+import type { FilterStatusInterface } from '~/interfaces/helper.interface'
 import { useState } from 'react'
 import { useOrderContext } from '~/contexts/admin/OrderContext'
-import type { OrderStatus } from '~/types/order.type'
+import type { OrderStatus } from '~/interfaces/order.interface'
 
 export interface Props {
   filterOrder: FilterStatusInterface[]

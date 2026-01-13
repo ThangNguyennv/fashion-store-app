@@ -1,5 +1,5 @@
 import { API_ROOT } from '~/utils/constants'
-import type { AdminChatRoomsAPIResponse, AdminChatHistoryAPIResponse } from '~/types/chat.type'
+import type { AdminChatRoomsAPIResponse, AdminChatHistoryAPIResponse } from '~/interfaces/chat.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosAdmin'
 
 export const fetchAdminChatRoomsAPI = async (): Promise<AdminChatRoomsAPIResponse> => {

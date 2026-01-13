@@ -4,7 +4,7 @@ import { fetchChangeMultiAPI } from '~/apis/admin/article.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useArticleContext } from '~/contexts/admin/ArticleContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 export const useArticle = () => {
   const { stateArticle, fetchArticle, dispatchArticle } = useArticleContext()

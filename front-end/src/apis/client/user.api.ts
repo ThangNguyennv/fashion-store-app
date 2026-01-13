@@ -1,5 +1,5 @@
-import type { OrderInfoInterface } from '~/types/order.type'
-import type { UserAPIResponse } from '~/types/user.type'
+import type { OrderInfoInterface } from '~/interfaces/order.interface'
+import type { UserAPIResponse } from '~/interfaces/user.interface'
 import authorizedAxiosInstance from '~/utils/authorizedAxiosClient'
 import { API_ROOT } from '~/utils/constants'
 

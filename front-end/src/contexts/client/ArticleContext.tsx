@@ -4,8 +4,8 @@ import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchAllArticlesAPI } from '~/apis/client/article.api'
 import { articleReducer } from '~/reducers/client/articleReducer'
 import { initialState } from '~/reducers/client/articleReducer'
-import type { ArticleActions, ArticleAPIResponse, ArticleStates } from '~/types/article.type'
-import type { AllParams } from '~/types/helper.type'
+import type { ArticleActions, ArticleAPIResponse, ArticleStates } from '~/interfaces/article.interface'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 interface ArticleContextType {
   stateArticle: ArticleStates

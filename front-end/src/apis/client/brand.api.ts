@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { BrandsClientResponseInterface } from '~/types/brand.type'
+import type { BrandsClientResponseInterface } from '~/interfaces/brand.interface'
 import { API_ROOT } from '~/utils/constants'
 
 export const fetchClientBrandsAPI = async (): Promise<BrandsClientResponseInterface> => {

@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { fetchAccountsAPI, fetchCreateAccountAPI } from '~/apis/admin/account.api'
 import { useAuth } from '~/contexts/admin/AuthContext'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountsAPIResponse } from '~/types/account.type'
-import type { RoleInfoInterface } from '~/types/role.type'
-import { accountSchema, type AccountFormData } from '~/validations/admin/account.validate'
+import type { AccountsAPIResponse } from '~/interfaces/account.interface'
+import type { RoleInfoInterface } from '~/interfaces/role.interface'
+import { accountSchema, type AccountFormData } from '~/validations/admin/account.validation'
 
 const useCreate = () => {
   const [roles, setRoles] = useState<RoleInfoInterface[]>([])

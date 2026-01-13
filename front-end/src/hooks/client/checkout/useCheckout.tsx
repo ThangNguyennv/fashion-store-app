@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { useEffect, useState } from 'react'
 import { fetchCartAPI } from '~/apis/client/cart.api'
-import type { CartInfoInterface } from '~/types/cart.type'
+import type { CartInfoInterface } from '~/interfaces/cart.interface'
 import { fetchOrderAPI } from '~/apis/client/checkout.api'
 import { useCart } from '~/contexts/client/CartContext'
 import { useNavigate } from 'react-router-dom'
@@ -11,7 +11,7 @@ import { useAuth } from '~/contexts/client/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import { checkoutSchema, type CheckoutFormData } from '~/validations/client/checkout.validate'
+import { checkoutSchema, type CheckoutFormData } from '~/validations/client/checkout.validation'
 
 const useCheckout = () => {
   const [cartDetail, setCartDetail] = useState<CartInfoInterface | null>(null)

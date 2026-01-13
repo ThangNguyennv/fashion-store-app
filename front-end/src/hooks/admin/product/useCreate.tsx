@@ -8,7 +8,7 @@ import { useAuth } from '~/contexts/admin/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { availableColors, availableSizes } from '~/utils/constants'
-import { productSchema, type ProductFormData } from '~/validations/admin/product.validate'
+import { productSchema, type ProductFormData } from '~/validations/admin/product.validation'
 
 export const useCreate = () => {
   const { stateProductCategory } = useProductCategoryContext()
@@ -313,7 +313,6 @@ export const useCreate = () => {
     inputRef.current?.click()
   }
 
-
   return {
     allProductCategories,
     uploadImageInputRef,
@@ -345,7 +344,6 @@ export const useCreate = () => {
     handleDeselectAllSizes,
     handleConfirmSelectionSizes,
     tempSelectedSizes,
-    // Thêm các props từ react-hook-form
     register,
     errors,
     isSubmitting,

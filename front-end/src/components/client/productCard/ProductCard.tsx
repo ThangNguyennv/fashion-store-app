@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import type { ProductInfoInterface } from '~/types/product.type'
+import type { ProductInfoInterface } from '~/interfaces/product.interface'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 
 interface ProductCardProps {

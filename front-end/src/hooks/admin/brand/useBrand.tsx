@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { deleteBrandAPI, fetchBrandAPI } from '~/apis/admin/brand.api'
-import type { Brand } from '~/types/brand.type'
+import type { Brand } from '~/interfaces/brand.interface'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 
 const useBrand = () => {
@@ -40,7 +40,7 @@ const useBrand = () => {
     if (!selectedId) return
     try {
       const res = await deleteBrandAPI(selectedId)
-      if (res.code === 200) {
+      if (res.code === 204) {
         dispatchAlert({ type: 'SHOW_ALERT', payload: { message: res.message, severity: 'success' } })
         loadBrands(page)
       }

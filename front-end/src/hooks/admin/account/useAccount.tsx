@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchAccountsAPI, fetchChangeStatusAPI, fetchDeleteAccountAPI } from '~/apis/admin/account.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { AccountsDetailInterface, AccountInfoInterface } from '~/types/account.type'
+import type { AccountsDetailInterface, AccountInfoInterface } from '~/interfaces/account.interface'
 import { useAuth } from '~/contexts/admin/AuthContext'
 
 const useAccount = () => {

@@ -5,8 +5,8 @@ import { exportOrdersAPI, fetchChangeMultiAPI } from '~/apis/admin/order.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useOrderContext } from '~/contexts/admin/OrderContext'
 import { useAuth } from '~/contexts/admin/AuthContext'
-import type { OrderStatus } from '~/types/order.type'
-import type { AllParams } from '~/types/helper.type'
+import type { OrderStatus } from '~/interfaces/order.interface'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 export const useOrder = () => {
   const { stateOrder, fetchOrders, dispatchOrder } = useOrderContext()

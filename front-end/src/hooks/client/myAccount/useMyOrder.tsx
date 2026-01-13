@@ -5,10 +5,10 @@ import { useSearchParams } from 'react-router-dom'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
 import { useOrderContext } from '~/contexts/client/OrderContext'
 import { fetchCancelOrder } from '~/apis/client/user.api'
-import type { OrderStatus } from '~/types/order.type'
+import type { OrderStatus } from '~/interfaces/order.interface'
 import { useCart } from '~/contexts/client/CartContext'
 import { submitReviewAPI } from '~/apis/client/product.api'
-import type { AllParams } from '~/types/helper.type'
+import type { AllParams } from '~/interfaces/helper.interface'
 
 const useMyOrder = () => {
   const { stateOrder, fetchOrder, dispatchOrder } = useOrderContext()

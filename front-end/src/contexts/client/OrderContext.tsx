@@ -3,8 +3,8 @@
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { fetchOrdersAPI } from '~/apis/client/order.api'
 import { initialState, orderReducer } from '~/reducers/client/orderReducer'
-import type { AllParams } from '~/types/helper.type'
-import type { OrderAction, OrderAPIResponse, OrderState } from '~/types/order.type'
+import type { AllParams } from '~/interfaces/helper.interface'
+import type { OrderAction, OrderAPIResponse, OrderState } from '~/interfaces/order.interface'
 
 interface OrderContextType {
   stateOrder: OrderState

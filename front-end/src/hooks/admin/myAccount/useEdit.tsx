@@ -3,11 +3,11 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
 import { fetchMyAccountAPI, fetchUpdateMyAccountAPI } from '~/apis/admin/myAccount.api'
 import { useAlertContext } from '~/contexts/alert/AlertContext'
-import type { MyAccountAPIResponse } from '~/types/account.type'
+import type { MyAccountAPIResponse } from '~/interfaces/account.interface'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
-import { editMyAccountSchema, type EditMyAccountFormData } from '~/validations/admin/myAccount.validate'
+import { editMyAccountSchema, type EditMyAccountFormData } from '~/validations/admin/myAccount.validation'
 
 export const useEditMyAccount = () => {
   const { dispatchAlert } = useAlertContext()
