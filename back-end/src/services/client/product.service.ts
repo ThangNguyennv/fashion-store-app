@@ -10,11 +10,11 @@ export const getSubCategory = async (parentId: string) => {
     deleted: false,
     status: 'ACTIVE',
     parent_id: parentId
-  })
+  }).lean()
   let allSub = [...subs]
 
   for (const sub of subs) {
-    const childs = await getSubCategory(sub.id)
+    const childs = await getSubCategory(sub._id.toString())
     allSub = allSub.concat(childs)
   }
   return allSub
@@ -39,15 +39,15 @@ export const getProducts = async (query: any) => {
             slug: categorySlug,
             status: 'ACTIVE',
             deleted: false
-        })
+        }).lean()
 
         if (category) {
             // SỬ DỤNG HÀM ĐỆ QUY `getSubCategory`
             // Lấy tất cả ID của danh mục con (Cấp 2, 3, 4...)
-            const listSubCategory = await getSubCategory(category.id)
-            const listSubCategoryId = listSubCategory.map((item) => item.id)
+            const listSubCategory = await getSubCategory(category._id.toString())
+            const listSubCategoryId = listSubCategory.map((item) => item._id.toString())
             // Tìm sản phẩm có ID nằm trong danh mục cha (Cấp 1) HOẶC bất kỳ danh mục con nào
-            find.product_category_id = { $in: [category.id, ...listSubCategoryId] }
+            find.product_category_id = { $in: [category._id.toString(), ...listSubCategoryId] }
         } else {
             return { 
                 success: false, 
@@ -195,18 +195,19 @@ export const category = async (slugCategory: string) => {
         slug: slugCategory,
         status: 'ACTIVE',
         deleted: false
-    })
+    }).lean()
 
-    const listSubCategory = await getSubCategory(category.id)
+    const listSubCategory = await getSubCategory(category._id.toString())
 
-    const listSubCategoryId = listSubCategory.map((item) => item.id)
+    const listSubCategoryId = listSubCategory.map((item) => item._id.toString())
 
     const products = await Product
         .find({
             deleted: false,
-            product_category_id: { $in: [category.id, ...listSubCategoryId] }
+            product_category_id: { $in: [category._id.toString(), ...listSubCategoryId] }
         })
         .sort({ createdAt: -1 })
+        .lean()
 
     const newProducts = productsHelper.priceNewProducts(
         products as OneProduct[]
